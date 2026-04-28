@@ -61,11 +61,43 @@ export interface TimelineNode {
   editable?: boolean;
 }
 
+export type LifeScale = "life" | "decade" | "era" | "year" | "month" | "week" | "day" | "hour";
+
+export type LifeLane = "stability" | "leap" | "experiment" | "relationship" | "creation";
+
+export interface LifeTimeSpan {
+  startLabel: string;
+  endLabel?: string;
+  durationLabel: string;
+}
+
+export interface LifeStateVector {
+  autonomy: number;
+  stability: number;
+  intimacy: number;
+  creation: number;
+  energy: number;
+  regret: number;
+  uncertainty: number;
+}
+
+export interface Consequence {
+  label: string;
+  delta: Partial<LifeStateVector>;
+}
+
 export interface ForkPath {
   id: string;
   parentId?: string;
   depth?: number;
-  nodeType?: "life-node" | "direction" | "strategy" | "consequence" | "ending";
+  nodeType?: "life-node" | "life-map" | "direction" | "strategy" | "consequence" | "ending";
+  scale?: LifeScale;
+  lane?: LifeLane;
+  timeSpan?: LifeTimeSpan;
+  stateVector?: LifeStateVector;
+  consequences?: Consequence[];
+  mergeInto?: string;
+  zoomHint?: string;
   title: string;
   subtitle: string;
   summary: string;

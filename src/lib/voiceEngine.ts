@@ -148,8 +148,9 @@ function applyCalibration(text: string, notes: string[]) {
 }
 
 function stagePrefix(selectedFork: ForkPath, voice: VoiceProfile) {
-  if (selectedFork.id.startsWith("node-still")) return voice.calibrationNotes.includes("更口语") ? "我先说句不那么漂亮的话：" : "我会说得慢一点：";
-  if (selectedFork.id.startsWith("node-leave")) return voice.calibrationNotes.includes("更克制") ? "直接说：" : "我可能会更锋利一点说：";
+  if (selectedFork.scale === "life" || selectedFork.scale === "decade") return voice.calibrationNotes.includes("更口语") ? "拉远一点看：" : "我会从更长的时间说起：";
+  if (selectedFork.lane === "stability") return voice.calibrationNotes.includes("更口语") ? "我先说句不那么漂亮的话：" : "我会说得慢一点：";
+  if (selectedFork.lane === "leap") return voice.calibrationNotes.includes("更克制") ? "直接说：" : "我可能会更锋利一点说：";
   return voice.signaturePhrases.includes("其实") ? "其实，" : "";
 }
 

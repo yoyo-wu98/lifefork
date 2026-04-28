@@ -8,21 +8,26 @@ function forkStageVoice(selfSkill?: SelfSkill) {
 export function generateInitialInstanceMessage(selectedFork: ForkPath, selfSkill?: SelfSkill): string {
   const finish = (base: string) => (selfSkill ? renderInUserVoice(base, selfSkill.voice, forkStageVoice(selfSkill), selectedFork) : base);
 
-  if (selectedFork.id.startsWith("node-still")) {
-    return finish("这一刻你先按住生活，问题没有被解决，只是被暂时放到桌面上。明天醒来，如果它还在，我们就继续读下一个节点。");
+  if (selectedFork.scale === "life") {
+    return finish(`我现在站在一整条人生的尺度上看你。${selectedFork.title} 不是今天就能证明对错的事，它更像一种长期排序：你把什么放到前面，什么就会慢慢塑造你。`);
   }
 
-  if (selectedFork.id.startsWith("node-leave")) {
-    return finish("从这个节点开始，你把真实愿望放进计划里。下一步会更重，也会更像你自己。");
+  if (selectedFork.scale === "decade" || selectedFork.scale === "era") {
+    return finish(`从 ${selectedFork.timeSpan?.durationLabel ?? "这个阶段"} 的尺度看，这条路真正改变的是你反复怎样安排生活。我们先看长期代价，再看它值不值得。`);
   }
 
-  return finish("当你把问题从“我要不要彻底改变人生”改成“我能不能先认真试一次”，身上的紧绷会松开一点。这个节点负责取样，先让现实回一句话。");
+  if (selectedFork.scale === "day" || selectedFork.scale === "hour") {
+    return finish("这个节点已经很近了，近到可以听见你的犹豫、身体反应和一句话的重量。先别急着总结人生，我们只看这一刻暴露了什么。");
+  }
+
+  return finish("这个阶段负责把大问题缩小一点。你不必一次改写人生，先让现实给你一个样本。");
 }
 
 function pathHint(selectedFork: ForkPath): string {
-  if (selectedFork.id.startsWith("node-still")) return "在这个节点里，先分清楚：你是在恢复判断力，还是又把自己往后放。";
-  if (selectedFork.id.startsWith("node-leave")) return "在这个节点里，让每一步都有现实承托，别只靠一口气冲过去。";
-  return "在这个节点里，把愿望压缩成一次能被现实检验的动作。";
+  if (selectedFork.lane === "stability") return "在这条线上，先分清楚：你是在恢复判断力，还是又把自己往后放。";
+  if (selectedFork.lane === "leap") return "在这条线上，让每一步都有现实承托，别只靠一口气冲过去。";
+  if (selectedFork.lane === "relationship") return "在这条线上，把关系当作现实变量，而不是把所有压力都吞回自己身上。";
+  return "在这条线上，把愿望压缩成一次能被现实检验的动作。";
 }
 
 export function generateInstanceReply(message: string, selfSkill: SelfSkill, selectedFork: ForkPath): string {
@@ -34,7 +39,7 @@ export function generateInstanceReply(message: string, selfSkill: SelfSkill, sel
   }
 
   if (/(失去|代价)/.test(text)) {
-    return finish("这条路的代价通常藏在日常里：少一点轻松，少一点确定，少一点别人眼中的“正常进度”。\n同时，你会得到一种更硬的东西：你开始知道自己到底有没有那么想要它。");
+    return finish(`这条路的代价要按 ${selectedFork.timeSpan?.durationLabel ?? "这个阶段"} 来看。短尺度里，它可能只是疲惫、解释成本或一次失约；长尺度里，它会变成身份、关系和后悔方式的变化。\n你要看的核心，是这种代价能不能被你的长期价值承认。`);
   }
 
   if (/(提醒|建议|一步开始|开始)/.test(text)) {
@@ -42,7 +47,7 @@ export function generateInstanceReply(message: string, selfSkill: SelfSkill, sel
   }
 
   if (/(成功|结果|未来|会不会|最难|难)/.test(text)) {
-    return finish("我不能告诉你一定会成功。LifeFork 不做命运判决。\n但我可以告诉你：继续什么都不做，信息会很少；设计一次低风险试验，至少会更接近真相。");
+    return finish("我不能告诉你一定会成功。LifeFork 不做命运判决。\n但我可以帮你看见尺度差异：全人生尺度看价值排序，十年尺度看代价，一年尺度看结构，一天和一小时尺度看真实动作。你越能把它放到合适尺度里，就越接近真相。");
   }
 
   return finish("我听见你真正想问的，可能是：我这样想有问题吗？\n没有问题。你只是站在一条旧路和一种新可能之间。先别急着审判自己，我们可以把这个选择拆小一点。");
