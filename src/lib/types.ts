@@ -4,6 +4,7 @@ export type AppStep =
   | "landing"
   | "select-version"
   | "questions"
+  | "wechat-import"
   | "extra-text"
   | "generating"
   | "self-skill"
@@ -14,7 +15,7 @@ export type AppStep =
 
 export interface Evidence {
   id: string;
-  source: "question" | "extra_text" | "generated";
+  source: "question" | "extra_text" | "wechat" | "generated";
   quote: string;
 }
 
@@ -56,11 +57,47 @@ export interface TimelineNode {
   title: string;
   emotion: string;
   pattern: string;
+  voice?: StageVoice;
   editable?: boolean;
+}
+
+export type LifeScale = "life" | "decade" | "era" | "year" | "month" | "week" | "day" | "hour";
+
+export type LifeLane = "stability" | "leap" | "experiment" | "relationship" | "creation";
+
+export interface LifeTimeSpan {
+  startLabel: string;
+  endLabel?: string;
+  durationLabel: string;
+}
+
+export interface LifeStateVector {
+  autonomy: number;
+  stability: number;
+  intimacy: number;
+  creation: number;
+  energy: number;
+  regret: number;
+  uncertainty: number;
+}
+
+export interface Consequence {
+  label: string;
+  delta: Partial<LifeStateVector>;
 }
 
 export interface ForkPath {
   id: string;
+  parentId?: string;
+  depth?: number;
+  nodeType?: "life-node" | "life-map" | "direction" | "strategy" | "consequence" | "ending";
+  scale?: LifeScale;
+  lane?: LifeLane;
+  timeSpan?: LifeTimeSpan;
+  stateVector?: LifeStateVector;
+  consequences?: Consequence[];
+  mergeInto?: string;
+  zoomHint?: string;
   title: string;
   subtitle: string;
   summary: string;
@@ -68,6 +105,7 @@ export interface ForkPath {
   costs: string[];
   futureSelfName: string;
   futureSelfVoice: string;
+  children?: ForkPath[];
 }
 
 export interface ChatMessage {
@@ -75,6 +113,54 @@ export interface ChatMessage {
   role: "user" | "instance" | "system";
   content: string;
   createdAt: string;
+}
+
+export interface VoiceProfile {
+  toneName: string;
+  closenessScore: number;
+  traits: string[];
+  signaturePhrases: string[];
+  sentenceRhythm: string;
+  punctuationStyle: string;
+  emotionalGesture: string;
+  sampleLine: string;
+  calibrationNotes: string[];
+}
+
+export interface StageVoice {
+  id: string;
+  stage: "past" | "hidden" | "present" | "future" | "fork";
+  ageLabel: string;
+  toneName: string;
+  description: string;
+  sampleLine: string;
+  traits: string[];
+}
+
+export interface WeChatMessageSample {
+  id: string;
+  timeLabel?: string;
+  speaker: string;
+  content: string;
+}
+
+export interface WeChatAnalysis {
+  id: string;
+  createdAt: string;
+  sourceName: string;
+  rawLength: number;
+  parsedMessageCount: number;
+  participantCount: number;
+  participants: string[];
+  dateRange?: string;
+  topKeywords: string[];
+  recurringTopics: string[];
+  emotionalSignals: string[];
+  keyMoments: WeChatMessageSample[];
+  privacyNotes: string[];
+  summary: string;
+  selfSkillSignals: string[];
+  suggestedSelfSkillText: string;
 }
 
 export interface SelfSkill {
@@ -90,7 +176,10 @@ export interface SelfSkill {
     futureSentence: string;
   };
   extraText?: string;
+  wechatAnalysis?: WeChatAnalysis;
   identity: IdentityProfile;
+  voice: VoiceProfile;
+  stageVoices: StageVoice[];
   semantic: SemanticProfile;
   decision: DecisionModel;
   timeline: TimelineNode[];
@@ -107,4 +196,6 @@ export interface GenerateSelfSkillInput {
   hiddenSelf: string;
   futureSentence: string;
   extraText?: string;
+  wechatAnalysis?: WeChatAnalysis;
+  voiceCalibration?: string[];
 }
