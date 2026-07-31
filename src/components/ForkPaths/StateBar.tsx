@@ -9,7 +9,7 @@ export function StateBar({ label, value, warm }: { label: string; value: number;
         <span>{label}</span>
         <span>{value}</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+      <div className="h-1.5 overflow-hidden rounded-full bg-night/10">
         <div
           className={`h-full rounded-full ${warm ? "bg-gold" : "bg-blue"}`}
           style={{ width: `${Math.max(4, Math.min(100, value))}%` }}

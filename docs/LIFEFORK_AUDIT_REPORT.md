@@ -1,8 +1,77 @@
 # LifeFork / 人生岔路 — 当前代码与功能巡检报告
 
-> 巡检日期：2026-04-28  
-> 巡检范围：本地仓库、模块结构、构建结果、主要功能链路、浏览器冒烟验证  
+> 巡检日期：2026-04-28
+> 巡检范围：本地仓库、模块结构、构建结果、主要功能链路、浏览器冒烟验证
 > 当前运行端口：http://localhost:3005
+>
+> **历史审计说明**：本文记录 V0.5 至 V0.6 的修复过程。V0.8 当前结论、服务器 AI、多人匿名会话、方法来源、后台运营和部署风险，以 `docs/PUBLIC_BETA_TECHNICAL_REPORT.md` 为准。
+
+## 0.1 2026-05-12 可部署性与后台编辑台复核
+
+复核目标：
+
+- 确认 V0.5 能以生产构建运行。
+- 确认无 API key 时使用本地 fallback。
+- 确认后台编辑台已接入前台关键页面。
+- 降低本地运行内存风险。
+
+命令结果：
+
+- `npm run lint`：通过。
+- `npm run build`：通过。
+
+本轮新增/确认：
+
+- 新增 `src/lib/editorConfig.ts`，定义 `EditorConfig`、默认配置、localStorage 读写、导入解析和恢复默认。
+- 新增 `src/components/EditorConsole.tsx`，提供首页文案、免责声明、导航标签、分享箴言、功能开关、部署模式、AI 模式的本地编辑窗口。
+- `AppNav` 接入后台入口，空状态也可进入。
+- `Landing`、`GeneratingScreen`、`ShareCard` 接入后台配置。
+- `QuestionFlow` 会根据后台微信导入开关决定下一步。
+- `selfSkillSlice.createSkill()` 与 `chatSlice.sendMessage()` 会根据 `features.aiApi` 和 `global.aiMode` 决定是否请求 API。
+- 默认配置为 `local-fallback`，不会在无 API 需求时发起模型请求。
+
+当前可部署口径：
+
+- 推荐验证命令：`npm run lint`、`npm run build`、`npm run start:3005`。
+- 推荐演示命令：`npm run preview:3005`。
+- 避免同时保留多个 `next dev` 或 `next start` 进程。
+- 后台配置保存在 `localStorage.lifefork.editorConfig`。
+
+剩余风险：
+
+- 人生地图仍是最高风险模块，需要独立交互规格、结构测试和浏览器回归。
+- 后台编辑台当前没有身份认证、服务端存储、审计日志，公开部署前必须迁移到 `/admin` 后台。
+- 微信大文本导入仍需要 Web Worker、分块摘要和更强脱敏。
+
+## 0. 2026-04-29 可用性复测
+
+目标：先确认产品可用、不崩溃、主流程闭环；FAQ、伦理扩展、传播材料后置。
+
+复测环境：
+
+- URL: `http://127.0.0.1:3005`
+- 目的：使用不同 origin，避免清理已有 `localhost` 存档。
+- 命令：`npm run lint`、`npm run build`、`npm run start:3005`
+
+结果：
+
+- ESLint 通过。
+- Next production build 通过。
+- 首页可加载。
+- 新用户可完成：开始五问 -> 跳过微信 -> 补充文本 -> 生成 Self Skill。
+- 可继续完成：Self Skill -> 时间线 -> 人生地图 -> 选择分支 -> 进入对话 -> 发送消息 -> 语气校准 -> 分享卡片。
+- 刷新后可恢复到分享卡片。
+- 浏览器 console error：0。
+- 分享卡片桌面视图无明显遮挡。
+
+本轮修复：
+
+- `/api/generate-self-skill` 现在会拒绝缺少 `selectedVersion` 或五问字段的坏请求，返回 400，不再生成空 Self Skill 或浪费模型调用。
+
+当前判断：
+
+- V0.5 已达到最低可演示标准：从空白用户到分享卡片可跑通，刷新可恢复。
+- 后续团队工作以 `docs/TEAM_WORK_ORDERS.md` 的稳定性工作单为准，优先修主流程卡点、崩溃、地图可交互、fallback 和恢复能力。
 
 ## 1. 结论
 
@@ -80,7 +149,7 @@ src/
   components/
     AppNav.tsx
     Landing.tsx
-    VersionSelector.tsx
+    VersionSelector.tsx  # legacy, V0.5 不挂载
     QuestionFlow.tsx
     WeChatImportStep.tsx
     ExtraTextStep.tsx
@@ -121,7 +190,7 @@ src/
 | `selfSkillEngine.ts` | 偏大 | 1364 行，承担本地生成、人生分支构造、模板逻辑。后续建议拆 `profileEngine`、`forkTreeEngine`、`timelineEngine`。 |
 | `voiceEngine.ts` | 良好 | 语气提取和阶段语气建模独立，方向正确。 |
 | `wechatEngine.ts` | 良好 | 本地解析、脱敏、主题识别集中处理。 |
-| `ai/client.ts` | 可用 | server-only 意图明确，但缺少 API key 显式 guard。 |
+| `ai/client.ts` | 可用 | server-only 意图明确，已具备 API key 缺失与 provider error fallback。 |
 | API routes | 可用 | 功能闭环成立，错误时前端有 fallback。 |
 
 ## 4. 功能确认
@@ -176,20 +245,21 @@ src/
 
 > 默认原型可本地 fallback；启用 AI API 后，摘要和对话上下文会发送到服务端与模型供应商。微信原文默认不上传。
 
-### P1：`DEEPSEEK_API_KEY` 缺少显式 guard
+### 已修复：`DEEPSEEK_API_KEY` 缺少显式 guard
 
-`src/lib/ai/client.ts` 使用：
+当前 `src/lib/ai/client.ts` 已在缺少 key 时返回：
 
 ```ts
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY!;
+fallbackReason: "ai_disabled"
 ```
 
-如果环境变量缺失，服务端会用 `Bearer undefined` 请求 DeepSeek，最终返回 500。前端大多会 fallback，但日志和错误语义不清楚。
+同时会在 provider error、请求失败、非 JSON、schema validation 失败时返回 fallback meta。前端主流程会继续使用本地生成或本地对话。
 
-建议：
+2026-04-29 追加修复：
 
-- 如果未配置 key，API route 直接返回 `{ success: false, error: "AI API disabled" }`。
-- 前端根据该错误静默 fallback。
+- `/api/generate-self-skill` 缺少 `selectedVersion` 或五问字段时返回 400。
+- `/api/chat` 缺少 `userMessage` 时返回 400。
+- `/api/wechat-analyze` 缺少 `localSummary` 时返回 400。
 
 ### P1：人生地图仍缺少专门 E2E 测试
 
@@ -278,12 +348,18 @@ migrations: v0.3 -> v0.4 -> v0.5
 
 ### 可部署性
 
-构建层面可部署。部署前建议补齐：
+构建层面可部署。V0.5 本地预览口径已满足：
 
-- AI API key 缺失 guard。
-- 隐私文案统一。
-- 人生地图人工验收。
+- `npm run lint` 通过。
+- `npm run build` 通过。
+- 无 API key 时有本地 fallback。
+- 生产预览优先使用 `npm run start:3005` 或 `npm run preview:3005`。
+
+部署前仍建议补齐：
+
+- 人生地图人工验收和自动化回归。
 - `.claude/` 是否进入 git 的决策。
+- 后台编辑台从 localStorage 迁移到带权限的 `/admin`。
 
 ### 架构成熟度
 
@@ -297,6 +373,5 @@ migrations: v0.3 -> v0.4 -> v0.5
 1. 固定当前产品需求文档，避免边做边变。
 2. 给人生地图写交互规格，不再只靠视觉反馈调整。
 3. 拆 `ForkPaths/index.tsx`。
-4. 为 AI API 添加 disabled mode。
-5. 做一次完整人工验收并截图记录。
-6. 再提交当前稳定版本。
+4. 做一次完整人工验收并截图记录。
+5. 再提交当前稳定版本。

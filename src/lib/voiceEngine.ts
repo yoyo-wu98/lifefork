@@ -8,6 +8,7 @@ function collectVoiceText(input: GenerateSelfSkillInput) {
     input.hiddenSelf,
     input.futureSentence,
     input.extraText ?? "",
+    input.wechatAnalysis?.suggestedSelfSkillText ?? "",
     input.wechatAnalysis?.keyMoments.map((moment) => moment.content).join(" ") ?? "",
   ].join(" ");
 }
@@ -24,39 +25,39 @@ function detectSignaturePhrases(text: string) {
 
 function detectTraits(text: string) {
   const traits = [];
-  if (/[，,].*[，,]/.test(text) || text.length > 80) traits.push("会把感受绕完整再落到判断");
-  if (/(其实|但|总觉得|好像)/.test(text)) traits.push("会先绕开表面理由，再靠近真正原因");
-  if (/(总觉得|好像|可能|有点)/.test(text)) traits.push("表达里保留不确定性和自我观察");
-  if (/(不甘心|害怕|焦虑|普通)/.test(text)) traits.push("会把情绪和价值判断放在一起说");
-  if (/(哈哈|笑死|救命|真的)/.test(text)) traits.push("有即时口语感，会用轻微自嘲缓冲沉重内容");
-  return traits.length ? traits : ["克制、自省、带一点试探", "比起下结论，更习惯描述一种状态"];
+  if (/[，,].*[，,]/.test(text) || text.length > 80) traits.push("习惯先描述背景，再给出判断");
+  if (/(其实|但|总觉得|好像)/.test(text)) traits.push("常用转折说明真实原因");
+  if (/(总觉得|好像|可能|有点)/.test(text)) traits.push("表达判断时会保留不确定性");
+  if (/(不甘心|害怕|焦虑|普通)/.test(text)) traits.push("会同时说明情绪和价值判断");
+  if (/(哈哈|笑死|救命|真的)/.test(text)) traits.push("口语化明显，会用自嘲降低表达压力");
+  return traits.length ? traits : ["表达克制", "倾向先描述情况再下结论"];
 }
 
 function detectToneName(text: string) {
-  if (/(哈哈|笑死|救命)/.test(text)) return "自嘲式清醒";
-  if (/(不甘心|害怕普通|被看见)/.test(text)) return "压着火的坦白";
-  if (/(可能|好像|总觉得|其实)/.test(text)) return "试探式自省";
-  return "克制的内心独白";
+  if (/(哈哈|笑死|救命)/.test(text)) return "口语自嘲型";
+  if (/(不甘心|害怕普通|被看见)/.test(text)) return "情绪直接型";
+  if (/(可能|好像|总觉得|其实)/.test(text)) return "谨慎试探型";
+  return "理性克制型";
 }
 
 function detectRhythm(text: string) {
-  if (text.length > 160) return "长句偏多，常用转折把复杂感受慢慢摊开";
-  if (/[。！？]/.test(text)) return "短句和中句交替，适合一层一层靠近真实想法";
-  return "偏口语，节奏短，适合直接但不武断的表达";
+  if (text.length > 160) return "长句较多，习惯补充背景和转折";
+  if (/[。！？]/.test(text)) return "短句和中句交替，表达节奏清楚";
+  return "口语化、短句较多，判断相对谨慎";
 }
 
 function detectPunctuation(text: string) {
-  if (/……|\.{3,}/.test(text)) return "会用省略号保留未说完的余地";
-  if (/！/.test(text)) return "偶尔用感叹号表达情绪抬升";
-  if (/？/.test(text)) return "会用问句承认不确定，给判断留一点缓冲";
-  return "标点克制，更多依靠词语本身承载情绪";
+  if (/……|\.{3,}/.test(text)) return "经常使用省略号，表达中保留未完成信息";
+  if (/！/.test(text)) return "会用感叹号强调情绪";
+  if (/？/.test(text)) return "经常使用问句表达不确定性";
+  return "标点使用较少，表达相对克制";
 }
 
 function buildSample(input: GenerateSelfSkillInput, phrases: string[]) {
   const phrase = phrases[0] ?? "其实";
   const choice = input.currentChoice || "这件事";
-  if (phrase.includes("其实")) return `其实我纠结“${choice}”时，最怕的是又把真正想要的东西往后放。`;
-  return `我总觉得，${choice} 像是在问我到底还要不要继续承认自己。`;
+  if (phrase.includes("其实")) return `其实我纠结“${choice}”时，最担心的是继续拖延，也担心行动后结果不理想。`;
+  return `我总觉得，${choice} 需要先把收益、风险和时间成本列清楚。`;
 }
 
 export function buildVoiceProfile(input: GenerateSelfSkillInput): VoiceProfile {
@@ -73,7 +74,7 @@ export function buildVoiceProfile(input: GenerateSelfSkillInput): VoiceProfile {
     signaturePhrases,
     sentenceRhythm: detectRhythm(text),
     punctuationStyle: detectPunctuation(text),
-    emotionalGesture: text.includes("其实") || text.includes("总觉得") ? "先剥开表面理由，再靠近真正愿望" : "先承认复杂，再给自己一个可行动出口",
+    emotionalGesture: text.includes("其实") || text.includes("总觉得") ? "先描述表面问题，再说明真正顾虑" : "先说明复杂性，再提出可执行动作",
     sampleLine: buildSample(input, signaturePhrases),
     calibrationNotes,
   };
@@ -86,26 +87,26 @@ export function buildStageVoices(input: GenerateSelfSkillInput, voice: VoiceProf
       id: "voice-past",
       stage: "past",
       ageLabel: "过去的你",
-      toneName: "还没说出口的试探",
-      description: "更短、更犹豫，很多话停在半句；像是在保护一个还没被允许的愿望。",
-      sampleLine: `我那时候可能说不清，只会觉得：${input.pastNode || "这件事"} 好像不只是过去了。`,
-      traits: unique(["犹豫", "防御", "想解释又怕太认真", ...shared]),
+      toneName: "犹豫试探型",
+      description: "句子更短，判断更犹豫，常常省略真实顾虑。",
+      sampleLine: `我那时候说不清楚，但「${input.pastNode || "这件事"}」确实影响了后来的选择。`,
+      traits: unique(["犹豫", "防御", "避免直接下结论", ...shared]),
     },
     {
       id: "voice-hidden",
       stage: "hidden",
-      ageLabel: "暗线里的你",
-      toneName: "压低声音的真实",
-      description: "更直接，也更怕被看见；它不一定成熟，但很接近真实欲望。",
-      sampleLine: input.hiddenSelf || "我其实没有那么无所谓，我只是一直没找到合适的出口。",
-      traits: unique(["敏感", "真实", "有一点反叛", ...shared]),
+      ageLabel: "隐藏特征",
+      toneName: "直接表达型",
+      description: "表达更直接，但会担心别人如何评价。",
+      sampleLine: input.hiddenSelf || "我其实很在意，只是一直没有找到合适的表达方式。",
+      traits: unique(["敏感", "直接", "在意评价", ...shared]),
     },
     {
       id: "voice-present",
       stage: "present",
       ageLabel: "现在的你",
       toneName: voice.toneName,
-      description: "会先描述复杂感受，再试图把选择拆成可以承受的小块。",
+      description: "会先说明复杂情况，再把选择拆成可以执行的步骤。",
       sampleLine: voice.sampleLine,
       traits: voice.traits.slice(0, 4),
     },
@@ -113,50 +114,81 @@ export function buildStageVoices(input: GenerateSelfSkillInput, voice: VoiceProf
       id: "voice-future",
       stage: "future",
       ageLabel: "未来的你",
-      toneName: "更慢一点的清醒",
-      description: "更稳、更少自责，但仍保留你说话里的转折和自我审问。",
-      sampleLine: input.futureSentence || "你没有浪费人生，你只是终于开始用自己的方式验证它。",
-      traits: unique(["温柔", "清醒", "不替现在的你下命令", ...shared]),
+      toneName: "长期复盘型",
+      description: "语气更稳定，重点说明长期结果、代价和调整方式。",
+      sampleLine: input.futureSentence || "你做过验证，也根据结果及时调整了方向。",
+      traits: unique(["稳定", "具体", "保留不确定性", ...shared]),
     },
     {
       id: "voice-fork",
       stage: "fork",
-      ageLabel: "分支人生里的你",
-      toneName: "带着代价感的回望",
-      description: "每条岔路都要保留不同代价：留下更克制，转向更锋利，试验更平静。",
-      sampleLine: "我不能说这条路一定对，但它至少让我更知道自己在为什么付出。",
-      traits: unique(["反事实", "代价意识", "不绝对化", ...shared]),
+      ageLabel: "方案模拟版本",
+      toneName: "方案复盘型",
+      description: "针对当前方案说明实际收益、成本和需要调整的地方。",
+      sampleLine: "这个方案未必最优，但它提供了可以用于下一次判断的真实结果。",
+      traits: unique(["比较方案", "说明代价", "不做绝对判断", ...shared]),
     },
   ];
 }
 
 function applyCalibration(text: string, notes: string[]) {
   let result = text;
+  if (notes.includes("像我")) {
+    result = result.replace(/你真正想问的，可能是/g, "你可能真正在问");
+  }
   if (notes.includes("更口语")) {
     result = result.replace(/我不能告诉你/g, "说白了，我不能告诉你").replace(/在这条路径里，关键/g, "这条路最关键的");
   }
   if (notes.includes("更克制")) {
     result = result.replace(/终于/g, "开始").replace(/燃烧后的/g, "").replace(/命运机器/g, "预测工具");
   }
-  if (notes.includes("更锋利")) {
-    result = `${result}\n更直白一点说：别再只分析自己了，你需要一个现实里的动作。`;
+  if (notes.includes("更锋利") || notes.includes("更直接")) {
+    result = `${result}\n更直接地说：停止继续补充假设，先完成一个现实动作。`;
   }
   if (notes.includes("少一点AI味")) {
-    result = result.replace(/基于你当前材料生成的可能性模拟/g, "一种可能的回声").replace(/LifeFork 不做/g, "这东西不做");
+    result = result.replace(/基于你当前材料生成的可能性模拟/g, "根据现有信息生成的模拟").replace(/LifeFork 不做/g, "这个工具不会");
   }
   return result;
 }
 
-function stagePrefix(selectedFork: ForkPath, voice: VoiceProfile) {
-  if (selectedFork.scale === "life" || selectedFork.scale === "decade") return voice.calibrationNotes.includes("更口语") ? "拉远一点看：" : "我会从更长的时间说起：";
-  if (selectedFork.lane === "stability") return voice.calibrationNotes.includes("更口语") ? "我先说句不那么漂亮的话：" : "我会说得慢一点：";
-  if (selectedFork.lane === "leap") return voice.calibrationNotes.includes("更克制") ? "直接说：" : "我可能会更锋利一点说：";
+export function selectStageVoiceForFork(stageVoices: StageVoice[], selectedFork?: ForkPath) {
+  if (!stageVoices.length) return undefined;
+  if (!selectedFork) return stageVoices.find((voice) => voice.stage === "present") ?? stageVoices[0];
+
+  if (selectedFork.scale === "life" || selectedFork.scale === "decade") {
+    return stageVoices.find((voice) => voice.stage === "future") ?? stageVoices[0];
+  }
+
+  if (selectedFork.scale === "day" || selectedFork.scale === "hour") {
+    return stageVoices.find((voice) => voice.stage === "present") ?? stageVoices[0];
+  }
+
+  if (selectedFork.lane === "relationship") {
+    return stageVoices.find((voice) => voice.stage === "hidden") ?? stageVoices[0];
+  }
+
+  if (selectedFork.lane === "leap" || selectedFork.lane === "creation") {
+    return stageVoices.find((voice) => voice.stage === "fork") ?? stageVoices[0];
+  }
+
+  return stageVoices.find((voice) => voice.stage === "fork") ?? stageVoices[0];
+}
+
+function stagePrefix(selectedFork: ForkPath, voice: VoiceProfile, stageVoice?: StageVoice) {
+  if (stageVoice?.stage === "hidden") return voice.calibrationNotes.includes("更口语") ? "说实话，" : "直接说明主要顾虑：";
+  if (stageVoice?.stage === "future") return "从长期看，";
+  if (selectedFork.scale === "life" || selectedFork.scale === "decade") return "按长期结果看：";
+  if (selectedFork.lane === "stability") return "按维持现状的方案看：";
+  if (selectedFork.lane === "leap") return "按立即转向的方案看：";
   return voice.signaturePhrases.includes("其实") ? "其实，" : "";
 }
 
 export function renderInUserVoice(base: string, voice: VoiceProfile, stageVoice?: StageVoice, selectedFork?: ForkPath) {
-  const prefix = selectedFork ? stagePrefix(selectedFork, voice) : "";
-  const stageLine = stageVoice?.stage === "future" || stageVoice?.stage === "fork" ? "" : "";
+  const prefix = selectedFork ? stagePrefix(selectedFork, voice, stageVoice) : "";
+  const stageLine =
+    stageVoice?.stage === "past"
+      ? "\n当时的信息和表达能力有限，需要结合现在的材料重新判断。"
+      : "";
   const softened = base.replace(/应该/g, "可以先");
   const withPrefix = prefix && !softened.startsWith(prefix) ? `${prefix}${softened}` : softened;
   return applyCalibration(`${withPrefix}${stageLine}`, voice.calibrationNotes);

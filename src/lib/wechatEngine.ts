@@ -30,6 +30,9 @@ const emotionLexicon: Record<string, string[]> = {
 };
 
 const keyMomentPattern = /(辞职|分手|离开|失败|开始|决定|后悔|害怕|不甘心|崩溃|喜欢|讨厌|换城市|读博|创业|转行|放弃|被困住|想试)/;
+export const WECHAT_MAX_SOURCE_CHARS = 600_000;
+export const WECHAT_MAX_LINES = 8_000;
+const WECHAT_MAX_ANALYSIS_CHARS = 120_000;
 
 function sanitizeText(text: string, maxLength = 72) {
   return text
@@ -111,10 +114,14 @@ function buildKeyMoments(messages: ParsedLine[]): WeChatMessageSample[] {
 }
 
 export function analyzeWeChatExport(raw: string, sourceName = "粘贴的微信记录"): WeChatAnalysis {
-  const normalized = raw.replace(/\r/g, "\n");
-  const lines = normalized.split("\n").slice(0, 8000);
+  const source = raw.slice(0, WECHAT_MAX_SOURCE_CHARS);
+  const normalized = source.replace(/\r\n?/g, "\n");
+  const lines = normalized.split("\n").slice(0, WECHAT_MAX_LINES);
   const messages = lines.map(parseLine).filter(Boolean) as ParsedLine[];
-  const compactText = messages.map((message) => message.content).join(" ") || normalized.slice(0, 12000);
+  const compactText = (
+    messages.map((message) => message.content).join(" ") ||
+    normalized.slice(0, 12_000)
+  ).slice(0, WECHAT_MAX_ANALYSIS_CHARS);
   const participants = Array.from(new Set(messages.map((message) => message.speaker).filter((speaker) => !speaker.startsWith("片段")))).slice(0, 8);
   const topics = countMatches(compactText, topicLexicon);
   const emotions = countMatches(compactText, emotionLexicon);
@@ -134,7 +141,7 @@ export function analyzeWeChatExport(raw: string, sourceName = "粘贴的微信�
     recurringTopics.includes("选择与转折") ? "聊天中反复出现选择、离开、开始或放弃，说明这段关系材料能帮助识别人生转折。" : "",
     recurringTopics.includes("关系与边界") ? "聊天中存在关系与边界主题，可以用于观察亲密、期待、后退和被理解的模式。" : "",
     recurringTopics.includes("工作与职业") ? "聊天中出现工作与职业压力，可以补充当前选择背后的现实约束。" : "",
-    recurringTopics.includes("自我表达") ? "聊天中出现表达、作品或内容线索，可以强化创造性愿望的证据。" : "",
+    recurringTopics.includes("自我表达") ? "聊天中多次提到表达、作品或内容，可以作为重视创作和输出的证据。" : "",
     emotionalSignals.length ? `情绪层面最明显的是 ${emotionalSignals.slice(0, 3).join("、")}。` : "",
   ].filter(Boolean);
 

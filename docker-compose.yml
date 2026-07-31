@@ -1,0 +1,36 @@
+services:
+  lifefork:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    init: true
+    restart: unless-stopped
+    ports:
+      - "${LIFEFORK_PORT:-3005}:3000"
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=768"
+      LIFEFORK_VERSION: "0.8.0"
+      LIFEFORK_AI_ENABLED: "${LIFEFORK_AI_ENABLED:-false}"
+      LIFEFORK_AI_PROVIDER: "${LIFEFORK_AI_PROVIDER:-openai}"
+      LIFEFORK_COOKIE_SECURE: "${LIFEFORK_COOKIE_SECURE:-true}"
+      LIFEFORK_SESSION_SECRET: "${LIFEFORK_SESSION_SECRET:?set LIFEFORK_SESSION_SECRET}"
+      LIFEFORK_ADMIN_PASSWORD: "${LIFEFORK_ADMIN_PASSWORD:?set LIFEFORK_ADMIN_PASSWORD}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      OPENAI_BASE_URL: "${OPENAI_BASE_URL:-https://api.openai.com}"
+      OPENAI_MODEL: "${OPENAI_MODEL:-gpt-5.6-terra}"
+      OPENAI_REASONING_EFFORT: "${OPENAI_REASONING_EFFORT:-medium}"
+      DEEPSEEK_API_KEY: "${DEEPSEEK_API_KEY:-}"
+      DEEPSEEK_BASE_URL: "${DEEPSEEK_BASE_URL:-https://api.deepseek.com}"
+      DEEPSEEK_MODEL: "${DEEPSEEK_MODEL:-deepseek-chat}"
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    mem_limit: 1g
+    cpus: 1.5
+    security_opt:
+      - no-new-privileges:true

@@ -1,200 +1,229 @@
 # LifeFork / 人生岔路
 
-> 与那些你尚未选择的人生交谈。
+> 整理当前问题，比较方案、依据、成本和下一步。
 
-LifeFork 是一个本地优先的自我模拟原型。它通过五个核心问题、可选文本、可选微信聊天记录分析，生成用户的 `Self Skill`、人生时间线、多节点人生存档树，并允许用户与不同阶段、不同分支上的自己对话。
+LifeFork 是一个面向活人的自我分析与人生方案模拟网页。用户通过五个问题、可选文本和微信记录摘要建立 `Self Skill`，随后查看个人报告、阶段时间线、人生方案地图和分支自我对话。
 
-它的目标很简单：把“我是谁、我为什么这样、我还可能成为什么”做成一个可以被读取、校准、分岔和继续对话的交互式体验。
+V0.8 面向公开测试：
 
-## 当前状态
+- 所有人可直接访问，无需注册。
+- 每个浏览器保存自己的个人分析，访客之间互不读取数据。
+- AI 密钥仅保存在服务器。
+- AI 失败或关闭后，完整流程会自动使用本地规则。
+- 管理员通过受保护的 `/admin` 页面管理全局公告、维护状态和功能开关。
+- 每条结论和人生分支显示分析方法、用户权重、参考度、依据、假设和限制。
 
-这是 V0 原型，适合本地演示、产品验证、交互试用和部署前保存。
+## 当前能力
 
-- 无后端
-- 无数据库
-- 无真实 AI API
-- 无登录注册
-- 数据保存在浏览器 `localStorage`
-- 可以完整走通从输入到分享卡片的体验
+完整用户流程：
 
-## 如何运行
+1. 回答五个核心问题。
+2. 可选导入微信文本，在浏览器本地提取主题和情绪线索。
+3. 可选补充日记、备忘录或聊天片段。
+4. 选择分析方法、开关和权重。
+5. 生成个人分析报告。
+6. 查看并修改人生时间线。
+7. 在人生方案地图中切换全人生、十年、阶段、一年、一月、一周、一天和一小时尺度。
+8. 查看每条分支的收益、成本、状态变化、生成依据和未知因素。
+9. 与该分支下的模拟版本对话，并持续校准说话方式。
+10. 生成结果卡片或导出完整 `Self Skill` JSON。
+
+分析方法：
+
+- 用户提供的事实与原文
+- 行为与决策模式
+- 群体统计参考
+- 服务器 AI 综合分析
+- 各人生阶段的 MBTI 倾向
+- 八字文化解读
+- 紫微斗数文化解读，包含生肖与星座字段
+
+默认使用“证据优先”。八字和紫微斗数需要用户主动启用并同意处理出生信息。文化方法保持低参考度，并独立标注为传统文化解读。
+
+## 本地运行
+
+要求：
+
+- Node.js 22
+- npm 10+
+
+安装与开发：
 
 ```bash
 npm install
-npm run dev
+npm run dev:3005
 ```
 
-打开 [http://localhost:3000](http://localhost:3000) 即可体验。
-
-也可以先构建再用生产模式运行：
+生产预览：
 
 ```bash
 npm run build
-npm run start
+npm run start:3005
 ```
 
-## 核心体验
+打开 [http://localhost:3005](http://localhost:3005)。
 
-用户会依次完成这些步骤：
+不要同时运行多个开发或生产进程。地图验收优先使用生产预览，避免开发文件监听器占用额外内存。
 
-1. 进入沉浸式首页
-2. 选择想见的自己：未来的我、过去的我、另一条路上的我
-3. 回答五个核心问题
-4. 可选导入微信聊天记录文本，做本地规则分析
-5. 可选粘贴日记、聊天、备忘录或草稿
-6. 生成 `Self Skill`
-7. 查看自我画像、价值观、恐惧、反复模式和证据
-8. 查看可编辑人生时间线
-9. 打开“人生模拟地图”
-10. 在全人生、十年、阶段、一年、一月、一周、一天、一小时之间切换尺度
-11. 点击任意人生节点，读取该节点的可能性说明
-12. 进入该时间点对应的未来自我对话
-13. 校准未来自我的语气，让它更接近用户说话方式
-14. 生成分享卡片
-15. 导出 `Self Skill` JSON
-16. 清空本地数据重新开始
+## 环境变量
 
-## V0 功能
+复制示例：
 
-- 沉浸式 Landing 页与版本选择
-- 五个核心问题和灵感标签输入
-- 可选文本输入，用于提取语言风格和主题线索
-- 微信聊天记录本地导入与规则分析
-- 本地规则生成 `Self Skill`
-- 自我画像：价值观、恐惧、欲望、反复模式、人生母题
-- 证据索引：关键判断会链接到用户回答或本地分析结果
-- 可编辑时间线：修改、删除、标记准确性
-- 可缩放人生模拟地图，带发光连接线、尺度切换和节点状态
-- 任意人生节点可点选、读取、放大、进入对话
-- 分支自我聊天：快捷问题、本地模板回复、安全提示
-- 语气学习：记录“像我 / 少一点 AI 味 / 更口语 / 更克制 / 更锋利”反馈
-- 分享卡片：复制结果、随机未来箴言、导出 JSON
-- 进度仪式感与徽章反馈
-- 全局导航：回主页、自我画像、时间线、人生地图、当前对话、分享卡片、清空重来
+```bash
+cp .env.example .env.local
+```
 
-## Self Skill
+公开测试至少配置：
 
-`Self Skill` 是 LifeFork 的核心对象。它不是完整人格，也不声称保存意识；它是一个结构化、可编辑、可导出的自我模型草稿。
+```bash
+LIFEFORK_AI_ENABLED=true
+LIFEFORK_AI_PROVIDER=openai
+LIFEFORK_SESSION_SECRET=<strong-random-secret>
+LIFEFORK_ADMIN_PASSWORD=<strong-admin-password>
+OPENAI_API_KEY=<server-only-key>
+```
 
-它包含：
+也可以选择 DeepSeek：
 
-- 用户选择的自我版本
-- 五个核心问题的回答
-- 可选文本和微信分析摘要
-- 身份画像
-- 语言风格画像
-- 不同人生阶段的语气模型
-- 价值观、恐惧、欲望和反复模式
-- 决策模型
-- 人生时间线
-- 证据片段
-- 可点击的人生分支节点
+```bash
+LIFEFORK_AI_PROVIDER=deepseek
+DEEPSEEK_API_KEY=<server-only-key>
+```
 
-## 人生模拟地图
+支持的模型网关：
 
-原型中的人生分支已经从单层路径卡片升级为可缩放的人生地图。
+- OpenAI Responses API，默认 `store: false`
+- DeepSeek Chat Completions
 
-它的尺度从大到小依次是：
+前端不会获得任何模型 API 密钥。服务端对生成、聊天、微信摘要和管理员登录分别限流。
 
-- 全人生
-- 十年
-- 阶段
-- 一年
-- 一月
-- 一周
-- 一天
-- 一小时
+## 管理后台
 
-每个节点都像一个可读取的时间点：
+地址：
 
-- 可以点击读取
-- 可以看到前序路线
-- 可以进入该节点对应的未来自我
-- 可以继续放大到更小尺度
-- 可以查看状态变量：自主、稳定、关系、创造、能量、遗憾、不确定
+```text
+/admin
+```
 
-当前 V0 使用本地规则生成多条人生线，例如：
+需要服务端配置 `LIFEFORK_ADMIN_PASSWORD`。登录后可以管理：
 
-- 稳定延续线：先保住生活结构
-- 激进转向线：把真实愿望放到生活中心
-- 试验线：用可逆实验慢慢改写人生
-- 关系安放线：把重要关系纳入人生设计
+- 正常开放或维护模式
+- 服务器 AI 开关
+- 微信记录导入开关
+- 八字与紫微斗数开关
+- 完整示例开关
+- 公开测试版本标签
+- 全站公告
+- 隐私提示
+- 新用户默认分析方案
 
-用户可以先从全人生尺度看几条主线，再逐步放大到十年、一年、一周、一天和一小时。
+本地与 Docker 配置写入：
 
-## 微信聊天记录导入
+```text
+data/runtime-config.json
+```
 
-V0 支持粘贴或上传已经导出的微信聊天文本。
+Docker 部署使用持久化卷 `/app/data`。Sites / Cloudflare 部署使用 D1 表 `lifefork_runtime_config`。两种运行目标使用同一套管理页面与 API。
 
-当前版本只做浏览器本地规则分析：
+## 数据边界
 
-- 高频主题
-- 情绪线索
-- 关键片段
-- 参与者数量
-- 文本长度
-- 可以进入 `Self Skill` 的摘要信号
-
-原型不会上传聊天记录，也不会把完整原文写入 `Self Skill`。后续如果接入真实模型，应使用分块摘要、证据索引、隐私脱敏和用户可删除机制。
-
-## 语气学习
-
-LifeFork 的长期价值在于逐步接近用户自己的表达方式。
-
-当前 V0 已经有一个轻量语气系统：
-
-- 从问题、额外文本和微信片段中提取常用短语
-- 生成语言节奏、标点习惯、情绪手势和样例句
-- 为过去、暗线、现在、未来、分支人生生成不同阶段语气
-- 在聊天中支持用户校准：像我、少一点 AI 味、更口语、更克制、更锋利
-- 校准结果保存在 `Self Skill.voice.calibrationNotes`
-
-## 数据存储
-
-全部状态保存在浏览器 `localStorage`：
+浏览器保存：
 
 - `lifefork.selfSkill`
 - `lifefork.currentStep`
 - `lifefork.selectedFork`
 - `lifefork.chatMessages`
 - `lifefork.wechatAnalysis`
+- `lifefork.analysisSettings`
 
-刷新页面后会自动恢复进度。用户可以通过界面里的“清空重来”删除本地数据。
+服务器处理：
 
-## 本版本不做什么
+- 生成个人分析所需的五问、补充材料和脱敏微信摘要
+- 分支对话上下文
+- 用户明确同意后的出生信息规则排盘
 
-- 不做用户注册或登录
-- 不做云端数据库
-- 不做后端 API
-- 不调用真实大模型
-- 不自动抓取微信
-- 不解析复杂二进制文件
-- 不做语音识别或视频生成
-- 不做心理诊断、医疗建议或命运预测
-- 不替用户做最终决定
+微信原文在浏览器中有界处理，最多保留 600,000 个字符并分析前 8,000 行。服务器只收到用于个人分析的短摘要。出生字段只发送到 LifeFork 服务器执行规则排盘，不会转发给 AI 提供商。
 
-## 伦理边界
+用户可以在界面中清空浏览器数据。管理员配置与用户数据分开存储。
 
-LifeFork 生成的是可能性模拟，请把它当作镜子、草稿和反思工具。
+## 解释规则
 
-系统设计遵守这些边界：
+LifeFork 对每条输出使用以下结构：
 
-- 不给确定性命运判断
-- 不使用“你一定会……”式表达
-- 不鼓励情感依赖
-- 用户可以查看、导出、清空本地数据
-- 检测到危机关键词时，停止常规模拟并显示现实支持建议
+```text
+结论
+  -> 使用的方法
+  -> 用户设置的权重
+  -> 本次参考度
+  -> 对应用户材料或技术来源
+  -> 方法限制
+  -> 用户可否修正
+```
 
-这不是心理治疗，也不是医疗建议。
+分支分数表示当前材料下的目标匹配程度，不能解释为成功率。MBTI 只描述特定人生阶段的偏好。八字、紫微斗数、生肖和星座属于文化解释内容。
 
-## 技术栈
+## 生产部署
 
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- localStorage
-- 本地规则引擎
+项目支持两种生产目标。
+
+### Sites / Cloudflare
+
+```bash
+npm run build:cloudflare
+```
+
+该构建使用 OpenNext，将现有 Next.js App Router、Route Handlers 和管理后台转换为 Cloudflare Worker：
+
+- D1 持久化全局运行配置
+- 托管环境变量保存 AI key、会话密钥和管理密码
+- 前端个人分析继续保存在各自浏览器
+- `/api/health`、匿名会话、限流和本地降级继续生效
+
+`.openai/hosting.json` 只保存项目标识和逻辑资源绑定，不保存运行密钥。
+
+### 单实例 Docker
+
+Docker Compose：
+
+```bash
+cp .env.example .env
+# 填写生产密钥与密码
+docker compose up -d --build
+docker compose ps
+```
+
+默认映射到主机端口 `3005`。容器包含：
+
+- 1 GB 内存上限
+- Node 768 MB 堆上限
+- 1.5 CPU 上限
+- `/api/health` 健康检查
+- `/app/data` 持久化配置卷
+- `no-new-privileges` 安全选项
+
+正式公网部署必须使用 HTTPS，并设置：
+
+```bash
+LIFEFORK_COOKIE_SECURE=true
+```
+
+完整步骤见 [部署运行手册](docs/DEPLOYMENT_RUNBOOK.md)。
+
+## 质量检查
+
+```bash
+npm run check
+npm run build
+npm run build:cloudflare
+npm audit --omit=dev
+```
+
+`npm run check` 包含：
+
+- TypeScript 类型检查
+- ESLint
+- 文案注册表审计
+- 人生场景 fixture 校验
 
 ## 项目结构
 
@@ -202,43 +231,48 @@ LifeFork 生成的是可能性模拟，请把它当作镜子、草稿和反思�
 src/
   app/
     page.tsx
-    globals.css
+    admin/page.tsx
+    api/
   components/
-    AppNav.tsx
-    Landing.tsx
-    QuestionFlow.tsx
-    WeChatImportStep.tsx
+    AnalysisMethodStep.tsx
     SelfSkillPanel.tsx
-    TimelineView.tsx
-    ForkPaths.tsx
-    InstanceChat.tsx
-    ShareCard.tsx
+    ForkPaths/
   lib/
-    types.ts
-    selfSkillEngine.ts
-    dialogueEngine.ts
-    voiceEngine.ts
-    wechatEngine.ts
-    storage.ts
-    safety.ts
-    copy.ts
+    analysis/
+    ai/
+    selfSkill/
+    server/
+    stores/
 ```
 
-## 验证命令
+关键边界：
 
-```bash
-npm run lint
-npm run build
-```
+- `src/lib/analysis/`：方法注册、权重、文化排盘和综合报告
+- `src/lib/ai/`：模型网关、提示词、预算和请求校验
+- `src/lib/server/`：匿名会话、限流、后台认证和全局配置
+- `src/lib/selfSkill/`：本地分析、时间线、分支树和阶段性格
+- `src/components/ForkPaths/`：稳定场景、相机、可见性、节点和连线
 
-## 未来路线
+## 文档
 
-- 更强的分支树编辑与合流可视化
-- 分支节点手动新增、重命名、删除和锁定
-- Self Skill 版本历史
-- 更细的语气学习与人生阶段风格迁移
-- 本地文件解析器：Markdown、TXT、CSV、JSON、HTML
-- 真实 LLM 接入后的分块摘要和证据检索
-- 分享卡片导出图片
-- 本地优先加密存储
-- 可部署 SaaS 版本与本地开源版本分离
+- [公开测试产品需求与交互规范](docs/PUBLIC_BETA_PRODUCT_SPEC.md)
+- [分析方法、权重与来源规范](docs/ANALYSIS_METHODS_AND_PROVENANCE.md)
+- [V0.8 技术审计与重构报告](docs/PUBLIC_BETA_TECHNICAL_REPORT.md)
+- [人生地图交互规范](docs/LIFE_MAP_INTERACTION_SPEC.md)
+- [部署运行手册](docs/DEPLOYMENT_RUNBOOK.md)
+- [内部开发管理与团队拆分](docs/INTERNAL_DEVELOPMENT_MANAGEMENT.md)
+- [Public Beta 团队执行计划](docs/PUBLIC_BETA_TEAM_EXECUTION_PLAN.md)
+- [项目技术参考](PROJECT_DOCS.md)
+- [伦理章程](docs/ETHICAL_CHARTER.md)
+
+## 重要限制
+
+- 当前公开测试采用匿名浏览器隔离，没有跨设备账号同步。
+- 服务器限流使用单进程内存；多实例部署需要 Redis 或网关限流。
+- 群体统计模块当前只提供研究基准，尚未接入行业、地区和年龄分层数据库。
+- AI 生成内容可能出现错误，需要用户核对。
+- LifeFork 不提供医疗、心理诊断、法律或财务结论。
+
+## License
+
+当前仓库未声明开源许可证。未经版权所有者明确授权，默认保留全部权利。

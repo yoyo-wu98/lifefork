@@ -1,47 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chatCompletionJSON } from "@/lib/ai/client";
 import {
+  SELF_SKILL_PROMPT_VERSION,
   SELF_SKILL_SYSTEM_PROMPT,
   buildSelfSkillUserPrompt,
 } from "@/lib/ai/prompts";
-import type { SelfSkill, Evidence, Claim, TimelineNode, StageVoice } from "@/lib/types";
+import { AI_TOKEN_BUDGETS } from "@/lib/ai/tokenBudget";
+import {
+  parseGenerateSelfSkillRequest,
+  readJsonRequest,
+} from "@/lib/ai/schemas/requestSchemas";
+import {
+  selfSkillResponseSchema,
+  type LLMGeneratedSkill,
+} from "@/lib/ai/schemas/selfSkillResponse";
+import { calculateCulturalMethods } from "@/lib/analysis/culturalCalculators.server";
+import { serverEnvironmentEnabled } from "@/lib/server/environment";
+import { createAnalysisSettings } from "@/lib/analysis/methodRegistry";
+import { guardPublicApi, finalizePublicApiResponse } from "@/lib/server/apiGuard";
+import { getRuntimeConfig } from "@/lib/server/runtimeConfigStore";
+import type {
+  Evidence,
+  Claim,
+  MethodAnalysisResult,
+  TimelineNode,
+} from "@/lib/types";
 import { buildStageVoices, buildVoiceProfile } from "@/lib/voiceEngine";
-
-interface LLMGeneratedSkill {
-  identity: {
-    displayName: string;
-    languageStyle: string;
-    emotionalTone: string;
-    selfNarrative: string;
-    archetype: string;
-  };
-  semantic: {
-    values: string[];
-    fears: string[];
-    desires: string[];
-    recurringPatterns: string[];
-    innerConflict: string;
-    lifeMotif: string;
-  };
-  decision: {
-    riskPreference: string;
-    workStyle: string;
-    conflictStyle: string;
-    changeTolerance: string;
-    attachmentPattern: string;
-  };
-  claims: Array<{
-    text: string;
-    confidence: number;
-    evidenceQuote: string;
-  }>;
-  timelineNodes: Array<{
-    yearLabel: string;
-    title: string;
-    emotion: string;
-    pattern: string;
-  }>;
-}
 
 function uid() {
   return crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -67,24 +51,24 @@ function mergeWithDefaults(
 } {
   const defaults = {
     identity: {
-      displayName: "正在分岔的你",
-      languageStyle: "简洁直接，带一点克制",
-      emotionalTone: input.recurringEmotion || "复杂但清醒",
-      selfNarrative: "你像一条迟迟不肯汇入固定河道的河流，一边害怕漂泊，一边害怕停下。",
-      archetype: "深海建造者",
+      displayName: "当前的你",
+      languageStyle: "表达直接，判断相对谨慎",
+      emotionalTone: input.recurringEmotion || "复杂、谨慎",
+      selfNarrative: "你希望保留自主权，同时也需要稳定的生活基础。当前更适合通过小规模行动补充信息。",
+      archetype: "谨慎规划型",
     },
     semantic: {
       values: ["自由", "意义", "连接"],
-      fears: ["害怕浪费人生", "害怕被误解", "害怕选择错误"],
-      desires: ["被自己承认", "更自由地表达", "稳定又不失热情"],
+      fears: ["担心浪费时间", "担心别人不理解", "担心选错"],
+      desires: ["拥有更多自主权", "能持续表达和创作", "保持稳定的生活基础"],
       recurringPatterns: [
-        "你渴望稳定带来的安全感，但又害怕它慢慢吞掉你的自由。",
-        "你常常需要先确认一件事值得付出，行动力才会真正启动。",
-        "你对人生的要求超过'过得还行'，还想在某种意义上被自己承认。",
-        "你习惯把很多真实愿望延后，直到它们以焦虑或疲惫的形式回来。",
+        "你同时重视稳定和自主权，因此重大选择通常需要较长时间比较。",
+        "你会先确认投入是否值得，再开始行动。",
+        "你希望工作和生活符合长期目标，不满足于短期维持。",
+        "你容易推迟真正想做的事，压力随后会表现为焦虑或疲惫。",
       ],
       innerConflict: "自由 vs 安全感",
-      lifeMotif: "不断逃离被定义，又不断寻找一个能安放自己的地方。",
+      lifeMotif: "你经常在安全感和改变之间权衡，需要用实际行动补充判断依据。",
     },
     decision: {
       riskPreference: "谨慎试探型",
@@ -95,36 +79,36 @@ function mergeWithDefaults(
     },
     claims: [
       {
-        text: "你目前的核心冲突更接近内在愿望与外部安全感的拉扯。",
+        text: "你当前主要在比较自主权和安全感两类需求。",
         confidence: 0.78,
         evidenceQuote: `来自你的回答："${input.currentChoice?.slice(0, 48) ?? ""}"`,
       },
       {
-        text: "你现在更需要一个不会背叛自己的试验结构，先别急着定终局。",
+        text: "目前信息不足以支持一次性做出最终决定，更适合先设定一个有期限的验证方案。",
         confidence: 0.84,
         evidenceQuote: input.extraText
           ? `来自你粘贴的文字："${input.extraText.slice(0, 48)}"`
-          : "系统推断：你正在尝试把犹豫转化为可行动的路径。",
+          : "系统推断：你希望把当前问题拆成可以执行和检查的方案。",
       },
     ],
     timelineNodes: [
       {
         yearLabel: "过去",
-        title: input.pastNode || "一个尚未被重新理解的节点",
-        emotion: "复杂、迟疑、仍有回声",
-        pattern: "这里可能藏着你后来很多选择的原型",
+        title: input.pastNode || "一段影响当前选择的经历",
+        emotion: "复杂、犹豫",
+        pattern: "这段经历可能影响你现在对风险和选择的判断",
       },
       {
         yearLabel: "现在",
         title: input.currentChoice || "当前选择",
         emotion: input.recurringEmotion || "混乱",
-        pattern: "你正在安全与变化之间寻找新的平衡",
+        pattern: "你正在比较维持现状和做出改变的收益与风险",
       },
       {
         yearLabel: "未来",
-        title: input.futureSentence || "未来的我想对现在说的话",
-        emotion: "温柔、清醒、带着提醒",
-        pattern: "你期待未来的自己证明：今天的犹豫没有白费",
+        title: input.futureSentence || "你希望这个选择带来的长期结果",
+        emotion: "明确、谨慎",
+        pattern: "这个结果可以作为比较不同方案的长期目标",
       },
     ],
   };
@@ -147,20 +131,70 @@ function mergeWithDefaults(
 }
 
 export async function POST(request: NextRequest) {
+  const { guard, blocked } = guardPublicApi(request, {
+    bucket: "generate-self-skill",
+    limit: 6,
+  });
+  if (blocked) return blocked;
+
+  const respond = (body: unknown, status = 200) =>
+    finalizePublicApiResponse(NextResponse.json(body, { status }), guard);
+
   try {
-    const body = await request.json();
+    const runtimeConfig = await getRuntimeConfig();
+    if (runtimeConfig.status === "maintenance") {
+      return respond(
+        { success: false, error: "服务正在维护，请稍后再试。" },
+        503,
+      );
+    }
+
+    const json = await readJsonRequest(request);
+    if (!json.success) {
+      return respond(
+        {
+          success: false,
+          error: json.error,
+          meta: {
+            llmUsed: false,
+            fallbackReason: "invalid_request",
+            promptVersion: SELF_SKILL_PROMPT_VERSION,
+          },
+        },
+        400,
+      );
+    }
+
+    const parsed = parseGenerateSelfSkillRequest(json.data);
+    if (!parsed.success) {
+      return respond(
+        {
+          success: false,
+          error: parsed.error,
+          meta: {
+            llmUsed: false,
+            fallbackReason: "invalid_request",
+            promptVersion: SELF_SKILL_PROMPT_VERSION,
+          },
+        },
+        400,
+      );
+    }
+
     const {
-      selectedVersion = "future",
-      currentChoice = "",
-      recurringEmotion = "",
-      pastNode = "",
-      hiddenSelf = "",
-      futureSentence = "",
+      selectedVersion,
+      currentChoice,
+      recurringEmotion,
+      pastNode,
+      hiddenSelf,
+      futureSentence,
       extraText,
       wechatSummary,
-    } = body;
+      analysisSettings: requestedAnalysisSettings,
+      enableAi,
+    } = parsed.data;
+    const analysisSettings = requestedAnalysisSettings ?? createAnalysisSettings();
 
-    // Call DeepSeek for structured self-skill generation
     const userPrompt = buildSelfSkillUserPrompt({
       currentChoice,
       recurringEmotion,
@@ -171,15 +205,24 @@ export async function POST(request: NextRequest) {
       wechatSummary,
     });
 
-    const { data: llmSkill, raw } = await chatCompletionJSON<LLMGeneratedSkill>(
+    const { data: llmSkill, raw, meta, usage } = await chatCompletionJSON<LLMGeneratedSkill>(
       [
         { role: "system", content: SELF_SKILL_SYSTEM_PROMPT },
         { role: "user", content: userPrompt },
       ],
-      { temperature: 0.3, maxTokens: 3000 },
+      {
+        temperature: 0.3,
+        maxTokens: AI_TOKEN_BUDGETS.selfSkill.maxOutputTokens,
+        reasoningEffort: "medium",
+        safetyIdentifier: guard.session.safetyIdentifier,
+        enabled:
+          enableAi &&
+          runtimeConfig.features.ai &&
+          runtimeConfig.service.aiConfigured,
+      },
+      selfSkillResponseSchema,
     );
 
-    // Merge LLM output with safe defaults
     const merged = mergeWithDefaults(llmSkill, {
       selectedVersion,
       currentChoice,
@@ -190,7 +233,6 @@ export async function POST(request: NextRequest) {
       extraText,
     });
 
-    // Build voice profile from user text
     const voiceInput = {
       selectedVersion: selectedVersion as "future" | "past" | "fork",
       currentChoice,
@@ -198,13 +240,12 @@ export async function POST(request: NextRequest) {
       pastNode,
       hiddenSelf,
       futureSentence,
-      extraText,
+      extraText: [extraText, wechatSummary].filter(Boolean).join("\n"),
       voiceCalibration: [] as string[],
     };
     const voice = buildVoiceProfile(voiceInput);
     const stageVoices = buildStageVoices(voiceInput, voice);
 
-    // Assemble evidence
     const evidence: Evidence[] = [
       {
         id: uid(),
@@ -226,7 +267,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Assemble claims with evidence links
     const claims: Claim[] = merged.claims.map((c) => ({
       id: uid(),
       text: c.text,
@@ -234,7 +274,6 @@ export async function POST(request: NextRequest) {
       evidenceIds: evidence.slice(0, 2).map((e) => e.id),
     }));
 
-    // Assemble timeline
     const timeline: TimelineNode[] = merged.timelineNodes.map((node, i) => ({
       id: uid(),
       yearLabel: node.yearLabel,
@@ -244,10 +283,9 @@ export async function POST(request: NextRequest) {
       voice: stageVoices[i] ?? stageVoices[2], // fallback to present voice
     }));
 
-    // Build the complete SelfSkill (forks are generated client-side still)
     const selfSkillCore = {
       id: uid(),
-      version: "v0.4-llm",
+      version: "v0.5-llm",
       createdAt: new Date().toISOString(),
       selectedVersion: selectedVersion as "future" | "past" | "fork",
       questions: { currentChoice, recurringEmotion, pastNode, hiddenSelf, futureSentence },
@@ -260,21 +298,54 @@ export async function POST(request: NextRequest) {
       timeline,
       evidence,
       claims,
+      analysisSettings,
     };
 
-    return NextResponse.json({
+    const enabledCulturalMethods = new Set(
+      runtimeConfig.features.culturalMethods
+        ? analysisSettings.methods
+            .filter(
+              (method) =>
+                method.enabled &&
+                (method.id === "bazi" || method.id === "ziwei"),
+            )
+            .map((method) => method.id)
+        : [],
+    );
+    const culturalResults: MethodAnalysisResult[] = enabledCulturalMethods.size
+      ? calculateCulturalMethods(analysisSettings.birthProfile).filter((result) =>
+          enabledCulturalMethods.has(result.methodId),
+        )
+      : [];
+
+    return respond({
       success: true,
       data: selfSkillCore,
-      meta: { llmUsed: !!llmSkill, rawResponse: raw.slice(0, 500) },
+      culturalResults,
+      meta: {
+        ...meta,
+        llmUsed: !!llmSkill,
+        fallbackReason: llmSkill ? undefined : meta.fallbackReason ?? "local_defaults",
+        promptVersion: SELF_SKILL_PROMPT_VERSION,
+        ...(serverEnvironmentEnabled("LIFEFORK_AI_DEBUG")
+          ? { rawResponse: raw.slice(0, 300) }
+          : {}),
+      },
+      usage,
     });
   } catch (error) {
     console.error("generate-self-skill error:", error);
-    return NextResponse.json(
+    return respond(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: "Failed to generate self skill",
+        meta: {
+          llmUsed: false,
+          fallbackReason: "route_error",
+          promptVersion: SELF_SKILL_PROMPT_VERSION,
+        },
       },
-      { status: 500 },
+      500,
     );
   }
 }

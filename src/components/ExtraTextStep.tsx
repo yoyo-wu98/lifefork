@@ -10,29 +10,43 @@ import { disclaimer } from "@/lib/copy";
 export function ExtraTextStep() {
   const extraText = useLifeforkStore((s) => s.extraText);
   const setExtraText = useLifeforkStore((s) => s.setExtraText);
-  const createSkill = useLifeforkStore((s) => s.createSkill);
+  const setStep = useLifeforkStore((s) => s.setStep);
 
   return (
-    <section className="space-y-4 rounded-3xl border border-white/15 bg-white/5 p-6">
-      <h3 className="text-2xl">给我一段更像你的文字</h3>
-      <p className="text-sm text-mist">
-        你可以粘贴一段日记、聊天记录、备忘录、朋友圈草稿，或者什么都不填。
-      </p>
+    <section className="space-y-5 rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-5 shadow-sm">
+      <div>
+        <p className="text-sm font-medium text-blue">补充材料</p>
+        <h3 className="mt-1 text-2xl font-semibold text-ink">补充一段真实材料</h3>
+        <p className="mt-2 max-w-[68ch] text-sm leading-6 text-mist">
+          可以粘贴日记、备忘录或聊天片段。系统会用它补充你的表达方式和反复出现的主题；这一步可以跳过。
+        </p>
+      </div>
       <textarea
-        placeholder="例如：我最近总觉得自己好像被困住了。我也说不清是否讨厌现在的生活，只是感觉身体里有另一部分一直没有被使用……"
-        className="min-h-40 w-full rounded-2xl border border-white/15 bg-deep/60 p-4"
+        placeholder="例如：我正在考虑辞职做自己的项目。主要顾虑是收入不稳定，也担心半年后发现方向不适合。"
+        className="min-h-44 w-full resize-y rounded-lg border border-night/10 bg-deep/70 p-4 text-sm leading-6 outline-none focus:border-blue focus:bg-[oklch(0.995_0.003_92)]"
         value={extraText}
         onChange={(e) => setExtraText(e.target.value)}
       />
-      <div className="flex gap-3">
-        <button onClick={createSkill} className="rounded-full border border-white/20 px-5 py-2">
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={() => {
+            setExtraText("");
+            setStep("methods");
+          }}
+          className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep"
+        >
           跳过
         </button>
-        <button onClick={createSkill} className="rounded-full bg-gradient-to-r from-blue to-violet px-5 py-2">
-          继续生成
+        <button
+          type="button"
+          onClick={() => setStep("methods")}
+          className="rounded-lg bg-night px-5 py-2 text-sm font-medium text-deep shadow-quiet"
+        >
+          下一步：选择分析方法
         </button>
       </div>
-      <p className="text-xs text-mist">{disclaimer}</p>
+      <p className="max-w-[72ch] text-xs leading-6 text-mist">{disclaimer}</p>
     </section>
   );
 }

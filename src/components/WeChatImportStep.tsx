@@ -4,7 +4,13 @@ import { useMemo, useState } from "react";
 import { useLifeforkStore } from "@/lib/stores/lifeforkStore";
 import { disclaimer } from "@/lib/copy";
 import { containsCrisisSignal, safetyMessage } from "@/lib/safety";
-import { analyzeWeChatExport } from "@/lib/wechatEngine";
+import {
+  analyzeWeChatExport,
+  WECHAT_MAX_LINES,
+  WECHAT_MAX_SOURCE_CHARS,
+} from "@/lib/wechatEngine";
+
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
 /**
  * WeChat chat log import step.
@@ -19,7 +25,7 @@ export function WeChatImportStep() {
   const setStep = useLifeforkStore((s) => s.setStep);
 
   const [fileName, setFileName] = useState("");
-  const hasLargeInput = wechatRaw.length > 120_000;
+  const hasLargeInput = wechatRaw.length >= WECHAT_MAX_SOURCE_CHARS;
   const characterLabel = useMemo(() => wechatRaw.length.toLocaleString("zh-CN"), [wechatRaw.length]);
 
   const analyze = (sourceName = fileName || "粘贴的微信记录") => {
@@ -29,49 +35,54 @@ export function WeChatImportStep() {
 
   const handleFile = async (file?: File) => {
     if (!file) return;
+    if (file.size > MAX_FILE_BYTES) {
+      alert("文件超过 5 MB。请先导出较小的时间范围，或分批分析。");
+      return;
+    }
     setFileName(file.name);
     const text = await file.text();
-    setWechatRaw(text);
-    setWechatAnalysis(analyzeWeChatExport(text, file.name));
+    const boundedText = text.slice(0, WECHAT_MAX_SOURCE_CHARS);
+    setWechatRaw(boundedText);
+    setWechatAnalysis(analyzeWeChatExport(boundedText, file.name));
   };
 
   const skip = () => setStep("extra-text");
   const next = () => setStep("extra-text");
 
   return (
-    <section className="space-y-5 rounded-3xl border border-white/15 bg-white/5 p-6">
+    <section className="space-y-5 rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-5 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm tracking-[0.2em] text-blue">Local WeChat Lens</p>
-          <h3 className="mt-2 text-2xl">导入微信聊天记录</h3>
-          <p className="mt-2 max-w-2xl text-sm text-mist">
-            粘贴或上传你已经导出的聊天文本。V0 只在浏览器本地做规则分析：提取主题、情绪线索、关键节点和短证据片段，不上传服务器，也不把完整原文写入 Self Skill。
+          <p className="text-sm font-medium text-blue">微信记录本地分析</p>
+          <h3 className="mt-1 text-2xl font-semibold text-ink">导入微信聊天记录</h3>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-mist">
+            粘贴或上传已经导出的聊天文本。系统会在当前浏览器中提取高频主题、情绪线索和关键片段。完整原文不会写入个人分析。
           </p>
         </div>
-        <button onClick={skip} className="rounded-full border border-white/20 px-5 py-2 text-sm">
+        <button type="button" onClick={skip} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
           跳过微信导入
         </button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-3">
-          <label className="block rounded-2xl border border-white/15 bg-deep/60 p-4">
+          <label className="block rounded-lg border border-night/10 bg-deep/70 p-4">
             <span className="mb-3 block text-sm text-mist">上传 .txt / .csv / .json / .html 文本文件</span>
             <input
               type="file"
               accept=".txt,.csv,.json,.html,.htm,.md"
-              className="block w-full text-sm text-mist file:mr-4 file:rounded-full file:border-0 file:bg-blue/20 file:px-4 file:py-2 file:text-blue"
+              className="block w-full text-sm text-mist file:mr-4 file:rounded-lg file:border-0 file:bg-blue/10 file:px-4 file:py-2 file:text-blue"
               onChange={(event) => handleFile(event.target.files?.[0])}
             />
           </label>
           <textarea
-            className="min-h-56 w-full rounded-2xl border border-white/15 bg-deep/60 p-4 text-sm"
+            className="min-h-56 w-full resize-y rounded-lg border border-night/10 bg-deep/70 p-4 text-sm leading-6 outline-none focus:border-blue focus:bg-[oklch(0.995_0.003_92)]"
             placeholder={`也可以直接粘贴聊天记录。例如：
 [2026-04-24 21:10:03] 我：我最近总觉得被困住了
 [2026-04-24 21:11:20] 朋友：你也许没有讨厌工作，只是太想做自己的东西了？`}
             value={wechatRaw}
             onChange={(event) => {
-              setWechatRaw(event.target.value);
+              setWechatRaw(event.target.value.slice(0, WECHAT_MAX_SOURCE_CHARS));
               setWechatAnalysis(null);
             }}
           />
@@ -79,26 +90,26 @@ export function WeChatImportStep() {
             <button
               disabled={!wechatRaw.trim()}
               onClick={() => analyze()}
-              className="rounded-full bg-gradient-to-r from-gold to-violet px-5 py-2 text-night disabled:opacity-40"
+              className="rounded-lg bg-night px-5 py-2 text-sm font-medium text-deep shadow-quiet disabled:cursor-not-allowed disabled:opacity-40"
             >
               本地分析这段聊天
             </button>
             <span className="text-xs text-mist">已读取 {characterLabel} 个字符</span>
           </div>
           {hasLargeInput && (
-            <p className="rounded-2xl border border-gold/30 bg-gold/10 p-3 text-xs text-gold">
-              文本很大。V0 会优先抽取前 8000 行做本地预分析；未来接入真实 AI 时应使用分块、摘要树和证据索引，避免一次性消耗大量 token。
+            <p className="rounded-lg border border-gold/20 bg-gold/10 p-3 text-xs leading-5 text-gold">
+              已达到当前上限。系统只保留前 {WECHAT_MAX_SOURCE_CHARS.toLocaleString("zh-CN")} 个字符，并分析前 {WECHAT_MAX_LINES.toLocaleString("zh-CN")} 行。
             </p>
           )}
           {containsCrisisSignal(wechatRaw) && (
-            <p className="rounded-2xl border border-red-300/30 bg-red-500/10 p-3 text-xs text-red-100">
+            <p className="rounded-lg border border-red-300/50 bg-red-50 p-3 text-xs leading-5 text-red-700">
               {safetyMessage}
             </p>
           )}
         </div>
 
-        <aside className="space-y-3 rounded-2xl border border-white/10 bg-night/60 p-4">
-          <p className="text-sm text-gold">分析预览</p>
+        <aside className="space-y-3 rounded-lg border border-night/10 bg-deep/70 p-4">
+          <p className="text-sm font-medium text-ink">分析预览</p>
           {wechatAnalysis ? (
             <>
               <p className="text-sm leading-6 text-mist">{wechatAnalysis.summary}</p>
@@ -125,7 +136,7 @@ export function WeChatImportStep() {
               <div className="space-y-2">
                 <p className="text-xs text-mist">关键片段</p>
                 {wechatAnalysis.keyMoments.slice(0, 3).map((moment) => (
-                  <p key={moment.id} className="rounded-xl bg-white/5 p-3 text-xs text-mist">
+                  <p key={moment.id} className="rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-3 text-xs leading-5 text-mist">
                     {moment.timeLabel ? `${moment.timeLabel} · ` : ""}
                     {moment.speaker}：{moment.content}
                   </p>
@@ -134,25 +145,25 @@ export function WeChatImportStep() {
             </>
           ) : (
             <p className="text-sm leading-6 text-mist">
-              还没有分析结果。导入聊天后，我会先生成一个隐私友好的摘要，再把它作为 Self Skill 的辅助证据。
+              还没有分析结果。导入后会显示高频主题、情绪线索和最多 3 个关键片段。
             </p>
           )}
         </aside>
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <button onClick={skip} className="rounded-full border border-white/20 px-5 py-2">
+        <button type="button" onClick={skip} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
           不使用聊天记录
         </button>
         <button
           disabled={!wechatAnalysis}
           onClick={next}
-          className="rounded-full bg-gradient-to-r from-blue to-violet px-5 py-2 disabled:opacity-40"
+          className="rounded-lg bg-night px-5 py-2 text-sm font-medium text-deep shadow-quiet disabled:cursor-not-allowed disabled:opacity-40"
         >
-          把这些线索加入 Self Skill
+          把分析结果加入个人分析
         </button>
       </div>
-      <p className="text-xs text-mist">{disclaimer}</p>
+      <p className="max-w-[72ch] text-xs leading-6 text-mist">{disclaimer}</p>
     </section>
   );
 }

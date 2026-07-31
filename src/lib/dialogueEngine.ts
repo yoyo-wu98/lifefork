@@ -1,54 +1,53 @@
 import { ForkPath, SelfSkill } from "@/lib/types";
-import { renderInUserVoice } from "@/lib/voiceEngine";
+import { containsCrisisSignal, safetyMessage } from "@/lib/safety";
+import { getDialoguePathHint, getDialogueStageHint } from "@/lib/content/lifeMapNarratives";
+import { renderInUserVoice, selectStageVoiceForFork } from "@/lib/voiceEngine";
 
-function forkStageVoice(selfSkill?: SelfSkill) {
-  return selfSkill?.stageVoices.find((voice) => voice.stage === "fork") ?? selfSkill?.stageVoices.find((voice) => voice.stage === "future");
+function forkStageVoice(selfSkill?: SelfSkill, selectedFork?: ForkPath) {
+  return selfSkill ? selectStageVoiceForFork(selfSkill.stageVoices, selectedFork) : undefined;
 }
 
 export function generateInitialInstanceMessage(selectedFork: ForkPath, selfSkill?: SelfSkill): string {
-  const finish = (base: string) => (selfSkill ? renderInUserVoice(base, selfSkill.voice, forkStageVoice(selfSkill), selectedFork) : base);
+  const finish = (base: string) => (selfSkill ? renderInUserVoice(base, selfSkill.voice, forkStageVoice(selfSkill, selectedFork), selectedFork) : base);
 
   if (selectedFork.scale === "life") {
-    return finish(`我现在站在一整条人生的尺度上看你。${selectedFork.title} 不是今天就能证明对错的事，它更像一种长期排序：你把什么放到前面，什么就会慢慢塑造你。`);
+    return finish(`下面按长期方案分析「${selectedFork.title}」。重点比较它对收入、关系、自主性、健康和长期后悔的影响。`);
   }
 
   if (selectedFork.scale === "decade" || selectedFork.scale === "era") {
-    return finish(`从 ${selectedFork.timeSpan?.durationLabel ?? "这个阶段"} 的尺度看，这条路真正改变的是你反复怎样安排生活。我们先看长期代价，再看它值不值得。`);
+    return finish(`这个节点覆盖 ${selectedFork.timeSpan?.durationLabel ?? "一个较长阶段"}。可以先比较长期收益和成本，再判断是否值得继续。`);
   }
 
   if (selectedFork.scale === "day" || selectedFork.scale === "hour") {
-    return finish("这个节点已经很近了，近到可以听见你的犹豫、身体反应和一句话的重量。先别急着总结人生，我们只看这一刻暴露了什么。");
+    return finish("这个节点对应一次具体事件。先确认当时发生了什么、你做了什么，以及结果是否支持当前判断。");
   }
 
-  return finish("这个阶段负责把大问题缩小一点。你不必一次改写人生，先让现实给你一个样本。");
-}
-
-function pathHint(selectedFork: ForkPath): string {
-  if (selectedFork.lane === "stability") return "在这条线上，先分清楚：你是在恢复判断力，还是又把自己往后放。";
-  if (selectedFork.lane === "leap") return "在这条线上，让每一步都有现实承托，别只靠一口气冲过去。";
-  if (selectedFork.lane === "relationship") return "在这条线上，把关系当作现实变量，而不是把所有压力都吞回自己身上。";
-  return "在这条线上，把愿望压缩成一次能被现实检验的动作。";
+  return finish("这个阶段把大问题拆成可以执行的步骤。先完成一个小规模测试，再根据结果调整方案。");
 }
 
 export function generateInstanceReply(message: string, selfSkill: SelfSkill, selectedFork: ForkPath): string {
   const text = message.toLowerCase();
-  const finish = (base: string) => renderInUserVoice(base, selfSkill.voice, forkStageVoice(selfSkill), selectedFork);
+  const finish = (base: string) => renderInUserVoice(base, selfSkill.voice, forkStageVoice(selfSkill, selectedFork), selectedFork);
+
+  if (containsCrisisSignal(message)) {
+    return safetyMessage;
+  }
 
   if (/(后悔)/.test(text)) {
-    return finish("我不能替你保证没有遗憾。每条路都会带走一些东西。\n但在这条路径里，我最庆幸的是：你终于停止把真实愿望无限延期。你给自己一次被现实检验的机会，这很重要。");
+    return finish("这个方案仍然可能带来遗憾。判断重点是：它造成的损失是否可承受，以及你是否获得了足够信息来更新下一步。");
   }
 
-  if (/(失去|代价)/.test(text)) {
-    return finish(`这条路的代价要按 ${selectedFork.timeSpan?.durationLabel ?? "这个阶段"} 来看。短尺度里，它可能只是疲惫、解释成本或一次失约；长尺度里，它会变成身份、关系和后悔方式的变化。\n你要看的核心，是这种代价能不能被你的长期价值承认。`);
+  if (/(失去|代价|成本)/.test(text)) {
+    return finish(`按 ${selectedFork.timeSpan?.durationLabel ?? "当前阶段"} 来看，主要成本包括：${selectedFork.costs.slice(0, 3).join("、")}。建议再确认这些成本的上限和应对措施。`);
   }
 
-  if (/(提醒|建议|一步开始|开始)/.test(text)) {
-    return finish(`我最想提醒你的是：不要把“还没准备好”当成永远不开始的理由。\n${pathHint(selectedFork)}`);
+  if (/(提醒|建议|注意|确认|一步开始|第一步|开始)/.test(text)) {
+    return finish(`建议先做一个有明确期限和完成标准的动作。${getDialoguePathHint(selectedFork)}`);
   }
 
   if (/(成功|结果|未来|会不会|最难|难)/.test(text)) {
-    return finish("我不能告诉你一定会成功。LifeFork 不做命运判决。\n但我可以帮你看见尺度差异：全人生尺度看价值排序，十年尺度看代价，一年尺度看结构，一天和一小时尺度看真实动作。你越能把它放到合适尺度里，就越接近真相。");
+    return finish(`现有信息无法保证结果。可以先检查成功条件、主要风险和退出条件。${getDialogueStageHint(selectedFork)}`);
   }
 
-  return finish("我听见你真正想问的，可能是：我这样想有问题吗？\n没有问题。你只是站在一条旧路和一种新可能之间。先别急着审判自己，我们可以把这个选择拆小一点。");
+  return finish(`这个问题还需要更多具体信息。先写清楚你要比较的两个选项、最重要的判断标准和可接受的风险。${getDialogueStageHint(selectedFork)}`);
 }

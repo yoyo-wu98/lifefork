@@ -1,0 +1,9 @@
+export const CURRENT_LOCAL_SELF_SKILL_VERSION = "v0.5";
+export const CURRENT_LLM_SELF_SKILL_VERSION = "v0.5-llm";
+
+export const KNOWN_SELF_SKILL_VERSIONS = new Set([
+  CURRENT_LOCAL_SELF_SKILL_VERSION,
+  CURRENT_LLM_SELF_SKILL_VERSION,
+  "v0.3",
+  "v0.4-llm",
+]);

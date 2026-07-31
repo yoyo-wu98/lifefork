@@ -1,9 +1,20 @@
 import type { Metadata } from "next";
+import { APP_METADATA_COPY } from "@/lib/copy";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LifeFork / 人生岔路",
-  description: "与那些你尚未选择的人生交谈。",
+  title: APP_METADATA_COPY.value.title,
+  description: APP_METADATA_COPY.value.description,
+  openGraph: {
+    type: "website",
+    title: APP_METADATA_COPY.value.title,
+    description: APP_METADATA_COPY.value.description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: APP_METADATA_COPY.value.title,
+    description: APP_METADATA_COPY.value.description,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
