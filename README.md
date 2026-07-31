@@ -13,6 +13,8 @@ V0.8 面向公开测试：
 - 管理员通过受保护的 `/admin` 页面管理全局公告、维护状态和功能开关。
 - 每条结论和人生分支显示分析方法、用户权重、参考度、依据、假设和限制。
 
+当前部署：[LifeFork Public Beta](https://lifefork-public-beta.poremansovir.chatgpt.site)
+
 ## 当前能力
 
 完整用户流程：
