@@ -29,12 +29,23 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [config, setConfig] = useState<PublicRuntimeConfig | null>(null);
   const [message, setMessage] = useState("");
+  const [configError, setConfigError] = useState("");
   const [busy, setBusy] = useState(false);
 
   const loadConfig = async () => {
-    const response = await fetch("/api/admin/config", { cache: "no-store" });
-    const body = await response.json();
-    if (response.ok && body.success) setConfig(body.data);
+    setConfigError("");
+    try {
+      const response = await fetch("/api/admin/config", { cache: "no-store" });
+      const body = await response.json().catch(() => null);
+      if (!response.ok || !body?.success) {
+        throw new Error(body?.error ?? `读取配置失败（HTTP ${response.status}）`);
+      }
+      setConfig(body.data);
+      return true;
+    } catch (error) {
+      setConfigError(error instanceof Error ? error.message : "读取配置失败，请重试。");
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -48,7 +59,10 @@ export default function AdminPage() {
         setSession(next);
         if (next.authenticated) void loadConfig();
       })
-      .catch(() => setSession({ authenticated: false, configured: false }));
+      .catch(() => {
+        setSession({ authenticated: false, configured: false });
+        setMessage("无法连接管理服务，请检查服务器状态后重试。");
+      });
   }, []);
 
   const login = async (event: FormEvent) => {
@@ -61,26 +75,37 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
-      const body = await response.json();
-      if (!response.ok || !body.success) {
-        setMessage(body.error ?? "登录失败。");
+      const body = await response.json().catch(() => null);
+      if (!response.ok || !body?.success) {
+        setMessage(body?.error ?? `登录失败（HTTP ${response.status}）。`);
         return;
       }
       setPassword("");
       setSession({ authenticated: true, configured: true });
       await loadConfig();
+    } catch {
+      setMessage("登录请求失败，请检查网络连接后重试。");
     } finally {
       setBusy(false);
     }
   };
 
   const logout = async () => {
-    await fetch("/api/admin/session", { method: "DELETE" });
-    setSession((current) => ({
-      authenticated: false,
-      configured: current?.configured ?? true,
-    }));
-    setConfig(null);
+    setBusy(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/admin/session", { method: "DELETE" });
+      if (!response.ok) throw new Error();
+      setSession((current) => ({
+        authenticated: false,
+        configured: current?.configured ?? true,
+      }));
+      setConfig(null);
+    } catch {
+      setMessage("退出失败，请检查网络后重试。");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const save = async () => {
@@ -93,13 +118,15 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(config),
       });
-      const body = await response.json();
-      if (!response.ok || !body.success) {
-        setMessage(body.error ?? "配置保存失败。");
+      const body = await response.json().catch(() => null);
+      if (!response.ok || !body?.success) {
+        setMessage(body?.error ?? `配置保存失败（HTTP ${response.status}）。`);
         return;
       }
       setConfig(body.data);
       setMessage("全局配置已保存。所有新请求会立即使用这份配置。");
+    } catch {
+      setMessage("配置保存失败，请检查网络连接后重试。");
     } finally {
       setBusy(false);
     }
@@ -142,7 +169,7 @@ export default function AdminPage() {
                   className="mt-2 w-full rounded-lg border border-night/15 bg-[var(--lf-paper-raised)] px-4 py-3"
                 />
               </label>
-              {message && <p className="text-sm text-red-700">{message}</p>}
+              {message && <p className="text-sm text-red-700" role="alert">{message}</p>}
               <button
                 type="submit"
                 disabled={busy || !password}
@@ -159,8 +186,21 @@ export default function AdminPage() {
 
   if (!config) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-xl items-center px-5">
-        <p className="text-sm text-mist">正在读取全局配置...</p>
+      <main className="mx-auto flex min-h-screen max-w-xl flex-col items-start justify-center gap-4 px-5">
+        {configError ? (
+          <>
+            <p className="text-sm leading-6 text-red-700" role="alert">{configError}</p>
+            <button
+              type="button"
+              className="rounded-lg bg-night px-4 py-2 text-sm font-medium text-deep"
+              onClick={() => void loadConfig()}
+            >
+              重新读取配置
+            </button>
+          </>
+        ) : (
+          <p className="text-sm text-mist">正在读取全局配置...</p>
+        )}
       </main>
     );
   }
@@ -190,6 +230,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={logout}
+            disabled={busy}
             className="inline-flex items-center gap-2 rounded-lg border border-night/15 px-4 py-2.5 text-sm text-mist"
           >
             <LogOut className="size-4" aria-hidden="true" />
@@ -337,7 +378,7 @@ export default function AdminPage() {
       </section>
 
       <footer className="flex flex-wrap items-center justify-between gap-4 py-7">
-        <div className="min-h-6 text-sm text-mist">
+        <div className="min-h-6 text-sm text-mist" aria-live="polite">
           {message && (
             <span className="inline-flex items-center gap-2">
               {message.startsWith("全局") && <Check className="size-4 text-blue" aria-hidden="true" />}

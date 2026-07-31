@@ -135,8 +135,13 @@ Docker 部署使用持久化卷 `/app/data`。Sites / Cloudflare 部署使用 D1
 - `lifefork.currentStep`
 - `lifefork.selectedFork`
 - `lifefork.chatMessages`
+- `lifefork.answers`
+- `lifefork.extraText`
+- `lifefork.selectedVersion`
 - `lifefork.wechatAnalysis`
 - `lifefork.analysisSettings`
+
+微信原文只存在于导入页面的内存中。离开页面、刷新页面或选择不使用聊天记录后会清除原文；浏览器只保留用户确认加入的脱敏摘要。
 
 服务器处理：
 
@@ -216,6 +221,8 @@ LIFEFORK_COOKIE_SECURE=true
 ```bash
 npm run check
 npm run build
+npm run qa:product -- --base-url=http://localhost:3005
+npm run qa:ai:providers
 npm run build:cloudflare
 npm audit --omit=dev
 ```
@@ -226,6 +233,16 @@ npm audit --omit=dev
 - ESLint
 - 文案注册表审计
 - 人生场景 fixture 校验
+
+`qa:product` 会验证匿名会话隔离、安全 Cookie、管理后台登录、配置读取与保存、退出、同源保护、限流、输入校验和危机拦截。它需要先启动生产预览，并从 `.env.local` 读取测试环境的管理员密码。
+
+配置好服务器 AI 并启动生产预览后，可以执行真实模型验收：
+
+```bash
+npm run qa:ai -- --require-live-ai
+```
+
+该命令会实际测试 Self Skill、阶段语气、顶层人生方案、微信摘要、方案对话、危机拦截、PII 脱敏、来源元数据和本地降级。`qa:ai:providers` 使用本地模拟服务验证 OpenAI Responses 协议，不消耗模型额度。完整结果和发布门槛见 [AI 核心功能验收与体验评估报告](docs/AI_CORE_ACCEPTANCE_REPORT.md)。
 
 ## 项目结构
 
@@ -258,6 +275,8 @@ src/
 ## 文档
 
 - [公开测试产品需求与交互规范](docs/PUBLIC_BETA_PRODUCT_SPEC.md)
+- [AI 核心功能验收与体验评估报告](docs/AI_CORE_ACCEPTANCE_REPORT.md)
+- [端到端用户体验与发布验收报告](docs/END_TO_END_USER_AUDIT_2026-07-31.md)
 - [分析方法、权重与来源规范](docs/ANALYSIS_METHODS_AND_PROVENANCE.md)
 - [V0.8 技术审计与重构报告](docs/PUBLIC_BETA_TECHNICAL_REPORT.md)
 - [人生地图交互规范](docs/LIFE_MAP_INTERACTION_SPEC.md)

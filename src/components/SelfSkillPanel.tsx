@@ -93,11 +93,27 @@ export function SelfSkillPanel() {
                 材料越完整，结论越容易核对。该数值不代表预测准确率。
               </p>
               {analysis.modelExecution && (
-                <p className="mt-2 text-xs leading-5 text-mist">
-                  模型：{analysis.modelExecution.used
-                    ? `${analysis.modelExecution.provider} / ${analysis.modelExecution.model}`
-                    : "本地规则"}
-                </p>
+                <div
+                  className={`mt-3 rounded-lg border p-3 text-xs leading-5 ${
+                    analysis.modelExecution.used
+                      ? "border-blue/20 bg-blue/5 text-blue"
+                      : "border-gold/25 bg-gold/5 text-ink"
+                  }`}
+                >
+                  <p className="font-medium">
+                    {analysis.modelExecution.used
+                      ? "服务器 AI 已参与本次分析"
+                      : "本次结果由本地规则生成"}
+                  </p>
+                  <p className="mt-1 opacity-80">
+                    {analysis.modelExecution.used
+                      ? `${analysis.modelExecution.provider} / ${analysis.modelExecution.model}`
+                      : "服务器模型未参与，结论参考度已相应降低。"}
+                    {analysis.modelExecution.durationMs
+                      ? ` · ${(analysis.modelExecution.durationMs / 1000).toFixed(1)} 秒`
+                      : ""}
+                  </p>
+                </div>
               )}
             </div>
           )}
@@ -189,7 +205,7 @@ export function SelfSkillPanel() {
                   />
                 </summary>
 
-                <div className="mt-5 grid gap-5 border-l-2 border-blue/20 pl-5 lg:grid-cols-[1fr_0.9fr]">
+                <div className="mt-5 grid gap-5 border-t border-night/10 pt-5 lg:grid-cols-[1fr_0.9fr]">
                   <div>
                     <p className="text-xs font-semibold text-ink">本条使用的方法</p>
                     <div className="mt-3 space-y-4">
@@ -322,7 +338,7 @@ export function SelfSkillPanel() {
                     href={reference.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="border-l-2 border-blue/20 pl-3 text-xs leading-5 text-mist hover:text-blue"
+                    className="rounded-lg border border-night/10 bg-deep/40 p-3 text-xs leading-5 text-mist hover:border-blue/25 hover:text-blue"
                   >
                     <span className="block font-medium text-ink">{reference.title}</span>
                     <span className="mt-1 block">{reference.note}</span>
@@ -384,7 +400,7 @@ export function SelfSkillPanel() {
               {selfSkill.voice.sentenceRhythm}；{selfSkill.voice.punctuationStyle}。
             </p>
             <p className="mt-2 text-xs text-mist">
-              当前语气接近度 {selfSkill.voice.closenessScore}%。你后续的修改和对话会继续校准它。
+              当前语气建模完成度 {selfSkill.voice.closenessScore}%。该数值根据文本样本和校准记录计算，不代表客观相似率。
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -409,7 +425,7 @@ export function SelfSkillPanel() {
         </h2>
         <div className="mt-4 grid gap-4 border-y border-night/10 py-5 md:grid-cols-2">
           {selfSkill.evidence.slice(0, 6).map((item) => (
-            <blockquote key={item.id} className="border-l-2 border-blue/20 pl-4 text-sm leading-6 text-mist">
+            <blockquote key={item.id} className="rounded-lg border border-night/10 bg-deep/40 p-4 text-sm leading-6 text-mist">
               {item.quote}
             </blockquote>
           ))}

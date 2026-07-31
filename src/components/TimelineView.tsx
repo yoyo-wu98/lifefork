@@ -36,7 +36,9 @@ export function TimelineView() {
       <div>
         <p className="text-sm font-medium text-blue">Timeline</p>
         <h3 className="mt-1 text-2xl font-semibold text-ink">影响当前选择的时间线</h3>
-        <p className="mt-2 text-sm text-mist">请检查每个节点是否准确。修改后的内容会用于生成方案。</p>
+        <p className="mt-2 text-sm leading-6 text-mist">
+          请检查每个节点是否准确。修改会立即更新个人分析和方案地图；已经生成的方案不会自动重算。
+        </p>
       </div>
       <div className="space-y-4 border-l border-night/15 pl-4">
         {nodes.map((node) => (
@@ -46,6 +48,8 @@ export function TimelineView() {
               <div className="space-y-2">
                 <input
                   className="w-full rounded-lg border border-night/10 bg-deep/70 p-2 text-sm outline-none focus:border-blue"
+                  aria-label={`${node.yearLabel}节点标题`}
+                  maxLength={160}
                   value={node.title}
                   onChange={(e) =>
                     setNodes(nodes.map((n) => (n.id === node.id ? { ...n, title: e.target.value } : n)))
@@ -53,6 +57,8 @@ export function TimelineView() {
                 />
                 <input
                   className="w-full rounded-lg border border-night/10 bg-deep/70 p-2 text-sm outline-none focus:border-blue"
+                  aria-label={`${node.yearLabel}节点情绪`}
+                  maxLength={120}
                   value={node.emotion}
                   onChange={(e) =>
                     setNodes(nodes.map((n) => (n.id === node.id ? { ...n, emotion: e.target.value } : n)))
@@ -60,6 +66,8 @@ export function TimelineView() {
                 />
                 <textarea
                   className="w-full rounded-lg border border-night/10 bg-deep/70 p-2 text-sm outline-none focus:border-blue"
+                  aria-label={`${node.yearLabel}节点模式`}
+                  maxLength={300}
                   value={node.pattern}
                   onChange={(e) =>
                     setNodes(nodes.map((n) => (n.id === node.id ? { ...n, pattern: e.target.value } : n)))
@@ -101,7 +109,7 @@ export function TimelineView() {
                 className="rounded-lg border border-night/15 px-3 py-1 text-mist hover:bg-deep hover:text-ink"
                 onClick={() => setEditingId(editingId === node.id ? null : node.id)}
               >
-                我要修改
+                {editingId === node.id ? "完成编辑" : "我要修改"}
               </button>
               <button
                 type="button"

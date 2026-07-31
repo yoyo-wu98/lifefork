@@ -74,8 +74,18 @@ export interface ForkSlice {
 
 export interface ChatSlice {
   messages: ChatMessage[];
+  isChatResponding: boolean;
   setMessages: (msgs: ChatMessage[]) => void;
   sendMessage: (content: string) => Promise<void>;
+}
+
+export interface ConfirmationDialogState {
+  title: string;
+  message: string;
+  confirmLabel: string;
+  cancelLabel?: string;
+  tone?: "danger" | "default";
+  dismissOnly?: boolean;
 }
 
 export interface UiSlice {
@@ -83,12 +93,20 @@ export interface UiSlice {
   proverb: string;
   editorConfig: EditorConfig;
   runtimeConfig: PublicRuntimeConfig;
+  confirmationDialog: ConfirmationDialogState | null;
+  confirmationAction: (() => void) | null;
   setBadge: (b: string | null) => void;
   setProverb: (p: string) => void;
   saveEditorConfig: (config: EditorConfig) => void;
   resetEditorConfig: () => void;
   importEditorConfig: (json: string) => void;
   setRuntimeConfig: (config: PublicRuntimeConfig) => void;
+  requestConfirmation: (
+    dialog: ConfirmationDialogState,
+    action: () => void,
+  ) => void;
+  dismissConfirmation: () => void;
+  confirmPendingAction: () => void;
 }
 
 export interface LifeforkState

@@ -18,6 +18,7 @@ export function ShareCard() {
   const setStep = useLifeforkStore((s) => s.setStep);
   const resetExperience = useLifeforkStore((s) => s.resetExperience);
   const editorConfig = useLifeforkStore((s) => s.editorConfig);
+  const setBadge = useLifeforkStore((s) => s.setBadge);
 
   if (!selfSkill || !selectedFork) return null;
 
@@ -51,7 +52,12 @@ export function ShareCard() {
       futureSelfLine: proverb,
       dynamicType: dynamicTypeSlot ?? undefined,
     });
-    await navigator.clipboard.writeText(content);
+    try {
+      await navigator.clipboard.writeText(content);
+      setBadge("结果已复制");
+    } catch {
+      setBadge("复制失败，请检查浏览器剪贴板权限");
+    }
   };
 
   const exportJson = () => {
@@ -64,6 +70,7 @@ export function ShareCard() {
     a.download = shareCopy.exportFileName;
     a.click();
     URL.revokeObjectURL(url);
+    setBadge("Self Skill JSON 已导出");
   };
 
   return (

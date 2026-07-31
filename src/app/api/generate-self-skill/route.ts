@@ -20,15 +20,84 @@ import { createAnalysisSettings } from "@/lib/analysis/methodRegistry";
 import { guardPublicApi, finalizePublicApiResponse } from "@/lib/server/apiGuard";
 import { getRuntimeConfig } from "@/lib/server/runtimeConfigStore";
 import type {
+  BranchScenarioSuggestion,
   Evidence,
   Claim,
   MethodAnalysisResult,
+  StageVoice,
   TimelineNode,
 } from "@/lib/types";
 import { buildStageVoices, buildVoiceProfile } from "@/lib/voiceEngine";
 
 function uid() {
   return crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function usefulString(value: string | undefined, fallback: string): string {
+  return value?.trim() || fallback;
+}
+
+function usefulArray(values: string[] | undefined, fallback: string[]): string[] {
+  const cleaned = values?.map((value) => value.trim()).filter(Boolean) ?? [];
+  return cleaned.length ? cleaned : fallback;
+}
+
+function completeBranchScenarios(
+  candidates: BranchScenarioSuggestion[],
+  currentChoice: string,
+): BranchScenarioSuggestion[] {
+  const choice = currentChoice.trim().slice(0, 80) || "当前问题";
+  const defaults: Record<BranchScenarioSuggestion["lane"], Omit<BranchScenarioSuggestion, "lane">> = {
+    stability: {
+      generatedBy: "local",
+      title: "维持当前安排，继续收集信息",
+      subtitle: "先保留稳定来源，再设定复查日期。",
+      summary: `围绕“${choice}”，暂时维持主要安排，同时记录成本、收益和变化信号。`,
+      gains: ["保留基本稳定", "获得更多观察时间"],
+      costs: ["改变速度较慢", "原有压力可能继续存在"],
+      futureSelfName: "继续观察后的你",
+      futureSelfVoice: "平静复盘这段时间新增了哪些信息",
+    },
+    leap: {
+      generatedBy: "local",
+      title: "直接执行主要变化",
+      subtitle: "集中资源验证最想走的方向。",
+      summary: `针对“${choice}”，选择更快的变化，并提前定义资源底线和退出条件。`,
+      gains: ["更快获得真实反馈", "行动与目标更一致"],
+      costs: ["短期不确定性上升", "需要承担更高资源压力"],
+      futureSelfName: "完成转向后的你",
+      futureSelfVoice: "直接说明实际收益、损失和意外结果",
+    },
+    experiment: {
+      generatedBy: "local",
+      title: "用 90 天完成一次验证",
+      subtitle: "把大问题拆成有期限的现实试验。",
+      summary: `为“${choice}”设置 90 天目标、投入上限、观察指标和复盘日期。`,
+      gains: ["降低一次性决策风险", "获得可比较的数据"],
+      costs: ["短期需要额外投入", "结果可能推翻原有想象"],
+      futureSelfName: "90 天后的你",
+      futureSelfVoice: "根据执行记录说明哪些假设成立",
+    },
+    relationship: {
+      generatedBy: "local",
+      title: "先完成关键沟通与支持安排",
+      subtitle: "把相关人的需求、边界和资源放进方案。",
+      summary: `围绕“${choice}”，先与关键关系人明确担忧、支持条件和不能接受的代价。`,
+      gains: ["减少信息差", "提前确认可获得的支持"],
+      costs: ["需要进行困难沟通", "他人的反馈可能改变原计划"],
+      futureSelfName: "完成关键沟通后的你",
+      futureSelfVoice: "清楚说明边界、支持和仍未解决的问题",
+    },
+  };
+  const byLane = new Map<BranchScenarioSuggestion["lane"], BranchScenarioSuggestion>();
+  candidates.forEach((candidate) => {
+    if (!byLane.has(candidate.lane)) {
+      byLane.set(candidate.lane, { ...candidate, generatedBy: "ai" });
+    }
+  });
+  return (["stability", "leap", "experiment", "relationship"] as const).map(
+    (lane) => byLane.get(lane) ?? { lane, ...defaults[lane] },
+  );
 }
 
 function mergeWithDefaults(
@@ -48,6 +117,9 @@ function mergeWithDefaults(
   decision: LLMGeneratedSkill["decision"];
   claims: LLMGeneratedSkill["claims"];
   timelineNodes: LLMGeneratedSkill["timelineNodes"];
+  voiceProfile: LLMGeneratedSkill["voiceProfile"] | null;
+  stageVoices: LLMGeneratedSkill["stageVoices"];
+  branchScenarios: BranchScenarioSuggestion[];
 } {
   const defaults = {
     identity: {
@@ -113,12 +185,56 @@ function mergeWithDefaults(
     ],
   };
 
-  if (!llm) return defaults;
+  if (!llm) {
+    return {
+      ...defaults,
+      voiceProfile: null,
+      stageVoices: [],
+      branchScenarios: [],
+    };
+  }
 
   return {
-    identity: { ...defaults.identity, ...llm.identity },
-    semantic: { ...defaults.semantic, ...llm.semantic },
-    decision: { ...defaults.decision, ...llm.decision },
+    identity: {
+      displayName: usefulString(llm.identity.displayName, defaults.identity.displayName),
+      languageStyle: usefulString(llm.identity.languageStyle, defaults.identity.languageStyle),
+      emotionalTone: usefulString(llm.identity.emotionalTone, defaults.identity.emotionalTone),
+      selfNarrative: usefulString(llm.identity.selfNarrative, defaults.identity.selfNarrative),
+      archetype: usefulString(llm.identity.archetype, defaults.identity.archetype),
+    },
+    semantic: {
+      values: usefulArray(llm.semantic.values, defaults.semantic.values),
+      fears: usefulArray(llm.semantic.fears, defaults.semantic.fears),
+      desires: usefulArray(llm.semantic.desires, defaults.semantic.desires),
+      recurringPatterns: usefulArray(
+        llm.semantic.recurringPatterns,
+        defaults.semantic.recurringPatterns,
+      ),
+      innerConflict: usefulString(
+        llm.semantic.innerConflict,
+        defaults.semantic.innerConflict,
+      ),
+      lifeMotif: usefulString(llm.semantic.lifeMotif, defaults.semantic.lifeMotif),
+    },
+    decision: {
+      riskPreference: usefulString(
+        llm.decision.riskPreference,
+        defaults.decision.riskPreference,
+      ),
+      workStyle: usefulString(llm.decision.workStyle, defaults.decision.workStyle),
+      conflictStyle: usefulString(
+        llm.decision.conflictStyle,
+        defaults.decision.conflictStyle,
+      ),
+      changeTolerance: usefulString(
+        llm.decision.changeTolerance,
+        defaults.decision.changeTolerance,
+      ),
+      attachmentPattern: usefulString(
+        llm.decision.attachmentPattern,
+        defaults.decision.attachmentPattern,
+      ),
+    },
     claims: llm.claims?.length
       ? llm.claims.map((c) => ({
           text: c.text,
@@ -127,7 +243,78 @@ function mergeWithDefaults(
         }))
       : defaults.claims,
     timelineNodes: llm.timelineNodes?.length ? llm.timelineNodes : defaults.timelineNodes,
+    voiceProfile: llm.voiceProfile,
+    stageVoices: llm.stageVoices,
+    branchScenarios: completeBranchScenarios(llm.branchScenarios, input.currentChoice),
   };
+}
+
+interface EvidenceCandidate {
+  evidence: Evidence;
+  raw: string;
+}
+
+function normalizeEvidenceText(value: string): string {
+  return value
+    .replace(/来自(?:你的回答|你粘贴的文字|微信摘要)|证据|原文|系统推断/gu, "")
+    .replace(/[^\p{L}\p{N}]/gu, "")
+    .toLowerCase();
+}
+
+function bigrams(value: string): Set<string> {
+  const normalized = normalizeEvidenceText(value);
+  if (normalized.length < 2) return new Set(normalized ? [normalized] : []);
+  return new Set(Array.from({ length: normalized.length - 1 }, (_, index) => normalized.slice(index, index + 2)));
+}
+
+function overlapScore(query: string, source: string): number {
+  const normalizedQuery = normalizeEvidenceText(query);
+  const normalizedSource = normalizeEvidenceText(source);
+  if (!normalizedQuery || !normalizedSource) return 0;
+  if (normalizedSource.includes(normalizedQuery) || normalizedQuery.includes(normalizedSource)) return 1;
+  const queryPairs = bigrams(normalizedQuery);
+  const sourcePairs = bigrams(normalizedSource);
+  if (!queryPairs.size) return 0;
+  let matches = 0;
+  queryPairs.forEach((pair) => {
+    if (sourcePairs.has(pair)) matches += 1;
+  });
+  return matches / queryPairs.size;
+}
+
+function evidenceForClaim(
+  claim: LLMGeneratedSkill["claims"][number],
+  candidates: EvidenceCandidate[],
+): Evidence[] {
+  const ranked = candidates
+    .map((candidate) => ({
+      evidence: candidate.evidence,
+      score:
+        overlapScore(claim.evidenceQuote, candidate.raw) * 0.75 +
+        overlapScore(claim.text, candidate.raw) * 0.25,
+    }))
+    .sort((a, b) => b.score - a.score);
+  const best = ranked[0];
+  if (!best || best.score < 0.14) return [];
+  return ranked
+    .filter((item, index) => index === 0 || (item.score >= 0.3 && best.score - item.score <= 0.12))
+    .slice(0, 2)
+    .map((item) => item.evidence);
+}
+
+function stageForTimelineNode(
+  node: LLMGeneratedSkill["timelineNodes"][number],
+  index: number,
+  total: number,
+): StageVoice["stage"] {
+  const label = `${node.yearLabel} ${node.title}`;
+  if (/(未来|以后|十年后|年后)/.test(label)) return "future";
+  if (/(暗线|隐藏|没说出口)/.test(label)) return "hidden";
+  if (/(现在|当前|此刻)/.test(label)) return "present";
+  if (/(过去|曾经|毕业|小时候|当年)/.test(label)) return "past";
+  if (index === 0) return "past";
+  if (index === total - 1) return "future";
+  return "present";
 }
 
 export async function POST(request: NextRequest) {
@@ -205,6 +392,7 @@ export async function POST(request: NextRequest) {
       wechatSummary,
     });
 
+    const llmStartedAt = Date.now();
     const { data: llmSkill, raw, meta, usage } = await chatCompletionJSON<LLMGeneratedSkill>(
       [
         { role: "system", content: SELF_SKILL_SYSTEM_PROMPT },
@@ -243,44 +431,127 @@ export async function POST(request: NextRequest) {
       extraText: [extraText, wechatSummary].filter(Boolean).join("\n"),
       voiceCalibration: [] as string[],
     };
-    const voice = buildVoiceProfile(voiceInput);
-    const stageVoices = buildStageVoices(voiceInput, voice);
+    const localVoice = buildVoiceProfile(voiceInput);
+    const allVoiceText = [
+      currentChoice,
+      recurringEmotion,
+      pastNode,
+      hiddenSelf,
+      futureSentence,
+      extraText,
+      wechatSummary,
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const validSignaturePhrases =
+      merged.voiceProfile?.signaturePhrases.filter(
+        (phrase) => phrase.length >= 2 && allVoiceText.includes(phrase),
+      ) ?? [];
+    const voice = merged.voiceProfile
+      ? {
+          ...localVoice,
+          toneName: usefulString(merged.voiceProfile.toneName, localVoice.toneName),
+          traits: usefulArray(merged.voiceProfile.traits, localVoice.traits),
+          signaturePhrases: usefulArray(
+            validSignaturePhrases,
+            localVoice.signaturePhrases,
+          ),
+          sentenceRhythm: usefulString(
+            merged.voiceProfile.sentenceRhythm,
+            localVoice.sentenceRhythm,
+          ),
+          punctuationStyle: usefulString(
+            merged.voiceProfile.punctuationStyle,
+            localVoice.punctuationStyle,
+          ),
+          emotionalGesture: usefulString(
+            merged.voiceProfile.emotionalGesture,
+            localVoice.emotionalGesture,
+          ),
+          sampleLine: usefulString(
+            merged.voiceProfile.sampleLine,
+            localVoice.sampleLine,
+          ),
+        }
+      : localVoice;
+    const localStageVoices = buildStageVoices(voiceInput, voice);
+    const llmStageByType = new Map(
+      merged.stageVoices.map((stageVoice) => [stageVoice.stage, stageVoice]),
+    );
+    const stageVoices: StageVoice[] = localStageVoices.map((fallback) => {
+      const candidate = llmStageByType.get(fallback.stage);
+      if (!candidate) return fallback;
+      return {
+        id: fallback.id,
+        stage: fallback.stage,
+        ageLabel: usefulString(candidate.ageLabel, fallback.ageLabel),
+        toneName: usefulString(candidate.toneName, fallback.toneName),
+        description: usefulString(candidate.description, fallback.description),
+        sampleLine: usefulString(candidate.sampleLine, fallback.sampleLine),
+        traits: usefulArray(candidate.traits, fallback.traits),
+      };
+    });
 
-    const evidence: Evidence[] = [
-      {
-        id: uid(),
-        source: "question" as const,
-        quote: `来自你的回答：「${currentChoice.slice(0, 80)}」`,
-      },
-      {
-        id: uid(),
-        source: "question" as const,
-        quote: `来自你的回答：「${hiddenSelf.slice(0, 80)}」`,
-      },
+    const sourceInputs: Array<{
+      source: Evidence["source"];
+      label: string;
+      raw: string | undefined;
+    }> = [
+      { source: "question", label: "当前选择", raw: currentChoice },
+      { source: "question", label: "反复情绪", raw: recurringEmotion },
+      { source: "question", label: "过去节点", raw: pastNode },
+      { source: "question", label: "隐藏特征", raw: hiddenSelf },
+      { source: "question", label: "未来期待", raw: futureSentence },
+      { source: "extra_text", label: "补充文字", raw: extraText },
+      { source: "wechat", label: "微信本地摘要", raw: wechatSummary },
     ];
+    const evidenceCandidates: EvidenceCandidate[] = sourceInputs
+      .filter((item): item is typeof item & { raw: string } => Boolean(item.raw?.trim()))
+      .map((item) => ({
+        raw: item.raw,
+        evidence: {
+          id: uid(),
+          source: item.source,
+          quote: `${item.label}：「${item.raw.slice(0, 100)}」`,
+        },
+      }));
+    const evidence: Evidence[] = evidenceCandidates.map((item) => item.evidence);
 
-    if (extraText) {
-      evidence.push({
+    const claims: Claim[] = merged.claims.map((claim) => {
+      const matchedEvidence = evidenceForClaim(claim, evidenceCandidates);
+      if (!matchedEvidence.length) {
+        const generatedEvidence: Evidence = {
+          id: uid(),
+          source: "generated",
+          quote: "模型推断：未找到可直接对应的原文，请用户核对这条判断。",
+        };
+        evidence.push(generatedEvidence);
+        return {
+          id: uid(),
+          text: claim.text,
+          confidence: Math.min(claim.confidence, 0.55),
+          evidenceIds: [generatedEvidence.id],
+        };
+      }
+      return {
         id: uid(),
-        source: "extra_text" as const,
-        quote: `来自你粘贴的文字：「${extraText.slice(0, 80)}」`,
-      });
-    }
+        text: claim.text,
+        confidence: claim.confidence,
+        evidenceIds: matchedEvidence.map((item) => item.id),
+      };
+    });
 
-    const claims: Claim[] = merged.claims.map((c) => ({
-      id: uid(),
-      text: c.text,
-      confidence: c.confidence,
-      evidenceIds: evidence.slice(0, 2).map((e) => e.id),
-    }));
-
-    const timeline: TimelineNode[] = merged.timelineNodes.map((node, i) => ({
+    const timeline: TimelineNode[] = merged.timelineNodes.map((node, i, nodes) => ({
       id: uid(),
       yearLabel: node.yearLabel,
       title: node.title,
       emotion: node.emotion,
       pattern: node.pattern,
-      voice: stageVoices[i] ?? stageVoices[2], // fallback to present voice
+      voice:
+        stageVoices.find(
+          (stageVoice) =>
+            stageVoice.stage === stageForTimelineNode(node, i, nodes.length),
+        ) ?? stageVoices.find((stageVoice) => stageVoice.stage === "present"),
     }));
 
     const selfSkillCore = {
@@ -298,6 +569,7 @@ export async function POST(request: NextRequest) {
       timeline,
       evidence,
       claims,
+      branchScenarios: merged.branchScenarios,
       analysisSettings,
     };
 
@@ -327,6 +599,8 @@ export async function POST(request: NextRequest) {
         llmUsed: !!llmSkill,
         fallbackReason: llmSkill ? undefined : meta.fallbackReason ?? "local_defaults",
         promptVersion: SELF_SKILL_PROMPT_VERSION,
+        durationMs: Date.now() - llmStartedAt,
+        tokenUsage: usage,
         ...(serverEnvironmentEnabled("LIFEFORK_AI_DEBUG")
           ? { rawResponse: raw.slice(0, 300) }
           : {}),

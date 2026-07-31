@@ -153,6 +153,13 @@ export interface AIExecutionMeta {
   provider: "openai" | "deepseek" | "local";
   model: string;
   fallbackReason?: string;
+  promptVersion?: string;
+  durationMs?: number;
+  tokenUsage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
 }
 
 export interface IntegratedAnalysis {
@@ -365,6 +372,7 @@ export interface ForkPath {
   stateVector?: LifeStateVector;
   consequences?: Consequence[];
   dynamicType?: DynamicTypeBranchSignal;
+  aiPersonalized?: boolean;
   mergeInto?: string;
   zoomHint?: string;
   title: string;
@@ -382,6 +390,9 @@ export interface ChatMessage {
   role: "user" | "instance" | "system";
   content: string;
   createdAt: string;
+  execution?: AIExecutionMeta & {
+    source: "server-ai" | "local-fallback" | "safety-intercept";
+  };
 }
 
 export interface VoiceProfile {
@@ -430,6 +441,29 @@ export interface WeChatAnalysis {
   summary: string;
   selfSkillSignals: string[];
   suggestedSelfSkillText: string;
+  aiAnalysis?: WeChatAIAnalysis;
+}
+
+export interface WeChatAIAnalysis {
+  recurringTopics: string[];
+  emotionalSignals: string[];
+  keyThemes: string[];
+  relationshipDynamics: string;
+  selfSkillSignals: string[];
+  suggestedSelfSkillText: string;
+  execution: AIExecutionMeta;
+}
+
+export interface BranchScenarioSuggestion {
+  lane: "stability" | "leap" | "experiment" | "relationship";
+  generatedBy?: "ai" | "local";
+  title: string;
+  subtitle: string;
+  summary: string;
+  gains: string[];
+  costs: string[];
+  futureSelfName: string;
+  futureSelfVoice: string;
 }
 
 export interface SelfSkill {

@@ -1,4 +1,5 @@
 import { isRecord, numberValue, stringArray, stringValue, type Schema } from "./common";
+import type { BranchScenarioSuggestion, StageVoice } from "@/lib/types";
 
 export interface LLMGeneratedSkill {
   identity: {
@@ -23,6 +24,17 @@ export interface LLMGeneratedSkill {
     changeTolerance: string;
     attachmentPattern: string;
   };
+  voiceProfile: {
+    toneName: string;
+    traits: string[];
+    signaturePhrases: string[];
+    sentenceRhythm: string;
+    punctuationStyle: string;
+    emotionalGesture: string;
+    sampleLine: string;
+  };
+  stageVoices: Array<Omit<StageVoice, "id">>;
+  branchScenarios: BranchScenarioSuggestion[];
   claims: Array<{
     text: string;
     confidence: number;
@@ -73,6 +85,60 @@ export const selfSkillResponseSchema: Schema<LLMGeneratedSkill> = {
           changeTolerance: stringValue(decision.changeTolerance),
           attachmentPattern: stringValue(decision.attachmentPattern),
         },
+        voiceProfile: (() => {
+          const voice = isRecord(value.voiceProfile) ? value.voiceProfile : {};
+          return {
+            toneName: stringValue(voice.toneName),
+            traits: stringArray(voice.traits).slice(0, 6),
+            signaturePhrases: stringArray(voice.signaturePhrases).slice(0, 6),
+            sentenceRhythm: stringValue(voice.sentenceRhythm),
+            punctuationStyle: stringValue(voice.punctuationStyle),
+            emotionalGesture: stringValue(voice.emotionalGesture),
+            sampleLine: stringValue(voice.sampleLine).slice(0, 180),
+          };
+        })(),
+        stageVoices: Array.isArray(value.stageVoices)
+          ? value.stageVoices
+              .filter(isRecord)
+              .map((voice) => ({
+                stage: (["past", "hidden", "present", "future", "fork"] as const).includes(
+                  voice.stage as "past" | "hidden" | "present" | "future" | "fork",
+                )
+                  ? (voice.stage as "past" | "hidden" | "present" | "future" | "fork")
+                  : "present",
+                ageLabel: stringValue(voice.ageLabel),
+                toneName: stringValue(voice.toneName),
+                description: stringValue(voice.description).slice(0, 180),
+                sampleLine: stringValue(voice.sampleLine).slice(0, 180),
+                traits: stringArray(voice.traits).slice(0, 6),
+              }))
+              .filter((voice) => voice.toneName && voice.sampleLine)
+              .slice(0, 5)
+          : [],
+        branchScenarios: Array.isArray(value.branchScenarios)
+          ? value.branchScenarios
+              .filter(isRecord)
+              .map((branch) => ({
+                lane: (["stability", "leap", "experiment", "relationship"] as const).includes(
+                  branch.lane as BranchScenarioSuggestion["lane"],
+                )
+                  ? (branch.lane as BranchScenarioSuggestion["lane"])
+                  : "experiment",
+                title: stringValue(branch.title).slice(0, 100),
+                subtitle: stringValue(branch.subtitle).slice(0, 140),
+                summary: stringValue(branch.summary).slice(0, 360),
+                gains: stringArray(branch.gains).slice(0, 5),
+                costs: stringArray(branch.costs).slice(0, 5),
+                futureSelfName: stringValue(branch.futureSelfName).slice(0, 80),
+                futureSelfVoice: stringValue(branch.futureSelfVoice).slice(0, 180),
+              }))
+              .filter((branch) => branch.title && branch.summary)
+              .filter(
+                (branch, index, all) =>
+                  all.findIndex((item) => item.lane === branch.lane) === index,
+              )
+              .slice(0, 4)
+          : [],
         claims: Array.isArray(value.claims)
           ? value.claims
               .filter(isRecord)

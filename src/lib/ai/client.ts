@@ -152,7 +152,7 @@ async function callOpenAI(
             ) as CompletionOptions["reasoningEffort"]) ??
             "medium",
         },
-        text: { verbosity: "high" },
+        text: { verbosity: "low" },
         ...(options.safetyIdentifier
           ? { safety_identifier: options.safetyIdentifier }
           : {}),

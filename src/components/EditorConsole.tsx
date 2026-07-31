@@ -71,6 +71,7 @@ export function EditorConsole() {
   const saveEditorConfig = useLifeforkStore((state) => state.saveEditorConfig);
   const resetEditorConfig = useLifeforkStore((state) => state.resetEditorConfig);
   const importEditorConfig = useLifeforkStore((state) => state.importEditorConfig);
+  const requestConfirmation = useLifeforkStore((state) => state.requestConfirmation);
   const setStep = useLifeforkStore((state) => state.setStep);
   const [draft, setDraft] = useState<EditorConfig>(editorConfig);
   const [importText, setImportText] = useState("");
@@ -300,9 +301,18 @@ export function EditorConsole() {
               <button
                 type="button"
                 onClick={() => {
-                  if (!window.confirm("恢复默认后台配置？")) return;
-                  resetEditorConfig();
-                  setDraft(useLifeforkStore.getState().editorConfig);
+                  requestConfirmation(
+                    {
+                      title: "恢复默认编辑配置？",
+                      message: "当前浏览器中的本地文案、功能开关和分享卡片配置会恢复默认值。服务器全局配置不会受影响。",
+                      confirmLabel: "恢复默认",
+                      tone: "danger",
+                    },
+                    () => {
+                      resetEditorConfig();
+                      setDraft(useLifeforkStore.getState().editorConfig);
+                    },
+                  );
                 }}
                 className="rounded-lg border border-red-300/50 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
               >

@@ -35,12 +35,12 @@ import {
 } from "./model/camera";
 import {
   buildStableLifeMapScene,
+  mergeSceneRects,
   type StableLifeMapScene,
   type StableSceneNode,
 } from "./model/stableScene";
 import {
   deriveSceneVisibility,
-  focusBoundsForMode,
 } from "./model/visibility";
 
 type LifeMapCanvasProps = {
@@ -65,6 +65,7 @@ type PanState = {
 };
 
 const focusModes: FocusMode[] = ["single", "parent-self", "self-children"];
+const MIN_READABLE_FOCUS_ZOOM = 0.42;
 
 function rankForScale(scale: LifeScale) {
   return Math.max(0, scaleOrder.indexOf(scale));
@@ -76,6 +77,56 @@ function nextFocusMode(current: FocusMode) {
 
 function clampOffset(value: number) {
   return Math.max(-1800, Math.min(1800, value));
+}
+
+function readableFocusBounds(
+  scene: StableLifeMapScene,
+  activeId: string,
+  visibleIds: Set<string>,
+  focusMode: FocusMode,
+  viewport: { width: number; height: number },
+  zoom: number,
+) {
+  const active = scene.nodeById.get(activeId) ?? scene.nodeById.get(scene.rootId);
+  if (!active) return scene.overviewBounds;
+  if (focusMode === "single") return active.card;
+
+  const parent = active.parentId ? scene.nodeById.get(active.parentId) : undefined;
+  if (focusMode === "parent-self" && parent) {
+    return mergeSceneRects([parent.card, active.card], 64);
+  }
+
+  const candidates = active.childrenIds
+    .map((id) => scene.nodeById.get(id))
+    .filter((node): node is StableSceneNode => Boolean(node))
+    .filter((node) => visibleIds.has(node.id))
+    .sort((left, right) => {
+      const activeCenterX = active.card.x + active.card.width / 2;
+      const activeCenterY = active.card.y + active.card.height / 2;
+      const leftDistance =
+        (left.card.x + left.card.width / 2 - activeCenterX) ** 2 +
+        (left.card.y + left.card.height / 2 - activeCenterY) ** 2;
+      const rightDistance =
+        (right.card.x + right.card.width / 2 - activeCenterX) ** 2 +
+        (right.card.y + right.card.height / 2 - activeCenterY) ** 2;
+      return leftDistance - rightDistance;
+    });
+
+  const selectedRects = [active.card];
+  const availableWidth = Math.max(1, viewport.width - 152);
+  const availableHeight = Math.max(1, viewport.height - 152);
+
+  candidates.forEach((candidate) => {
+    const proposed = mergeSceneRects([...selectedRects, candidate.card], 56);
+    const fitsViewport =
+      proposed.width * zoom <= availableWidth &&
+      proposed.height * zoom <= availableHeight;
+    if (fitsViewport) selectedRects.push(candidate.card);
+  });
+
+  // Keep one child in view when a large subtree cannot fit at the readable zoom.
+  if (selectedRects.length === 1 && candidates[0]) selectedRects.push(candidates[0].card);
+  return mergeSceneRects(selectedRects, 56);
 }
 
 function initialCameraForScene(
@@ -155,11 +206,6 @@ export function LifeMapCanvas({
     scene.nodeById.get(activeId) ??
     scene.nodeById.get(ROOT_NODE_ID) ??
     scene.nodes[0];
-  const activeBounds = useMemo(
-    () => focusBoundsForMode(scene, activeId, visibility, focusMode),
-    [activeId, focusMode, scene, visibility],
-  );
-
   useEffect(() => {
     const element = viewportRef.current;
     if (!element) return;
@@ -209,23 +255,34 @@ export function LifeMapCanvas({
       return;
     }
 
+    const readableBounds = readableFocusBounds(
+      scene,
+      activeId,
+      visibility.visibleIds,
+      focusMode,
+      viewport,
+      cameraRef.current.zoom,
+    );
     const target =
       focusMode === "single"
-        ? centerCameraOnRect(activeBounds, viewport, cameraRef.current.zoom)
-        : fitCameraToRect(activeBounds, viewport, {
+        ? centerCameraOnRect(readableBounds, viewport, cameraRef.current.zoom)
+        : fitCameraToRect(readableBounds, viewport, {
             padding: 76,
-            minZoom: MIN_CAMERA_ZOOM,
+            minZoom: Math.max(
+              MIN_CAMERA_ZOOM,
+              Math.min(MIN_READABLE_FOCUS_ZOOM, cameraRef.current.zoom),
+            ),
             maxZoom: Math.max(cameraRef.current.zoom, cameraZoom[semanticScale]),
           });
     setCamera(target);
   }, [
-    activeBounds,
     activeNode,
     activeId,
     focusMode,
     scene,
     semanticScale,
     directManipulation,
+    visibility.visibleIds,
     viewport,
   ]);
 
@@ -250,13 +307,6 @@ export function LifeMapCanvas({
       nextRank,
       nextMode,
     );
-    const nextBounds = focusBoundsForMode(
-      scene,
-      activeId,
-      nextVisibility,
-      nextMode,
-    );
-
     setSemanticScale(scale);
     setFocusMode(nextMode);
     skipNextFocusRef.current = true;
@@ -266,12 +316,23 @@ export function LifeMapCanvas({
       return;
     }
 
+    const readableBounds = readableFocusBounds(
+      scene,
+      activeId,
+      nextVisibility.visibleIds,
+      nextMode,
+      viewport,
+      targetZoom,
+    );
     setCamera(
       nextMode === "single"
-        ? centerCameraOnRect(nextBounds, viewport, targetZoom)
-        : fitCameraToRect(nextBounds, viewport, {
+        ? centerCameraOnRect(readableBounds, viewport, targetZoom)
+        : fitCameraToRect(readableBounds, viewport, {
             padding: 76,
-            minZoom: MIN_CAMERA_ZOOM,
+            minZoom: Math.max(
+              MIN_CAMERA_ZOOM,
+              Math.min(MIN_READABLE_FOCUS_ZOOM, targetZoom),
+            ),
             maxZoom: targetZoom,
           }),
     );
@@ -574,6 +635,7 @@ export function LifeMapCanvas({
                 displayContainer={visibility.containerById.get(node.id)}
                 zoom={camera.zoom}
                 expanded={visibility.expandedIds.has(node.id)}
+                visibleDirectChildCount={node.childrenIds.filter((childId) => visibility.visibleIds.has(childId)).length}
                 active={node.id === activeId}
                 lineage={visibility.lineageIds.has(node.id)}
                 context={visibility.contextIds.has(node.id)}

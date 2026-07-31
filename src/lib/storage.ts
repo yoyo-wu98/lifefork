@@ -8,8 +8,10 @@ import type {
   ChatMessage,
   ForkPath,
   SelfSkill,
+  SelfVersion,
   WeChatAnalysis,
 } from "@/lib/types";
+import type { Answers } from "@/lib/stores/types";
 
 const KEY_SELF_SKILL = "lifefork.selfSkill";
 const KEY_STEP = "lifefork.currentStep";
@@ -18,6 +20,17 @@ const KEY_CHAT = "lifefork.chatMessages";
 const KEY_WECHAT_ANALYSIS = "lifefork.wechatAnalysis";
 const KEY_LIFE_MAP_OFFSETS = "lifefork.lifeMapOffsets";
 const KEY_ANALYSIS_SETTINGS = "lifefork.analysisSettings";
+const KEY_ANSWERS = "lifefork.answers";
+const KEY_EXTRA_TEXT = "lifefork.extraText";
+const KEY_SELECTED_VERSION = "lifefork.selectedVersion";
+
+const answerKeys: Array<keyof Answers> = [
+  "currentChoice",
+  "recurringEmotion",
+  "pastNode",
+  "hiddenSelf",
+  "futureSentence",
+];
 
 const appSteps = new Set<AppStep>([
   "landing",
@@ -78,6 +91,46 @@ const remove = (key: string) => {
 
 export const saveSelfSkill = (selfSkill: SelfSkill) => write(KEY_SELF_SKILL, JSON.stringify(selfSkill));
 export const loadSelfSkill = (): SelfSkill | null => migrateSelfSkill(safeParse<unknown>(read(KEY_SELF_SKILL)));
+
+export const saveAnswers = (answers: Answers) => write(KEY_ANSWERS, JSON.stringify(answers));
+export const loadAnswers = (): Answers | null => {
+  const stored = safeParse<Partial<Answers>>(read(KEY_ANSWERS));
+  if (!stored) return null;
+  return answerKeys.reduce<Answers>(
+    (answers, key) => ({
+      ...answers,
+      [key]: typeof stored[key] === "string" ? stored[key] : "",
+    }),
+    {
+      currentChoice: "",
+      recurringEmotion: "",
+      pastNode: "",
+      hiddenSelf: "",
+      futureSentence: "",
+    },
+  );
+};
+
+export const saveExtraText = (value: string) => {
+  if (!value) {
+    remove(KEY_EXTRA_TEXT);
+    return;
+  }
+  write(KEY_EXTRA_TEXT, value);
+};
+export const loadExtraText = () => read(KEY_EXTRA_TEXT) ?? "";
+
+export const saveSelectedVersion = (version: SelfVersion | null) => {
+  if (!version) {
+    remove(KEY_SELECTED_VERSION);
+    return;
+  }
+  write(KEY_SELECTED_VERSION, version);
+};
+export const loadSelectedVersion = (): SelfVersion | null => {
+  const value = read(KEY_SELECTED_VERSION);
+  return value === "future" || value === "past" || value === "fork" ? value : null;
+};
 
 export const saveStep = (step: AppStep) => {
   if (step === "landing") {
@@ -180,5 +233,8 @@ export const clearAll = () => {
     KEY_WECHAT_ANALYSIS,
     KEY_LIFE_MAP_OFFSETS,
     KEY_ANALYSIS_SETTINGS,
+    KEY_ANSWERS,
+    KEY_EXTRA_TEXT,
+    KEY_SELECTED_VERSION,
   ].forEach(remove);
 };

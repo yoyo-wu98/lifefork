@@ -1,7 +1,7 @@
 "use client";
 
 import { generateInitialInstanceMessage } from "@/lib/dialogueEngine";
-import { saveChatMessages, saveSelectedFork } from "@/lib/storage";
+import { saveChatMessages, saveSelectedFork, saveStep } from "@/lib/storage";
 import type { ChatMessage } from "@/lib/types";
 import { ROOT_FORK_ID, type ForkSlice, type LifeforkSlice } from "@/lib/stores/types";
 
@@ -21,6 +21,14 @@ export const createForkSlice: LifeforkSlice<ForkSlice> = (set, get) => ({
         role: "instance",
         content: generateInitialInstanceMessage(path, selfSkill ?? undefined),
         createdAt: new Date().toISOString(),
+        execution: {
+          source: "local-fallback",
+          used: false,
+          provider: "local",
+          model: "scenario-intro-rules",
+          fallbackReason: "initial_scenario_intro",
+          durationMs: 0,
+        },
       },
     ];
 
@@ -34,5 +42,6 @@ export const createForkSlice: LifeforkSlice<ForkSlice> = (set, get) => ({
 
     saveSelectedFork(path);
     saveChatMessages(messages);
+    saveStep("chat");
   },
 });

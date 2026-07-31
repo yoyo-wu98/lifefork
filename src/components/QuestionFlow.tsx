@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AI_TOKEN_BUDGETS } from "@/lib/ai/tokenBudget";
 import { useLifeforkStore } from "@/lib/stores/lifeforkStore";
 
 const prompts = [
@@ -53,6 +54,7 @@ export function QuestionFlow() {
   });
   const activePrompt = prompts[activeIndex];
   const currentAnswer = answers[activePrompt.key];
+  const currentLimit = AI_TOKEN_BUDGETS.selfSkill.maxInputChars[activePrompt.key];
   const answeredCount = prompts.filter((prompt) => answers[prompt.key].trim()).length;
   const complete = answeredCount === prompts.length;
   const progress = Math.round((answeredCount / prompts.length) * 100);
@@ -60,7 +62,10 @@ export function QuestionFlow() {
   const appendTag = (tag: string) => {
     const current = answers[activePrompt.key].trim();
     if (current.includes(tag)) return;
-    setAnswer(activePrompt.key, current ? `${current}，${tag}` : tag);
+    setAnswer(
+      activePrompt.key,
+      (current ? `${current}，${tag}` : tag).slice(0, currentLimit),
+    );
   };
 
   const continueFlow = () => {
@@ -132,7 +137,7 @@ export function QuestionFlow() {
         <div className="mx-auto max-w-3xl">
           <div className="flex items-center justify-between gap-4 text-xs text-mist">
             <span>问题 {activeIndex + 1} / {prompts.length}</span>
-            <span>{currentAnswer.trim().length} 字</span>
+            <span>{currentAnswer.length} / {currentLimit} 字</span>
           </div>
           <h2 className="mt-4 text-3xl font-semibold leading-tight text-ink">
             {activePrompt.q}
@@ -146,9 +151,11 @@ export function QuestionFlow() {
             data-testid={`question-${activePrompt.key}`}
             className="mt-6 min-h-52 w-full resize-y rounded-lg border border-night/15 bg-[var(--lf-paper-raised)] p-5 text-base leading-8 text-ink outline-none focus:border-blue"
             value={currentAnswer}
+            maxLength={currentLimit}
             placeholder="直接写答案，越具体越好……"
             onChange={(event) => setAnswer(activePrompt.key, event.target.value)}
           />
+          <p className="mt-2 text-xs text-mist">回答会自动保存在当前浏览器。</p>
 
           <div className="mt-4">
             <p className="text-xs text-mist">可以直接选择一个示例，再继续补充</p>
@@ -187,7 +194,7 @@ export function QuestionFlow() {
               >
                 {activeIndex === prompts.length - 1
                   ? complete
-                    ? "生成个人分析"
+                    ? "下一步：补充分析材料"
                     : "检查未回答的问题"
                   : "保存并继续"}
               </button>

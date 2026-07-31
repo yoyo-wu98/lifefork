@@ -31,7 +31,7 @@ export function AppNav() {
     }`;
 
   return (
-    <nav className="sticky top-3 z-50 rounded-lg border border-night/10 bg-[var(--lf-panel)] px-2 py-2 shadow-quiet backdrop-blur-md">
+    <nav className="sticky top-3 z-50 rounded-lg border border-night/10 bg-[var(--lf-paper-raised)] px-2 py-2 shadow-quiet">
       <div className="flex min-w-0 items-center gap-2">
         <button
           type="button"

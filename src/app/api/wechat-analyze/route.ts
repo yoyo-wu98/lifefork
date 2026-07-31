@@ -22,6 +22,13 @@ function localWechatFallback(localSummary: string): WechatLLMAnalysis {
   };
 }
 
+function sanitizeLocalSummary(value: string): string {
+  return value
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email]")
+    .replace(/1[3-9]\d{9}/g, "[phone]")
+    .replace(/https?:\/\/\S+/g, "[link]");
+}
+
 export async function POST(request: NextRequest) {
   const { guard, blocked } = guardPublicApi(request, {
     bucket: "wechat-analysis",
@@ -82,9 +89,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { localSummary } = parsed.data;
+    const localSummary = sanitizeLocalSummary(parsed.data.localSummary);
     const userPrompt = buildWechatAnalysisUserPrompt(localSummary);
 
+    const startedAt = Date.now();
     const response = await chatCompletionJSON<WechatLLMAnalysis>(
       [
         { role: "system", content: WECHAT_ANALYSIS_SYSTEM_PROMPT },
@@ -109,6 +117,8 @@ export async function POST(request: NextRequest) {
         llmUsed: !!response.data,
         fallbackReason: response.data ? undefined : response.meta.fallbackReason ?? "local_summary",
         promptVersion: WECHAT_PROMPT_VERSION,
+        durationMs: Date.now() - startedAt,
+        tokenUsage: response.usage,
       },
       usage: response.usage,
     });

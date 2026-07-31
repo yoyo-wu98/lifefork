@@ -18,6 +18,7 @@ import { SelfSkillPanel } from "@/components/SelfSkillPanel";
 import { ShareCard } from "@/components/ShareCard";
 import { TimelineView } from "@/components/TimelineView";
 import { WeChatImportStep } from "@/components/WeChatImportStep";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 
 /**
  * Lifefork root page.
@@ -135,6 +136,7 @@ export default function HomePage() {
       )}
 
       <BadgeToast />
+      <ConfirmationDialog />
     </main>
   );
 }

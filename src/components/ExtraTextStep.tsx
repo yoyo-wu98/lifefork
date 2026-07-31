@@ -2,6 +2,7 @@
 
 import { useLifeforkStore } from "@/lib/stores/lifeforkStore";
 import { disclaimer } from "@/lib/copy";
+import { AI_TOKEN_BUDGETS } from "@/lib/ai/tokenBudget";
 
 /**
  * Optional free-text input step.
@@ -11,6 +12,7 @@ export function ExtraTextStep() {
   const extraText = useLifeforkStore((s) => s.extraText);
   const setExtraText = useLifeforkStore((s) => s.setExtraText);
   const setStep = useLifeforkStore((s) => s.setStep);
+  const limit = AI_TOKEN_BUDGETS.selfSkill.maxInputChars.extraText;
 
   return (
     <section className="space-y-5 rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-5 shadow-sm">
@@ -25,8 +27,13 @@ export function ExtraTextStep() {
         placeholder="例如：我正在考虑辞职做自己的项目。主要顾虑是收入不稳定，也担心半年后发现方向不适合。"
         className="min-h-44 w-full resize-y rounded-lg border border-night/10 bg-deep/70 p-4 text-sm leading-6 outline-none focus:border-blue focus:bg-[oklch(0.995_0.003_92)]"
         value={extraText}
+        maxLength={limit}
         onChange={(e) => setExtraText(e.target.value)}
       />
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-mist">
+        <span>内容会自动保存在当前浏览器。</span>
+        <span>{extraText.length} / {limit} 字</span>
+      </div>
       <div className="flex flex-wrap gap-3">
         <button
           type="button"

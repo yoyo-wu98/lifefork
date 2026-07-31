@@ -16,7 +16,10 @@
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint && npm run content:audit && npm run qa:scenarios",
     "content:audit": "node scripts/audit-content-registry.mjs",
-    "qa:scenarios": "node scripts/validate-scenarios.cjs"
+    "qa:scenarios": "node scripts/validate-scenarios.cjs",
+    "qa:product": "node --env-file-if-exists=.env.local --no-warnings --experimental-strip-types scripts/qa-product.mjs",
+    "qa:ai": "node scripts/qa-ai.mjs",
+    "qa:ai:providers": "node scripts/qa-ai-provider-contracts.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.11.17",

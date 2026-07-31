@@ -13,6 +13,11 @@ export function GeneratingScreen() {
   const isGenerating = useLifeforkStore((s) => s.isGenerating);
   const editorConfig = useLifeforkStore((s) => s.editorConfig);
   const runtimeConfig = useLifeforkStore((s) => s.runtimeConfig);
+  const analysisSettings = useLifeforkStore((s) => s.analysisSettings);
+  const aiMethodEnabled = analysisSettings.methods.some(
+    (method) =>
+      method.id === "ai-synthesis" && method.enabled && method.weight > 0,
+  );
 
   return (
     <section className="mx-auto max-w-2xl space-y-6 rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-6 text-center shadow-sm">
@@ -38,11 +43,18 @@ export function GeneratingScreen() {
         ))}
       </ul>
       {isGenerating && (
-        <p className="mt-4 text-xs leading-5 text-blue">
-          {editorConfig.features.aiApi && runtimeConfig.features.ai
-            ? "正在使用服务器 AI 和本地规则分析回答…"
-            : "正在使用本地规则生成结果…"}
-        </p>
+        <div className="mt-4 space-y-1 text-xs leading-5">
+          <p className="text-blue">
+            {editorConfig.features.aiApi && runtimeConfig.features.ai && aiMethodEnabled
+              ? "正在使用服务器 AI 和本地规则分析回答…"
+              : "正在使用本地规则生成结果…"}
+          </p>
+          <p className="text-mist">
+            {editorConfig.features.aiApi && runtimeConfig.features.ai && aiMethodEnabled
+              ? "通常需要 10–25 秒，请保持页面打开。"
+              : "通常几秒内完成，请保持页面打开。"}
+          </p>
+        </div>
       )}
     </section>
   );

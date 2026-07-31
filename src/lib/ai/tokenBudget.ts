@@ -1,6 +1,6 @@
 export const AI_TOKEN_BUDGETS = {
   selfSkill: {
-    promptVersion: "selfSkill.v1",
+    promptVersion: "selfSkill.v2",
     maxInputChars: {
       currentChoice: 600,
       recurringEmotion: 300,
@@ -13,7 +13,7 @@ export const AI_TOKEN_BUDGETS = {
     maxOutputTokens: 3000,
   },
   dialogue: {
-    promptVersion: "dialogue.v1",
+    promptVersion: "dialogue.v4",
     maxInputChars: {
       selfSkillSummary: 500,
       forkSummary: 700,

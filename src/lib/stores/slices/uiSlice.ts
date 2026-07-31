@@ -12,11 +12,13 @@ import { createDefaultRuntimeConfig } from "@/lib/runtimeConfig";
 
 const initialEditorConfig = loadEditorConfig();
 
-export const createUiSlice: LifeforkSlice<UiSlice> = (set) => ({
+export const createUiSlice: LifeforkSlice<UiSlice> = (set, get) => ({
   badge: null,
   proverb: initialEditorConfig.share.futureSelfLines[0] ?? proverbs[0],
   editorConfig: initialEditorConfig,
   runtimeConfig: createDefaultRuntimeConfig(),
+  confirmationDialog: null,
+  confirmationAction: null,
   setBadge: (badge) => set({ badge }),
   setProverb: (proverb) => set({ proverb }),
   saveEditorConfig: (config) => {
@@ -45,4 +47,13 @@ export const createUiSlice: LifeforkSlice<UiSlice> = (set) => ({
     });
   },
   setRuntimeConfig: (runtimeConfig) => set({ runtimeConfig }),
+  requestConfirmation: (confirmationDialog, confirmationAction) =>
+    set({ confirmationDialog, confirmationAction }),
+  dismissConfirmation: () =>
+    set({ confirmationDialog: null, confirmationAction: null }),
+  confirmPendingAction: () => {
+    const action = get().confirmationAction;
+    set({ confirmationDialog: null, confirmationAction: null });
+    action?.();
+  },
 });

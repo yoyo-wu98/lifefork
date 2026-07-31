@@ -7,6 +7,7 @@ type LifeMapNodeProps = {
   displayContainer?: SceneRect;
   zoom: number;
   expanded: boolean;
+  visibleDirectChildCount: number;
   active: boolean;
   lineage: boolean;
   context: boolean;
@@ -22,6 +23,7 @@ export function LifeMapNode({
   displayContainer,
   zoom,
   expanded,
+  visibleDirectChildCount,
   active,
   lineage,
   context,
@@ -112,7 +114,7 @@ export function LifeMapNode({
           }}
         >
           <span className="block text-[var(--lf-map-muted)]" style={{ fontSize: readableMetaSize }}>
-            {scaleLabel} · 包含 {node.childrenIds.length} 个直接节点
+            {scaleLabel} · 已展开 {visibleDirectChildCount} / 共 {node.childrenIds.length} 个直接节点
           </span>
           <span className="mt-1 block font-semibold">{node.path.title}</span>
         </button>

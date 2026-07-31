@@ -186,7 +186,7 @@ function buildMethodResults(
         category: method.category,
         status: modelExecution.used ? "complete" : "limited",
         summary: modelExecution.used
-          ? `服务器模型已参与材料整理和方案生成：${modelExecution.provider} / ${modelExecution.model}。`
+          ? `服务器模型已参与材料整理、判断和语气建模：${modelExecution.provider} / ${modelExecution.model}。`
           : `本次使用本地规则生成，服务器模型未参与${
               modelExecution.fallbackReason
                 ? `（${modelExecution.fallbackReason}）`
@@ -367,16 +367,21 @@ function buildBranchExplanations(
 
   return branches.map((branch, index) => {
     const evidenceIds = skill.evidence.slice(0, 3).map((item) => item.id);
-    const methodContributions = enabled.map((methodId) =>
+    const applicableMethods = enabled.filter((methodId) => {
+      if (methodId === "ai-synthesis") return branch.aiPersonalized === true;
+      if (methodId === "population-statistics") return false;
+      if (methodId === "bazi" || methodId === "ziwei") return false;
+      if (methodId === "mbti-stage") return Boolean(branch.dynamicType);
+      return true;
+    });
+    const methodContributions = applicableMethods.map((methodId) =>
       contributionFor(
         methodId,
         settings,
-        methodId === "bazi" || methodId === "ziwei" ? [] : evidenceIds,
-        methodId === "population-statistics"
-          ? "用于检查常见执行风险，当前没有给出个人概率。"
-          : methodId === "bazi" || methodId === "ziwei"
-            ? "只提供传统文化视角，分支评分仍以现实材料为主。"
-            : "用于比较该方案与用户目标、顾虑和现有资源的匹配程度。",
+        evidenceIds,
+        methodId === "ai-synthesis"
+          ? "服务器模型根据用户材料个性化了这条顶层方案的收益、成本和表达方式。"
+          : "用于比较该方案与用户目标、顾虑和现有资源的匹配程度。",
       ),
     );
     const contributionTotal = methodContributions.reduce(

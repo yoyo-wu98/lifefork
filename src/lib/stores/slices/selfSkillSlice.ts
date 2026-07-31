@@ -5,6 +5,8 @@ import { buildIntegratedAnalysis } from "@/lib/analysis/integratedAnalysis";
 import { saveSelfSkill, saveStep } from "@/lib/storage";
 import type {
   AnalysisSettings,
+  BranchScenarioSuggestion,
+  ForkPath,
   MethodAnalysisResult,
   SelfSkill,
   SelfVersion,
@@ -13,14 +15,46 @@ import { CURRENT_LLM_SELF_SKILL_VERSION } from "@/lib/schema/versions";
 import { ROOT_FORK_ID, type LifeforkSlice, type SelfSkillSlice } from "@/lib/stores/types";
 
 interface SelfSkillApiResult {
-  data: Partial<SelfSkill>;
+  data: Partial<SelfSkill> & {
+    branchScenarios?: BranchScenarioSuggestion[];
+  };
   culturalResults: MethodAnalysisResult[];
   meta: {
     llmUsed?: boolean;
     provider?: string;
     model?: string;
     fallbackReason?: string;
+    promptVersion?: string;
+    durationMs?: number;
   };
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+}
+
+function mergeBranchScenarios(
+  forks: ForkPath[],
+  scenarios: BranchScenarioSuggestion[] | undefined,
+): ForkPath[] {
+  if (!scenarios?.length) return forks;
+  const byLane = new Map(scenarios.map((scenario) => [scenario.lane, scenario]));
+  return forks.map((fork) => {
+    const scenario = fork.lane ? byLane.get(fork.lane as BranchScenarioSuggestion["lane"]) : undefined;
+    if (!scenario) return fork;
+    return {
+      ...fork,
+      title: scenario.title || fork.title,
+      subtitle: scenario.subtitle || fork.subtitle,
+      summary: scenario.summary || fork.summary,
+      gains: scenario.gains.length ? scenario.gains : fork.gains,
+      costs: scenario.costs.length ? scenario.costs : fork.costs,
+      futureSelfName: scenario.futureSelfName || fork.futureSelfName,
+      futureSelfVoice: scenario.futureSelfVoice || fork.futureSelfVoice,
+      aiPersonalized: scenario.generatedBy === "ai",
+    };
+  });
 }
 
 async function fetchSelfSkillFromAPI(input: {
@@ -50,6 +84,7 @@ async function fetchSelfSkillFromAPI(input: {
             ? json.culturalResults
             : [],
           meta: json.meta ?? {},
+          usage: json.usage,
         }
       : null;
   } catch {
@@ -74,7 +109,16 @@ export const createSelfSkillSlice: LifeforkSlice<SelfSkillSlice> = (set, get) =>
     const merged = `${Object.values(answers).join(" ")} ${extraText}`;
 
     if (containsCrisisSignal(merged)) {
-      alert(safetyMessage);
+      get().requestConfirmation(
+        {
+          title: "这需要现实中的支持",
+          message: safetyMessage,
+          confirmLabel: "关闭提示",
+          tone: "danger",
+          dismissOnly: true,
+        },
+        () => undefined,
+      );
       return;
     }
 
@@ -94,10 +138,16 @@ export const createSelfSkillSlice: LifeforkSlice<SelfSkillSlice> = (set, get) =>
     const shouldUseAi =
       runtimeConfig.features.ai &&
       editorConfig.features.aiApi &&
-      editorConfig.global.aiMode === "api-enhanced";
+      editorConfig.global.aiMode === "api-enhanced" &&
+      effectiveAnalysisSettings.methods.some(
+        (method) =>
+          method.id === "ai-synthesis" && method.enabled && method.weight > 0,
+      );
     const shouldUseCulturalApi = effectiveAnalysisSettings.methods.some(
       (method) =>
-        method.enabled && (method.id === "bazi" || method.id === "ziwei"),
+        method.enabled &&
+        method.weight > 0 &&
+        (method.id === "bazi" || method.id === "ziwei"),
     );
     const apiResult = shouldUseAi || shouldUseCulturalApi
       ? await fetchSelfSkillFromAPI({
@@ -120,16 +170,22 @@ export const createSelfSkillSlice: LifeforkSlice<SelfSkillSlice> = (set, get) =>
       analysisSettings: effectiveAnalysisSettings,
     });
 
-    const skillBase: SelfSkill = llmSkillCore
+    const branchScenarios = llmSkillCore?.branchScenarios;
+    const llmSkillData = llmSkillCore
+      ? Object.fromEntries(
+          Object.entries(llmSkillCore).filter(([key]) => key !== "branchScenarios"),
+        ) as Partial<SelfSkill>
+      : null;
+    const skillBase: SelfSkill = llmSkillData
       ? {
           ...localSkill,
-          ...llmSkillCore,
+          ...llmSkillData,
           version: CURRENT_LLM_SELF_SKILL_VERSION,
-          forks: localSkill.forks,
+          forks: mergeBranchScenarios(localSkill.forks, branchScenarios),
           wechatAnalysis: wechatAnalysis ?? undefined,
           questions: localSkill.questions,
-          evidence: llmSkillCore.evidence ?? localSkill.evidence,
-          claims: llmSkillCore.claims ?? localSkill.claims,
+          evidence: llmSkillData.evidence ?? localSkill.evidence,
+          claims: llmSkillData.claims ?? localSkill.claims,
           analysisSettings: effectiveAnalysisSettings,
         }
       : { ...localSkill, analysisSettings: effectiveAnalysisSettings };
@@ -148,6 +204,9 @@ export const createSelfSkillSlice: LifeforkSlice<SelfSkillSlice> = (set, get) =>
               : "local",
           model: apiResult?.meta.model ?? "local-rules",
           fallbackReason: apiResult?.meta.fallbackReason,
+          promptVersion: apiResult?.meta.promptVersion,
+          durationMs: apiResult?.meta.durationMs,
+          tokenUsage: apiResult?.usage,
         },
       }),
     };
@@ -203,14 +262,24 @@ export const createSelfSkillSlice: LifeforkSlice<SelfSkillSlice> = (set, get) =>
   deleteTimelineNode: (nodeId) => {
     const { selfSkill } = get();
     if (!selfSkill) return;
-    if (!window.confirm("删除这个时间线节点后会更新当前个人分析，要继续吗？")) return;
-
-    const updated = {
-      ...selfSkill,
-      timeline: selfSkill.timeline.filter((node) => node.id !== nodeId),
-    };
-
-    set({ selfSkill: updated, badge: "时间线已更新" });
-    saveSelfSkill(updated);
+    const node = selfSkill.timeline.find((item) => item.id === nodeId);
+    get().requestConfirmation(
+      {
+        title: "删除这个时间线节点？",
+        message: `将删除「${node?.title ?? "未命名节点"}」。个人分析和方案地图会立即更新，已经生成的方案不会自动重算。`,
+        confirmLabel: "删除节点",
+        tone: "danger",
+      },
+      () => {
+        const currentSkill = get().selfSkill;
+        if (!currentSkill) return;
+        const updated = {
+          ...currentSkill,
+          timeline: currentSkill.timeline.filter((item) => item.id !== nodeId),
+        };
+        set({ selfSkill: updated, badge: "时间线已更新" });
+        saveSelfSkill(updated);
+      },
+    );
   },
 });
