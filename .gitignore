@@ -1,5 +1,9 @@
 node_modules
 .next
+.open-next
+dist
+.wrangler
+.dev.vars
 out
 tsconfig.tsbuildinfo
 .DS_Store
@@ -9,3 +13,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 .env*
+!.env.example
+data/*
+!data/.gitkeep

@@ -5,16 +5,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        night: "#080B14",
-        deep: "#0B1020",
-        ink: "#F4F0E8",
-        mist: "#A8A8B3",
-        gold: "#D6A85C",
-        blue: "#8FB7FF",
-        violet: "#B18CFF",
+        night: "oklch(0.22 0.018 255)",
+        deep: "oklch(0.965 0.01 92)",
+        ink: "oklch(0.24 0.018 255)",
+        mist: "oklch(0.52 0.018 255)",
+        gold: "oklch(0.57 0.08 78)",
+        blue: "oklch(0.48 0.095 235)",
+        violet: "oklch(0.47 0.085 305)",
       },
       boxShadow: {
-        glow: "0 0 0 1px rgba(255,255,255,0.08), 0 20px 80px rgba(143,183,255,0.15)",
+        glow: "0 1px 2px rgba(26, 28, 36, 0.06), 0 24px 80px rgba(42, 37, 27, 0.09)",
+        quiet: "0 1px 2px rgba(26, 28, 36, 0.05), 0 16px 44px rgba(26, 28, 36, 0.08)",
       },
     },
   },

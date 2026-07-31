@@ -8,11 +8,14 @@
  */
 export function ProgressOrb({ progress }: { progress: number }) {
   return (
-    <div className="rounded-3xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-mist">
-      <p className="mb-2">Self Skill 构建进度：{Math.round(progress)}%</p>
-      <div className="h-2 w-full rounded-full bg-white/10">
+    <div className="rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] px-4 py-3 text-sm text-mist">
+      <div className="mb-2 flex items-center justify-between gap-4">
+        <p className="text-xs text-mist">个人分析生成进度</p>
+        <p className="text-xs font-medium text-ink">{Math.round(progress)}%</p>
+      </div>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-night/10">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-gold via-blue to-violet transition-all duration-500"
+          className="h-full rounded-full bg-night transition-all duration-500"
           style={{ width: `${Math.round(progress)}%` }}
         />
       </div>

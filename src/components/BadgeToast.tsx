@@ -12,8 +12,8 @@ export function BadgeToast() {
   if (!badge) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 rounded-2xl border border-gold/30 bg-deep/90 px-4 py-3 text-sm text-ink shadow-glow">
-      🏅 {badge}
+    <div className="fixed bottom-6 right-6 z-50 rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] px-4 py-3 text-sm text-ink shadow-quiet">
+      已记录: {badge}
     </div>
   );
 }

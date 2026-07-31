@@ -1,32 +1,55 @@
 {
   "name": "lifefork",
-  "version": "0.1.0",
+  "version": "0.8.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev --webpack --disable-source-maps",
+    "dev:3005": "next dev --webpack --disable-source-maps -p 3005",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint ."
+    "build:cloudflare": "node scripts/build-cloudflare.mjs",
+    "postbuild": "node scripts/prepare-standalone.mjs",
+    "start": "node --env-file-if-exists=.env.local scripts/start-standalone.mjs",
+    "start:3005": "PORT=3005 HOSTNAME=0.0.0.0 node --env-file-if-exists=.env.local scripts/start-standalone.mjs",
+    "preview:3005": "npm run build && npm run start:3005",
+    "preview:cloudflare": "npm run build:cloudflare && opennextjs-cloudflare preview",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run lint && npm run content:audit && npm run qa:scenarios",
+    "content:audit": "node scripts/audit-content-registry.mjs",
+    "qa:scenarios": "node scripts/validate-scenarios.cjs",
+    "qa:product": "node --env-file-if-exists=.env.local --no-warnings --experimental-strip-types scripts/qa-product.mjs",
+    "qa:ai": "node scripts/qa-ai.mjs",
+    "qa:ai:providers": "node scripts/qa-ai-provider-contracts.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.11.17",
-    "next": "^16.2.4",
+    "iztro": "^2.5.8",
+    "lucide-react": "^1.28.0",
+    "lunar-typescript": "^1.8.6",
+    "next": "^16.2.12",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "zod": "^4.4.3",
     "zustand": "^5.0.1"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.2",
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "autoprefixer": "^10.5.0",
     "eslint": "^9.16.0",
-    "eslint-config-next": "^16.2.4",
-    "postcss": "^8.4.49",
+    "eslint-config-next": "^16.2.12",
+    "postcss": "8.5.25",
     "tailwindcss": "^3.4.16",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "wrangler": "^4.116.0"
   },
   "optionalDependencies": {
-    "@next/swc-darwin-arm64": "^16.2.4"
+    "@next/swc-darwin-arm64": "^16.2.12"
+  },
+  "overrides": {
+    "postcss": "8.5.25",
+    "sharp": "0.35.3"
   }
 }

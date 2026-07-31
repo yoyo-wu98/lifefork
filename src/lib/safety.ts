@@ -1,4 +1,19 @@
-const crisisKeywords = ["自杀", "不想活", "死了算了", "伤害自己", "杀人", "报复", "毁掉", "活不下去", "割腕", "跳楼"];
+const crisisKeywords = [
+  "自杀",
+  "不想活",
+  "死了算了",
+  "伤害自己",
+  "杀人",
+  "我要报复",
+  "我想报复",
+  "毁掉自己",
+  "毁掉他",
+  "毁掉她",
+  "毁掉他们",
+  "活不下去",
+  "割腕",
+  "跳楼",
+];
 
 export function containsCrisisSignal(text: string): boolean {
   const source = text.toLowerCase();

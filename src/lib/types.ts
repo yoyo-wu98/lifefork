@@ -1,3 +1,5 @@
+import type { ContentAttribution } from "@/lib/content/types";
+
 export type SelfVersion = "future" | "past" | "fork";
 
 export type AppStep =
@@ -6,12 +8,14 @@ export type AppStep =
   | "questions"
   | "wechat-import"
   | "extra-text"
+  | "methods"
   | "generating"
   | "self-skill"
   | "timeline"
   | "forks"
   | "chat"
-  | "share";
+  | "share"
+  | "editor";
 
 export interface Evidence {
   id: string;
@@ -24,6 +28,260 @@ export interface Claim {
   text: string;
   confidence: number;
   evidenceIds: string[];
+  methodContributions?: MethodContribution[];
+}
+
+export type AnalysisMethodId =
+  | "user-evidence"
+  | "behavioral-pattern"
+  | "population-statistics"
+  | "ai-synthesis"
+  | "mbti-stage"
+  | "bazi"
+  | "ziwei";
+
+export type AnalysisMethodCategory =
+  | "evidence"
+  | "statistical"
+  | "model"
+  | "psychometric"
+  | "cultural";
+
+export type AnalysisReliabilityLevel = "higher" | "medium" | "experimental" | "cultural";
+
+export type AnalysisPresetId =
+  | "evidence-first"
+  | "balanced"
+  | "cultural-exploration"
+  | "custom";
+
+export interface AnalysisMethodPreference {
+  id: AnalysisMethodId;
+  label: string;
+  category: AnalysisMethodCategory;
+  description: string;
+  enabled: boolean;
+  weight: number;
+  reliability: AnalysisReliabilityLevel;
+}
+
+export interface BirthProfile {
+  calendar: "solar" | "lunar";
+  date: string;
+  time: string;
+  timeAccuracy: "exact" | "within-two-hours" | "unknown";
+  timezone: string;
+  place?: string;
+  gender: "female" | "male" | "other" | "prefer-not-to-say";
+  consentToProcess: boolean;
+}
+
+export interface AnalysisSettings {
+  preset: AnalysisPresetId;
+  methods: AnalysisMethodPreference[];
+  birthProfile?: BirthProfile;
+}
+
+export interface MethodContribution {
+  methodId: AnalysisMethodId;
+  methodLabel: string;
+  category: AnalysisMethodCategory;
+  userWeight: number;
+  confidence: number;
+  contribution: number;
+  evidenceIds: string[];
+  rationale: string;
+  limitation: string;
+}
+
+export interface IntegratedInsight {
+  id: string;
+  title: string;
+  summary: string;
+  kind: "observation" | "scenario" | "cultural-reading";
+  confidence: number;
+  evidenceIds: string[];
+  methodContributions: MethodContribution[];
+  userCanDisagree: true;
+}
+
+export interface AnalysisReference {
+  id: string;
+  title: string;
+  url: string;
+  note: string;
+}
+
+export interface MethodAnalysisResult {
+  methodId: AnalysisMethodId;
+  label: string;
+  category: AnalysisMethodCategory;
+  status: "complete" | "limited" | "disabled" | "missing-input";
+  summary: string;
+  details: string[];
+  confidence: number;
+  inputQuality: number;
+  limitation: string;
+  calculatedData?: Record<string, string | number | string[]>;
+  references?: AnalysisReference[];
+}
+
+export interface StagePersonalityAssessment {
+  id: string;
+  stageLabel: string;
+  ageRange: string;
+  type: DynamicTypeCode;
+  confidence: number;
+  source: "observed" | "retrospective" | "scenario";
+  description: string;
+  changeDrivers: string[];
+  methodContributions: MethodContribution[];
+}
+
+export interface BranchMethodExplanation {
+  branchId: string;
+  branchTitle: string;
+  score: number;
+  summary: string;
+  methodContributions: MethodContribution[];
+  assumptions: string[];
+  unknowns: string[];
+}
+
+export interface AIExecutionMeta {
+  used: boolean;
+  provider: "openai" | "deepseek" | "local";
+  model: string;
+  fallbackReason?: string;
+  promptVersion?: string;
+  durationMs?: number;
+  tokenUsage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+}
+
+export interface IntegratedAnalysis {
+  schemaVersion: "integrated-analysis.v1";
+  generatedAt: string;
+  preset: AnalysisPresetId;
+  dataCompleteness: number;
+  modelExecution: AIExecutionMeta;
+  normalizedWeights: Record<AnalysisMethodId, number>;
+  insights: IntegratedInsight[];
+  stagePersonality: StagePersonalityAssessment[];
+  methodResults: MethodAnalysisResult[];
+  branchExplanations: BranchMethodExplanation[];
+  limitations: string[];
+}
+
+export type DynamicTypeCode =
+  | "ISTJ"
+  | "ISFJ"
+  | "INFJ"
+  | "INTJ"
+  | "ISTP"
+  | "ISFP"
+  | "INFP"
+  | "INTP"
+  | "ESTP"
+  | "ESFP"
+  | "ENFP"
+  | "ENTP"
+  | "ESTJ"
+  | "ESFJ"
+  | "ENFJ"
+  | "ENTJ";
+
+export type DynamicTypeDimension = "E_I" | "S_N" | "T_F" | "J_P";
+export type DynamicTypePole = "E" | "I" | "S" | "N" | "T" | "F" | "J" | "P";
+export type DynamicTypeStressState = "settled" | "adaptive" | "strained";
+
+export interface DynamicTypeProductRole {
+  tendency: "dynamic-tendency";
+  evidence: "evidence-backed";
+  context: "context-sensitive";
+}
+
+export interface DynamicTypeLanguageBoundaries {
+  deterministicPersonalityJudgment: false;
+  clinicalFraming: false;
+  typeRanking: false;
+}
+
+export interface DynamicTypeContext {
+  branchId?: string;
+  branchTitle?: string;
+  lifeScale?: LifeScale;
+  timeLabel?: string;
+  stressState?: DynamicTypeStressState;
+  note: string;
+}
+
+export interface DynamicTypeDimensionSignal {
+  dimension: DynamicTypeDimension;
+  tendency: DynamicTypePole;
+  balance: number;
+  confidence: number;
+  evidenceIds: string[];
+  evidenceHint: string;
+}
+
+export interface DynamicTypeTendency {
+  type: DynamicTypeCode;
+  label: string;
+  confidence: number;
+  evidenceIds: string[];
+  evidenceHint: string;
+  context: DynamicTypeContext;
+}
+
+export interface DynamicTypeForkShift {
+  id: string;
+  branchId: string;
+  branchTitle: string;
+  lane?: LifeLane;
+  scale?: LifeScale;
+  fromType: DynamicTypeCode;
+  toType: DynamicTypeCode;
+  driftLabel: string;
+  confidence: number;
+  evidenceIds: string[];
+  evidenceHint: string;
+  contextNote: string;
+}
+
+export interface DynamicTypeStageTendency {
+  id: string;
+  label: string;
+  type: DynamicTypeCode;
+  confidence: number;
+  evidenceIds: string[];
+  evidenceHint: string;
+  context: DynamicTypeContext;
+}
+
+export interface DynamicTypeBranchSignal {
+  currentTypeTendency: DynamicTypeCode;
+  typeDrift: DynamicTypeForkShift;
+  confidence: number;
+  evidenceIds: string[];
+  evidenceHint: string;
+  contextNote: string;
+}
+
+export interface DynamicTypeProfile {
+  schemaVersion: "dynamic-type-profile.v0_5";
+  productRole: DynamicTypeProductRole;
+  languageBoundaries: DynamicTypeLanguageBoundaries;
+  baseTendency: DynamicTypeTendency;
+  currentTendency: DynamicTypeTendency;
+  dimensions: Record<DynamicTypeDimension, DynamicTypeDimensionSignal>;
+  stageTypes: DynamicTypeStageTendency[];
+  forkTypeShifts: DynamicTypeForkShift[];
+  evidenceIds: string[];
+  summary: string;
 }
 
 export interface IdentityProfile {
@@ -69,7 +327,18 @@ export interface LifeTimeSpan {
   startLabel: string;
   endLabel?: string;
   durationLabel: string;
+  durationMonths?: number;
+  range?: LifeTimeRange;
 }
+
+export interface LifeTimeRange {
+  startDay: number;
+  endDay: number;
+  granularity: LifeScale;
+}
+
+export type LifeMapRole = "current" | "life-container" | "checkpoint" | "period" | "event";
+export type ForkContainmentRole = "root" | "container" | "checkpoint" | "period" | "event";
 
 export interface LifeStateVector {
   autonomy: number;
@@ -88,14 +357,22 @@ export interface Consequence {
 
 export interface ForkPath {
   id: string;
+  content?: ContentAttribution;
   parentId?: string;
   depth?: number;
   nodeType?: "life-node" | "life-map" | "direction" | "strategy" | "consequence" | "ending";
+  mapRole?: LifeMapRole;
+  containmentRole?: ForkContainmentRole;
   scale?: LifeScale;
+  displayScale?: LifeScale;
+  durationMonths?: number;
+  orderIndex?: number;
   lane?: LifeLane;
   timeSpan?: LifeTimeSpan;
   stateVector?: LifeStateVector;
   consequences?: Consequence[];
+  dynamicType?: DynamicTypeBranchSignal;
+  aiPersonalized?: boolean;
   mergeInto?: string;
   zoomHint?: string;
   title: string;
@@ -113,6 +390,9 @@ export interface ChatMessage {
   role: "user" | "instance" | "system";
   content: string;
   createdAt: string;
+  execution?: AIExecutionMeta & {
+    source: "server-ai" | "local-fallback" | "safety-intercept";
+  };
 }
 
 export interface VoiceProfile {
@@ -161,6 +441,29 @@ export interface WeChatAnalysis {
   summary: string;
   selfSkillSignals: string[];
   suggestedSelfSkillText: string;
+  aiAnalysis?: WeChatAIAnalysis;
+}
+
+export interface WeChatAIAnalysis {
+  recurringTopics: string[];
+  emotionalSignals: string[];
+  keyThemes: string[];
+  relationshipDynamics: string;
+  selfSkillSignals: string[];
+  suggestedSelfSkillText: string;
+  execution: AIExecutionMeta;
+}
+
+export interface BranchScenarioSuggestion {
+  lane: "stability" | "leap" | "experiment" | "relationship";
+  generatedBy?: "ai" | "local";
+  title: string;
+  subtitle: string;
+  summary: string;
+  gains: string[];
+  costs: string[];
+  futureSelfName: string;
+  futureSelfVoice: string;
 }
 
 export interface SelfSkill {
@@ -185,6 +488,9 @@ export interface SelfSkill {
   timeline: TimelineNode[];
   evidence: Evidence[];
   claims: Claim[];
+  dynamicTypeProfile?: DynamicTypeProfile;
+  analysisSettings?: AnalysisSettings;
+  integratedAnalysis?: IntegratedAnalysis;
   forks: ForkPath[];
 }
 
@@ -198,4 +504,5 @@ export interface GenerateSelfSkillInput {
   extraText?: string;
   wechatAnalysis?: WeChatAnalysis;
   voiceCalibration?: string[];
+  analysisSettings?: AnalysisSettings;
 }

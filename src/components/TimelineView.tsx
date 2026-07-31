@@ -12,7 +12,8 @@ export function TimelineView() {
   const selfSkill = useLifeforkStore((s) => s.selfSkill);
   const setStep = useLifeforkStore((s) => s.setStep);
   const setBadge = useLifeforkStore((s) => s.setBadge);
-  const storeSet = useLifeforkStore.setState;
+  const setTimelineNodes = useLifeforkStore((s) => s.setTimelineNodes);
+  const deleteTimelineNode = useLifeforkStore((s) => s.deleteTimelineNode);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [confirmedIds, setConfirmedIds] = useState<string[]>([]);
@@ -22,39 +23,51 @@ export function TimelineView() {
   const nodes = selfSkill.timeline;
 
   const setNodes = (updated: TimelineNode[]) => {
-    storeSet({ selfSkill: { ...selfSkill, timeline: updated } });
+    setTimelineNodes(updated);
   };
 
   const handleNext = () => {
-    setBadge("第三条路发现者");
+    setBadge("方案对比已生成");
     setStep("forks");
   };
 
   return (
     <section className="space-y-4">
-      <h3 className="text-2xl">你的人生时间线</h3>
-      <div className="space-y-4 border-l border-blue/40 pl-4">
+      <div>
+        <p className="text-sm font-medium text-blue">Timeline</p>
+        <h3 className="mt-1 text-2xl font-semibold text-ink">影响当前选择的时间线</h3>
+        <p className="mt-2 text-sm leading-6 text-mist">
+          请检查每个节点是否准确。修改会立即更新个人分析和方案地图；已经生成的方案不会自动重算。
+        </p>
+      </div>
+      <div className="space-y-4 border-l border-night/15 pl-4">
         {nodes.map((node) => (
-          <article key={node.id} className="rounded-2xl border border-white/15 bg-white/5 p-4">
-            <p className="text-xs text-blue">{node.yearLabel}</p>
+          <article key={node.id} className="rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-4 shadow-sm">
+            <p className="text-xs font-medium text-blue">{node.yearLabel}</p>
             {editingId === node.id ? (
               <div className="space-y-2">
                 <input
-                  className="w-full rounded border border-white/15 bg-deep/70 p-2"
+                  className="w-full rounded-lg border border-night/10 bg-deep/70 p-2 text-sm outline-none focus:border-blue"
+                  aria-label={`${node.yearLabel}节点标题`}
+                  maxLength={160}
                   value={node.title}
                   onChange={(e) =>
                     setNodes(nodes.map((n) => (n.id === node.id ? { ...n, title: e.target.value } : n)))
                   }
                 />
                 <input
-                  className="w-full rounded border border-white/15 bg-deep/70 p-2"
+                  className="w-full rounded-lg border border-night/10 bg-deep/70 p-2 text-sm outline-none focus:border-blue"
+                  aria-label={`${node.yearLabel}节点情绪`}
+                  maxLength={120}
                   value={node.emotion}
                   onChange={(e) =>
                     setNodes(nodes.map((n) => (n.id === node.id ? { ...n, emotion: e.target.value } : n)))
                   }
                 />
                 <textarea
-                  className="w-full rounded border border-white/15 bg-deep/70 p-2"
+                  className="w-full rounded-lg border border-night/10 bg-deep/70 p-2 text-sm outline-none focus:border-blue"
+                  aria-label={`${node.yearLabel}节点模式`}
+                  maxLength={300}
                   value={node.pattern}
                   onChange={(e) =>
                     setNodes(nodes.map((n) => (n.id === node.id ? { ...n, pattern: e.target.value } : n)))
@@ -63,12 +76,12 @@ export function TimelineView() {
               </div>
             ) : (
               <>
-                <p className="text-lg">{node.title}</p>
-                <p className="text-sm text-mist">情绪：{node.emotion}</p>
-                <p className="text-sm text-mist">{node.pattern}</p>
+                <p className="mt-1 text-lg font-medium text-ink">{node.title}</p>
+                <p className="mt-2 text-sm text-mist">情绪：{node.emotion}</p>
+                <p className="mt-1 text-sm leading-6 text-mist">{node.pattern}</p>
                 {node.voice && (
-                  <div className="mt-3 rounded-2xl border border-gold/20 bg-gold/10 p-3 text-xs">
-                    <p className="text-gold">这个阶段的语气：{node.voice.toneName}</p>
+                  <div className="mt-3 rounded-lg border border-gold/20 bg-gold/10 p-3 text-xs">
+                    <p className="font-medium text-gold">这个阶段的语气：{node.voice.toneName}</p>
                     <p className="mt-1 text-mist">{node.voice.description}</p>
                     <p className="mt-1 text-blue">&ldquo;{node.voice.sampleLine}&rdquo;</p>
                   </div>
@@ -77,10 +90,11 @@ export function TimelineView() {
             )}
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
               <button
-                className={`rounded-full border px-3 py-1 transition ${
+                type="button"
+                className={`rounded-lg border px-3 py-1 transition ${
                   confirmedIds.includes(node.id)
-                    ? "border-gold bg-gold/15 text-gold"
-                    : "border-green-500/50"
+                    ? "border-gold/30 bg-gold/10 text-gold"
+                    : "border-emerald-500/40 text-emerald-700 hover:bg-emerald-50"
                 }`}
                 onClick={() =>
                   setConfirmedIds((ids) =>
@@ -88,17 +102,19 @@ export function TimelineView() {
                   )
                 }
               >
-                {confirmedIds.includes(node.id) ? "已确认 ✓" : "这很准 ✓"}
+                {confirmedIds.includes(node.id) ? "已确认 ✓" : "内容准确"}
               </button>
               <button
-                className="rounded-full border border-white/20 px-3 py-1"
+                type="button"
+                className="rounded-lg border border-night/15 px-3 py-1 text-mist hover:bg-deep hover:text-ink"
                 onClick={() => setEditingId(editingId === node.id ? null : node.id)}
               >
-                我要修改
+                {editingId === node.id ? "完成编辑" : "我要修改"}
               </button>
               <button
-                className="rounded-full border border-red-400/50 px-3 py-1"
-                onClick={() => setNodes(nodes.filter((n) => n.id !== node.id))}
+                type="button"
+                className="rounded-lg border border-red-300/50 px-3 py-1 text-red-700 hover:bg-red-50"
+                onClick={() => deleteTimelineNode(node.id)}
               >
                 删除
               </button>
@@ -107,10 +123,11 @@ export function TimelineView() {
         ))}
       </div>
       <button
+        type="button"
         onClick={handleNext}
-        className="rounded-full bg-gradient-to-r from-blue to-violet px-6 py-3"
+        className="rounded-lg bg-night px-5 py-3 text-sm font-medium text-deep shadow-quiet"
       >
-        继续，打开人生地图
+        继续查看方案地图
       </button>
     </section>
   );

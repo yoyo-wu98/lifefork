@@ -1,89 +1,54 @@
-import type { LifeScale, ForkPath, SelfSkill } from "@/lib/types";
-import type { LayoutNode, LayoutBounds, NodeOffset } from "./types";
+import type { ForkPath, SelfSkill } from "@/lib/types";
+import { createLifeMapContentAttribution } from "@/lib/content/lifeMapNarratives";
 import {
   ROOT_NODE_ID, HISTORY_BIRTH_ID, HISTORY_EARLY_ID, HISTORY_PAST_ID, HISTORY_HIDDEN_ID,
-  ROOT_FRAME, PAD_X, PAD_Y,
-  scaleOrder, scaleMeta, cameraZoom, MIN_CAMERA_ZOOM, MAX_CAMERA_ZOOM,
-  frameByScale,
 } from "./constants";
-
-// ── Scale utilities ───────────────────────────────────────────────────
-
-export function scaleRank(scale?: LifeScale) {
-  return Math.max(0, scaleOrder.indexOf(scale ?? "life"));
-}
-
-export function clampZoom(value: number) {
-  return Math.min(MAX_CAMERA_ZOOM, Math.max(MIN_CAMERA_ZOOM, value));
-}
-
-export function scaleForZoom(zoom: number): LifeScale {
-  for (let index = 0; index < scaleOrder.length - 1; index += 1) {
-    const current = scaleOrder[index];
-    const next = scaleOrder[index + 1];
-    const threshold = (cameraZoom[current] + cameraZoom[next]) / 2;
-    if (zoom < threshold) return current;
-  }
-
-  return scaleOrder[scaleOrder.length - 1];
-}
-
-// ── Color utilities ──────────────────────────────────────────────────
-
-export function hexToRgb(hex: string) {
-  const value = hex.replace("#", "");
-  const normalized = value.length === 3 ? value.split("").map((char) => char + char).join("") : value;
-  const parsed = Number.parseInt(normalized, 16);
-
-  return {
-    r: (parsed >> 16) & 255,
-    g: (parsed >> 8) & 255,
-    b: parsed & 255,
-  };
-}
-
-export function rgba(hex: string, alpha: number) {
-  const { r, g, b } = hexToRgb(hex);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
 
 // ── Path data creation ───────────────────────────────────────────────
 
 export function createCurrentPath(selfSkill: SelfSkill): ForkPath {
-  return {
+  const path: ForkPath = {
     id: ROOT_NODE_ID,
     parentId: HISTORY_HIDDEN_ID,
     nodeType: "life-node",
+    mapRole: "current",
     scale: "hour",
-    timeSpan: { startLabel: "此刻", durationLabel: "现在" },
-    title: "现在的生活点",
-    subtitle: selfSkill.questions.currentChoice || "你此刻正在站立的地方",
-    summary: "这里是过去时间线抵达此刻的交汇点。出生、早年、关键记忆和暗线从左侧汇入这里，未来的分支从这里继续向右长出。",
-    gains: ["所有选择从这里开始", "可以向外观察不同尺度", "能随时回到现在校准方向"],
-    costs: ["还没有替你做出选择", "需要你继续把真实材料放进来", "未来仍然保持开放"],
+    timeSpan: { startLabel: "此刻", durationLabel: "现在", range: { startDay: 0, endDay: 1 / 24, granularity: "hour" } },
+    title: "当前问题",
+    subtitle: selfSkill.questions.currentChoice || "你现在需要比较和处理的问题",
+    summary: "左侧节点说明哪些经历影响了当前判断，右侧节点展示可以比较的方案。选择任一方案可以继续查看长期影响和具体行动。",
+    gains: ["集中查看当前问题", "可以比较不同时间尺度", "可以随时回到这里重新选择方案"],
+    costs: ["系统不会替你决定", "分析准确度取决于输入材料", "结果需要根据新信息持续更新"],
     futureSelfName: "现在的你",
-    futureSelfVoice: "贴近、清醒，像刚把地图摊开",
+    futureSelfVoice: "直接说明当前问题、信息缺口和可比较方案",
     children: selfSkill.forks,
+  };
+
+  return {
+    ...path,
+    content: path.content ?? createLifeMapContentAttribution(path),
   };
 }
 
 export function createHistoryPaths(selfSkill: SelfSkill): ForkPath[] {
   const pastNode = selfSkill.timeline.find((node) => node.yearLabel === "过去") ?? selfSkill.timeline[0];
-  const hiddenNode = selfSkill.timeline.find((node) => node.yearLabel === "暗线") ?? selfSkill.timeline[1];
+  const hiddenNode =
+    selfSkill.timeline.find((node) => node.yearLabel === "隐藏特征" || node.yearLabel === "长期目标" || node.yearLabel === "暗线") ??
+    selfSkill.timeline[1];
 
-  return [
+  const paths: ForkPath[] = [
     {
       id: HISTORY_BIRTH_ID,
       nodeType: "life-node",
       scale: "decade",
       timeSpan: { startLabel: "出生", durationLabel: "生命开始" },
-      title: "出生：第一条时间线开始",
-      subtitle: "你还没有做出选择，但已经进入世界。",
-      summary: "人生地图的最左端。这里不承载判断，只标记一条从身体、家庭和环境开始的连续线。",
-      gains: ["生命线被放到地图上", "所有后续节点有了起点", "过去和未来可以被同一条轴连接"],
-      costs: ["细节仍需要你补充", "这只是 V0 的粗粒度起点", "早期记忆需要之后继续细化"],
+      title: "出生与家庭环境",
+      subtitle: "记录最早期的家庭、环境和生活条件。",
+      summary: "这个节点是时间线起点。后续可以补充家庭结构、生活环境和重要早期经历。",
+      gains: ["建立时间线起点", "为后续经历提供背景", "便于观察长期变化"],
+      costs: ["当前信息较少", "早期内容可能依赖他人补充", "系统无法自动还原缺失记忆"],
       futureSelfName: "最早的你",
-      futureSelfVoice: "安静、模糊，像一张尚未显影的底片",
+      futureSelfVoice: "信息有限，只描述已经确认的事实",
       stateVector: { autonomy: 10, stability: 48, intimacy: 60, creation: 18, energy: 55, regret: 0, uncertainty: 90 },
     },
     {
@@ -92,13 +57,13 @@ export function createHistoryPaths(selfSkill: SelfSkill): ForkPath[] {
       nodeType: "life-node",
       scale: "year",
       timeSpan: { startLabel: "早年", durationLabel: "成长阶段" },
-      title: "早年：被世界塑形",
-      subtitle: "一些说法、习惯和期待开始进入你。",
-      summary: "这一段代表你逐渐学会如何表达、退让、争取、隐藏和适应。后续的很多选择，会带着这里留下的语气。",
-      gains: ["形成基本安全感", "学会理解别人", "开始长出自己的表达方式"],
-      costs: ["也会学会压下某些愿望", "一些边界还没有名字", "早期期待会影响后来的选择"],
+      title: "早年经历",
+      subtitle: "记录早期形成的习惯、表达方式和关系模式。",
+      summary: "这一阶段可能影响你如何表达需求、处理冲突和评估安全感。",
+      gains: ["识别早期影响", "理解当前表达方式的来源", "为关系模式提供背景"],
+      costs: ["记忆可能不完整", "部分解释需要核对", "不能只靠早期经历解释当前选择"],
       futureSelfName: "早年的你",
-      futureSelfVoice: "轻、试探、容易把真实话收回去",
+      futureSelfVoice: "句子较短，判断犹豫，容易省略真实需求",
       stateVector: { autonomy: 24, stability: 56, intimacy: 66, creation: 30, energy: 62, regret: 8, uncertainty: 76 },
     },
     {
@@ -107,13 +72,13 @@ export function createHistoryPaths(selfSkill: SelfSkill): ForkPath[] {
       nodeType: "life-node",
       scale: "year",
       timeSpan: { startLabel: pastNode?.yearLabel ?? "过去", durationLabel: "关键过去节点" },
-      title: pastNode?.title || "一个尚未被重新理解的节点",
-      subtitle: pastNode?.emotion || "复杂、迟疑、仍有回声",
-      summary: pastNode?.pattern || "这里可能藏着你后来很多选择的原型。",
-      gains: ["过去节点被放回时间轴", "当前选择有了来处", "可以继续补充证据"],
-      costs: ["回看会带来情绪波动", "V0 还不能还原所有细节", "有些解释需要你修正"],
-      futureSelfName: "过去节点里的你",
-      futureSelfVoice: pastNode?.voice?.description ?? "带着当时的语气，谨慎地重新开口",
+      title: pastNode?.title || "一段影响当前选择的经历",
+      subtitle: pastNode?.emotion || "复杂、犹豫",
+      summary: pastNode?.pattern || "这段经历可能影响你现在对风险和选择的判断。",
+      gains: ["说明当前判断的背景", "可以继续补充证据", "便于检查是否存在重复模式"],
+      costs: ["回顾可能带来情绪压力", "系统无法还原所有细节", "解释需要你确认和修改"],
+      futureSelfName: "当时的你",
+      futureSelfVoice: pastNode?.voice?.description ?? "使用当时的表达方式，只说明已经确认的内容",
       stateVector: { autonomy: 42, stability: 50, intimacy: 54, creation: 44, energy: 48, regret: 38, uncertainty: 66 },
     },
     {
@@ -121,89 +86,25 @@ export function createHistoryPaths(selfSkill: SelfSkill): ForkPath[] {
       parentId: HISTORY_PAST_ID,
       nodeType: "life-node",
       scale: "month",
-      timeSpan: { startLabel: "暗线", durationLabel: "隐藏自我" },
-      title: hiddenNode?.title || "一个没有被充分表达的自己",
-      subtitle: hiddenNode?.emotion || "压抑、等待、想被看见",
-      summary: hiddenNode?.pattern || "你把某部分自己藏了起来，但它仍在影响你的选择。",
-      gains: ["隐藏愿望被命名", "现在的张力更容易被理解", "未来分支有了心理来源"],
-      costs: ["承认它需要勇气", "它可能挑战现有生活叙事", "你需要决定如何安放它"],
-      futureSelfName: "暗线里的你",
-      futureSelfVoice: hiddenNode?.voice?.description ?? "敏感、低声，但比表面更真实",
+      timeSpan: { startLabel: "长期目标", durationLabel: "较少公开表达的特征" },
+      title: hiddenNode?.title || "别人不容易看到的一面",
+      subtitle: hiddenNode?.emotion || "克制、较少公开表达",
+      summary: hiddenNode?.pattern || "这部分特征很少公开表达，但会影响你的实际选择。",
+      gains: ["补充公开形象之外的信息", "解释部分决策冲突", "帮助生成更完整的方案"],
+      costs: ["内容可能涉及隐私", "判断需要你确认", "不应据此给人格下结论"],
+      futureSelfName: "这项隐藏特征对应的模拟版本",
+      futureSelfVoice: hiddenNode?.voice?.description ?? "表达直接，但会担心别人如何评价",
       stateVector: { autonomy: 54, stability: 46, intimacy: 52, creation: 58, energy: 45, regret: 46, uncertainty: 58 },
     },
   ];
-}
 
-// ── Bounds utility functions ──────────────────────────────────────────
-
-export function nodeBounds(node?: LayoutNode): LayoutBounds | undefined {
-  if (!node) return undefined;
-
-  return {
-    x: node.x + PAD_X,
-    y: node.y + PAD_Y,
-    width: node.width,
-    height: node.height,
-  };
-}
-
-export function collectLayoutDescendants(node: LayoutNode): LayoutNode[] {
-  return node.children.flatMap((child) => [child, ...collectLayoutDescendants(child)]);
-}
-
-export function containerBoundsForNode(node: LayoutNode | undefined): LayoutBounds | undefined {
-  return node?.container;
-}
-
-export function mergeBounds(bounds: Array<LayoutBounds | undefined>): LayoutBounds | undefined {
-  const existing = bounds.filter((item): item is LayoutBounds => Boolean(item));
-  if (!existing.length) return undefined;
-
-  const minX = Math.min(...existing.map((item) => item.x));
-  const minY = Math.min(...existing.map((item) => item.y));
-  const maxX = Math.max(...existing.map((item) => item.x + item.width));
-  const maxY = Math.max(...existing.map((item) => item.y + item.height));
-
-  return {
-    x: minX,
-    y: minY,
-    width: maxX - minX,
-    height: maxY - minY,
-  };
-}
-
-export function fitZoomForBounds(bounds: LayoutBounds | undefined, viewport: { width: number; height: number }) {
-  if (!bounds) return MAX_CAMERA_ZOOM;
-
-  const horizontalRoom = Math.max(280, viewport.width - 150);
-  const verticalRoom = Math.max(260, viewport.height - 150);
-  const fitZoom = Math.min(horizontalRoom / Math.max(1, bounds.width), verticalRoom / Math.max(1, bounds.height));
-
-  return clampZoom(fitZoom);
-}
-
-export function getBoundsCenter(bounds: LayoutBounds) {
-  return {
-    x: bounds.x + bounds.width / 2,
-    y: bounds.y + bounds.height / 2,
-  };
-}
-
-export function pointOnHorizontalEdgeToward(bounds: LayoutBounds, target: { x: number; y: number }) {
-  const center = getBoundsCenter(bounds);
-  const edgePadding = Math.min(28, Math.max(10, bounds.height * 0.12));
-
-  return {
-    x: target.x >= center.x ? bounds.x + bounds.width : bounds.x,
-    y: Math.min(bounds.y + bounds.height - edgePadding, Math.max(bounds.y + edgePadding, target.y)),
-  };
+  return paths.map((path) => ({
+    ...path,
+    content: path.content ?? createLifeMapContentAttribution(path),
+  }));
 }
 
 // ── Fork tree utilities ──────────────────────────────────────────────
-
-export function flattenForks(paths: ForkPath[]): ForkPath[] {
-  return paths.flatMap((path) => [path, ...flattenForks(path.children ?? [])]);
-}
 
 export function getAncestry(active: ForkPath, all: ForkPath[]) {
   const byId = new Map(all.map((path) => [path.id, path]));
@@ -216,18 +117,4 @@ export function getAncestry(active: ForkPath, all: ForkPath[]) {
   }
 
   return lineage;
-}
-
-// ── Node display utilities ────────────────────────────────────────────
-
-export function getNodeMarker(path: ForkPath) {
-  const scale = path.scale ?? "life";
-  const time = path.timeSpan;
-  if (time?.startLabel && time?.endLabel) return `${scaleMeta[scale].label} · ${time.startLabel} → ${time.endLabel}`;
-  if (time?.startLabel) return `${scaleMeta[scale].label} · ${time.startLabel}`;
-  return scaleMeta[scale].label;
-}
-
-export function getFrameSize(scale?: LifeScale) {
-  return scale ? frameByScale[scale] : { ...ROOT_FRAME, label: "Now Frame" };
 }

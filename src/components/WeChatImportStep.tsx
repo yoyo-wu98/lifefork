@@ -1,10 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { BrainCircuit, LoaderCircle } from "lucide-react";
 import { useLifeforkStore } from "@/lib/stores/lifeforkStore";
 import { disclaimer } from "@/lib/copy";
 import { containsCrisisSignal, safetyMessage } from "@/lib/safety";
-import { analyzeWeChatExport } from "@/lib/wechatEngine";
+import type { WeChatAIAnalysis } from "@/lib/types";
+import {
+  analyzeWeChatExport,
+  WECHAT_MAX_LINES,
+  WECHAT_MAX_SOURCE_CHARS,
+} from "@/lib/wechatEngine";
+
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
 
 /**
  * WeChat chat log import step.
@@ -17,9 +25,15 @@ export function WeChatImportStep() {
   const wechatAnalysis = useLifeforkStore((s) => s.wechatAnalysis);
   const setWechatAnalysis = useLifeforkStore((s) => s.setWechatAnalysis);
   const setStep = useLifeforkStore((s) => s.setStep);
+  const runtimeConfig = useLifeforkStore((s) => s.runtimeConfig);
+  const editorConfig = useLifeforkStore((s) => s.editorConfig);
+  const requestConfirmation = useLifeforkStore((s) => s.requestConfirmation);
 
   const [fileName, setFileName] = useState("");
-  const hasLargeInput = wechatRaw.length > 120_000;
+  const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const hasLargeInput = wechatRaw.length >= WECHAT_MAX_SOURCE_CHARS;
+  const hasCrisisSignal = useMemo(() => containsCrisisSignal(wechatRaw), [wechatRaw]);
   const characterLabel = useMemo(() => wechatRaw.length.toLocaleString("zh-CN"), [wechatRaw.length]);
 
   const analyze = (sourceName = fileName || "粘贴的微信记录") => {
@@ -27,51 +41,145 @@ export function WeChatImportStep() {
     setWechatAnalysis(analyzeWeChatExport(wechatRaw, sourceName));
   };
 
-  const handleFile = async (file?: File) => {
-    if (!file) return;
-    setFileName(file.name);
-    const text = await file.text();
-    setWechatRaw(text);
-    setWechatAnalysis(analyzeWeChatExport(text, file.name));
+  const canUseServerAi =
+    runtimeConfig.features.ai &&
+    runtimeConfig.service.aiConfigured &&
+    editorConfig.features.aiApi &&
+    editorConfig.global.aiMode === "api-enhanced";
+
+  const analyzeWithServerAi = async () => {
+    if (!wechatAnalysis || !canUseServerAi || isAiAnalyzing || hasCrisisSignal) return;
+    setIsAiAnalyzing(true);
+    setAiError("");
+    const startedAt = Date.now();
+    try {
+      const localSummary = [
+        wechatAnalysis.summary,
+        `高频主题：${wechatAnalysis.recurringTopics.join("、") || "未识别"}`,
+        `情绪线索：${wechatAnalysis.emotionalSignals.join("、") || "未识别"}`,
+        `自我模型线索：${wechatAnalysis.selfSkillSignals.join(" ")}`,
+      ].join("\n");
+      const response = await fetch("/api/wechat-analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ localSummary }),
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) {
+        throw new Error(body.error ?? "服务器分析失败");
+      }
+      const used = body.meta?.llmUsed === true;
+      const data = body.data;
+      const aiAnalysis: WeChatAIAnalysis = {
+        recurringTopics: Array.isArray(data.recurringTopics) ? data.recurringTopics : [],
+        emotionalSignals: Array.isArray(data.emotionalSignals) ? data.emotionalSignals : [],
+        keyThemes: Array.isArray(data.keyThemes) ? data.keyThemes : [],
+        relationshipDynamics: data.relationshipDynamics ?? "",
+        selfSkillSignals: Array.isArray(data.selfSkillSignals) ? data.selfSkillSignals : [],
+        suggestedSelfSkillText: data.suggestedSelfSkillText ?? "",
+        execution: {
+          used,
+          provider:
+            used && (body.meta?.provider === "openai" || body.meta?.provider === "deepseek")
+              ? body.meta.provider
+              : "local",
+          model: used ? body.meta?.model ?? "unknown" : "local-rules",
+          fallbackReason: used ? undefined : body.meta?.fallbackReason,
+          promptVersion: body.meta?.promptVersion,
+          durationMs: Date.now() - startedAt,
+          tokenUsage: body.usage,
+        },
+      };
+      setWechatAnalysis({
+        ...wechatAnalysis,
+        recurringTopics: Array.from(
+          new Set([...wechatAnalysis.recurringTopics, ...aiAnalysis.recurringTopics]),
+        ).slice(0, 8),
+        emotionalSignals: Array.from(
+          new Set([...wechatAnalysis.emotionalSignals, ...aiAnalysis.emotionalSignals]),
+        ).slice(0, 8),
+        selfSkillSignals: Array.from(
+          new Set([...wechatAnalysis.selfSkillSignals, ...aiAnalysis.selfSkillSignals]),
+        ).slice(0, 10),
+        suggestedSelfSkillText:
+          aiAnalysis.suggestedSelfSkillText || wechatAnalysis.suggestedSelfSkillText,
+        aiAnalysis,
+      });
+      if (!used) {
+        setAiError("服务器模型本轮未成功响应，已保留本地分析结果。");
+      }
+    } catch (error) {
+      setAiError(error instanceof Error ? error.message : "服务器分析失败，已保留本地结果。");
+    } finally {
+      setIsAiAnalyzing(false);
+    }
   };
 
-  const skip = () => setStep("extra-text");
-  const next = () => setStep("extra-text");
+  const handleFile = async (file?: File) => {
+    if (!file) return;
+    if (file.size > MAX_FILE_BYTES) {
+      requestConfirmation(
+        {
+          title: "文件超过 5 MB",
+          message: "请导出较小的时间范围，或把聊天记录拆成多个文件分批分析。",
+          confirmLabel: "关闭提示",
+          dismissOnly: true,
+        },
+        () => undefined,
+      );
+      return;
+    }
+    setFileName(file.name);
+    const text = await file.text();
+    const boundedText = text.slice(0, WECHAT_MAX_SOURCE_CHARS);
+    setWechatRaw(boundedText);
+    setWechatAnalysis(analyzeWeChatExport(boundedText, file.name));
+  };
+
+  const skip = () => {
+    setWechatRaw("");
+    setWechatAnalysis(null);
+    setStep("extra-text");
+  };
+  const next = () => {
+    setWechatRaw("");
+    setStep("extra-text");
+  };
 
   return (
-    <section className="space-y-5 rounded-3xl border border-white/15 bg-white/5 p-6">
+    <section className="space-y-5 rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-5 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm tracking-[0.2em] text-blue">Local WeChat Lens</p>
-          <h3 className="mt-2 text-2xl">导入微信聊天记录</h3>
-          <p className="mt-2 max-w-2xl text-sm text-mist">
-            粘贴或上传你已经导出的聊天文本。V0 只在浏览器本地做规则分析：提取主题、情绪线索、关键节点和短证据片段，不上传服务器，也不把完整原文写入 Self Skill。
+          <p className="text-sm font-medium text-blue">微信记录本地分析</p>
+          <h3 className="mt-1 text-2xl font-semibold text-ink">导入微信聊天记录</h3>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-mist">
+            粘贴或上传已经导出的聊天文本。系统会在当前浏览器中提取高频主题、情绪线索和关键片段。离开此步骤后会清除原文，只保留脱敏后的本地分析结果。
           </p>
         </div>
-        <button onClick={skip} className="rounded-full border border-white/20 px-5 py-2 text-sm">
+        <button type="button" onClick={skip} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
           跳过微信导入
         </button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-3">
-          <label className="block rounded-2xl border border-white/15 bg-deep/60 p-4">
+          <label className="block rounded-lg border border-night/10 bg-deep/70 p-4">
             <span className="mb-3 block text-sm text-mist">上传 .txt / .csv / .json / .html 文本文件</span>
             <input
               type="file"
               accept=".txt,.csv,.json,.html,.htm,.md"
-              className="block w-full text-sm text-mist file:mr-4 file:rounded-full file:border-0 file:bg-blue/20 file:px-4 file:py-2 file:text-blue"
+              className="block w-full text-sm text-mist file:mr-4 file:rounded-lg file:border-0 file:bg-blue/10 file:px-4 file:py-2 file:text-blue"
               onChange={(event) => handleFile(event.target.files?.[0])}
             />
           </label>
           <textarea
-            className="min-h-56 w-full rounded-2xl border border-white/15 bg-deep/60 p-4 text-sm"
+            className="min-h-56 w-full resize-y rounded-lg border border-night/10 bg-deep/70 p-4 text-sm leading-6 outline-none focus:border-blue focus:bg-[oklch(0.995_0.003_92)]"
             placeholder={`也可以直接粘贴聊天记录。例如：
 [2026-04-24 21:10:03] 我：我最近总觉得被困住了
 [2026-04-24 21:11:20] 朋友：你也许没有讨厌工作，只是太想做自己的东西了？`}
             value={wechatRaw}
             onChange={(event) => {
-              setWechatRaw(event.target.value);
+              setWechatRaw(event.target.value.slice(0, WECHAT_MAX_SOURCE_CHARS));
               setWechatAnalysis(null);
             }}
           />
@@ -79,26 +187,29 @@ export function WeChatImportStep() {
             <button
               disabled={!wechatRaw.trim()}
               onClick={() => analyze()}
-              className="rounded-full bg-gradient-to-r from-gold to-violet px-5 py-2 text-night disabled:opacity-40"
+              className="rounded-lg bg-night px-5 py-2 text-sm font-medium text-deep shadow-quiet disabled:cursor-not-allowed disabled:opacity-40"
             >
               本地分析这段聊天
             </button>
             <span className="text-xs text-mist">已读取 {characterLabel} 个字符</span>
           </div>
           {hasLargeInput && (
-            <p className="rounded-2xl border border-gold/30 bg-gold/10 p-3 text-xs text-gold">
-              文本很大。V0 会优先抽取前 8000 行做本地预分析；未来接入真实 AI 时应使用分块、摘要树和证据索引，避免一次性消耗大量 token。
+            <p className="rounded-lg border border-gold/20 bg-gold/10 p-3 text-xs leading-5 text-gold">
+              已达到当前上限。系统只保留前 {WECHAT_MAX_SOURCE_CHARS.toLocaleString("zh-CN")} 个字符，并分析前 {WECHAT_MAX_LINES.toLocaleString("zh-CN")} 行。
             </p>
           )}
-          {containsCrisisSignal(wechatRaw) && (
-            <p className="rounded-2xl border border-red-300/30 bg-red-500/10 p-3 text-xs text-red-100">
-              {safetyMessage}
-            </p>
+          {hasCrisisSignal && (
+            <div className="rounded-lg border border-red-300/50 bg-red-50 p-3 text-xs leading-5 text-red-700">
+              <p>{safetyMessage}</p>
+              <p className="mt-2 font-medium">
+                这段材料不会发送给服务器 AI。你仍可做本地分析，或删除相关内容后继续。
+              </p>
+            </div>
           )}
         </div>
 
-        <aside className="space-y-3 rounded-2xl border border-white/10 bg-night/60 p-4">
-          <p className="text-sm text-gold">分析预览</p>
+        <aside className="space-y-3 rounded-lg border border-night/10 bg-deep/70 p-4">
+          <p className="text-sm font-medium text-ink">分析预览</p>
           {wechatAnalysis ? (
             <>
               <p className="text-sm leading-6 text-mist">{wechatAnalysis.summary}</p>
@@ -125,34 +236,81 @@ export function WeChatImportStep() {
               <div className="space-y-2">
                 <p className="text-xs text-mist">关键片段</p>
                 {wechatAnalysis.keyMoments.slice(0, 3).map((moment) => (
-                  <p key={moment.id} className="rounded-xl bg-white/5 p-3 text-xs text-mist">
+                  <p key={moment.id} className="rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-3 text-xs leading-5 text-mist">
                     {moment.timeLabel ? `${moment.timeLabel} · ` : ""}
                     {moment.speaker}：{moment.content}
                   </p>
                 ))}
               </div>
+              {wechatAnalysis.aiAnalysis && (
+                <div className="border-t border-night/10 pt-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs font-medium text-ink">服务器 AI 补充</p>
+                    <span className="rounded-full border border-blue/20 bg-blue/5 px-2 py-1 text-[11px] text-blue">
+                      {wechatAnalysis.aiAnalysis.execution.used
+                        ? `${wechatAnalysis.aiAnalysis.execution.provider} / ${wechatAnalysis.aiAnalysis.execution.model}`
+                        : "本地备用结果"}
+                    </span>
+                  </div>
+                  {wechatAnalysis.aiAnalysis.keyThemes.length > 0 && (
+                    <p className="mt-2 text-xs leading-5 text-mist">
+                      关键主题：{wechatAnalysis.aiAnalysis.keyThemes.join("、")}
+                    </p>
+                  )}
+                  {wechatAnalysis.aiAnalysis.relationshipDynamics && (
+                    <p className="mt-2 text-xs leading-5 text-mist">
+                      互动特征：{wechatAnalysis.aiAnalysis.relationshipDynamics}
+                    </p>
+                  )}
+                </div>
+              )}
             </>
           ) : (
             <p className="text-sm leading-6 text-mist">
-              还没有分析结果。导入聊天后，我会先生成一个隐私友好的摘要，再把它作为 Self Skill 的辅助证据。
+              还没有分析结果。导入后会显示高频主题、情绪线索和最多 3 个关键片段。
             </p>
           )}
         </aside>
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <button onClick={skip} className="rounded-full border border-white/20 px-5 py-2">
+        <button type="button" onClick={skip} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
           不使用聊天记录
         </button>
         <button
           disabled={!wechatAnalysis}
           onClick={next}
-          className="rounded-full bg-gradient-to-r from-blue to-violet px-5 py-2 disabled:opacity-40"
+          className="rounded-lg bg-night px-5 py-2 text-sm font-medium text-deep shadow-quiet disabled:cursor-not-allowed disabled:opacity-40"
         >
-          把这些线索加入 Self Skill
+          把分析结果加入个人分析
         </button>
+        {wechatAnalysis && canUseServerAi && (
+          <button
+            type="button"
+            disabled={isAiAnalyzing || hasCrisisSignal}
+            onClick={analyzeWithServerAi}
+            className="inline-flex items-center gap-2 rounded-lg border border-blue/25 bg-blue/5 px-5 py-2 text-sm font-medium text-blue disabled:opacity-50"
+          >
+            {isAiAnalyzing ? (
+              <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <BrainCircuit className="size-4" aria-hidden="true" />
+            )}
+            {wechatAnalysis.aiAnalysis ? "重新做 AI 深度分析" : "使用服务器 AI 深度分析"}
+          </button>
+        )}
       </div>
-      <p className="text-xs text-mist">{disclaimer}</p>
+      {wechatAnalysis && canUseServerAi && (
+        <p className="text-xs leading-5 text-mist">
+          服务器只接收上方的本地统计摘要、主题和情绪标签；聊天原文与关键片段留在此页面内存中，刷新或离开后清除。
+        </p>
+      )}
+      {aiError && (
+        <p className="rounded-lg border border-gold/25 bg-gold/5 p-3 text-xs leading-5 text-ink">
+          {aiError}
+        </p>
+      )}
+      <p className="max-w-[72ch] text-xs leading-6 text-mist">{disclaimer}</p>
     </section>
   );
 }
