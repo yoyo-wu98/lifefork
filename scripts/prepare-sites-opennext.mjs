@@ -1,4 +1,4 @@
-import { access, cp, mkdir, rename, rm } from "node:fs/promises";
+import { access, cp, mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const root = process.cwd();
@@ -13,9 +13,20 @@ await rm(distDirectory, { recursive: true, force: true });
 await mkdir(serverDirectory, { recursive: true });
 
 await cp(openNextDirectory, serverDirectory, { recursive: true });
-await rename(
-  path.join(serverDirectory, "worker.js"),
+await writeFile(
   path.join(serverDirectory, "index.js"),
+  `import { createRequire } from "node:module";
+
+globalThis.require ??= createRequire("file:///worker/index.js");
+
+const worker = await import("./worker.js");
+
+export const DOQueueHandler = worker.DOQueueHandler;
+export const DOShardedTagCache = worker.DOShardedTagCache;
+export const BucketCachePurge = worker.BucketCachePurge;
+export default worker.default;
+`,
+  "utf8",
 );
 // Sites uploads dist/client through its static-asset pipeline. Keeping the same
 // files under dist/server would count them again toward the Worker size limit.
