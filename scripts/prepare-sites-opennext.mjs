@@ -17,6 +17,12 @@ await rename(
   path.join(serverDirectory, "worker.js"),
   path.join(serverDirectory, "index.js"),
 );
+// Sites uploads dist/client through its static-asset pipeline. Keeping the same
+// files under dist/server would count them again toward the Worker size limit.
+await rm(path.join(serverDirectory, "assets"), {
+  recursive: true,
+  force: true,
+});
 
 const assetsDirectory = path.join(openNextDirectory, "assets");
 try {
