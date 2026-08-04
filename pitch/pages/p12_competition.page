@@ -1,0 +1,118 @@
+pageType: content
+background:
+  type: solid
+  color: "$paper"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>COMPETITION · 竞争格局</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$title"
+      wrap: false
+      text: |
+        <p>不在任何现有品类里——我们定义新品类</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: compTable
+    elementType: table
+    bounds: [80, 170, 1120, 380]
+    columnWidths: [0.28, 0.17, 0.17, 0.17, 0.21]
+    rowHeights: [0.16, 0.168, 0.168, 0.168, 0.168, 0.168]
+    style: "$default"
+    rows:
+      - - content: {text: 能力维度, fontSize: 15}
+        - content: {text: 日记笔记类, fontSize: 15}
+        - content: {text: 测评占星类, fontSize: 15}
+        - content: {text: 通用 AI 聊天, fontSize: 15}
+        - content:
+            fontSize: 15
+            text: |
+              <p><span style="color:#B08A3E;"><strong>LifeFork</strong></span></p>
+      - - content: {text: 结构化人生决策, fontSize: 15}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content:
+            fontSize: 16
+            text: |
+              <p><span style="color:#B08A3E;"><strong>●</strong></span></p>
+          fill: {type: solid, color: "$goldSoft"}
+      - - content: {text: 结论可追溯、可反驳, fontSize: 15}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content:
+            fontSize: 16
+            text: |
+              <p><span style="color:#B08A3E;"><strong>●</strong></span></p>
+          fill: {type: solid, color: "$goldSoft"}
+      - - content: {text: 多时间尺度路径模拟, fontSize: 15}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content: {text: ◐, fontSize: 15, color: "#6B7186"}
+        - content:
+            fontSize: 16
+            text: |
+              <p><span style="color:#B08A3E;"><strong>●</strong></span></p>
+          fill: {type: solid, color: "$goldSoft"}
+      - - content: {text: 用户拥有数据所有权, fontSize: 15}
+        - content: {text: ◐, fontSize: 15, color: "#6B7186"}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content:
+            fontSize: 16
+            text: |
+              <p><span style="color:#B08A3E;"><strong>●</strong></span></p>
+          fill: {type: solid, color: "$goldSoft"}
+      - - content: {text: 本地优先隐私架构, fontSize: 15}
+        - content: {text: ◐, fontSize: 15, color: "#6B7186"}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content: {text: —, fontSize: 15, color: "#9AA0B0"}
+        - content:
+            fontSize: 16
+            text: |
+              <p><span style="color:#B08A3E;"><strong>●</strong></span></p>
+          fill: {type: solid, color: "$goldSoft"}
+  - elementId: verdict
+    elementType: text
+    bounds: [80, 592, 1120, 30]
+    content:
+      fontSize: 20
+      color: "$ink"
+      fontFamily: "siyuanSongti"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>别人解决的是记录、娱乐或聊天。LifeFork 解决的是「看清选择」。</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>12 / 14</p>

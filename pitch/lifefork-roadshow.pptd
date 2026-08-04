@@ -1,0 +1,73 @@
+title: LifeFork 人生岔路 · 公测路演
+size: [1280, 720]
+theme:
+  colors:
+    paper: "#F7F4EE"
+    paperRaised: "#FCFAF6"
+    ink: "#232A3D"
+    muted: "#6B7186"
+    faint: "#9AA0B0"
+    line: "#D8D5CC"
+    gold: "#B08A3E"
+    goldSoft: "#F0E8D8"
+    violet: "#7B5EA7"
+    blue: "#3D5A99"
+    map: "#1D2333"
+    mapDeep: "#161B29"
+    mapLine: "#3A4358"
+    mapText: "#EDEAE2"
+    mapMuted: "#9BA3B5"
+  textStyles:
+    kicker:
+      fontSize: 13
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      letterSpacing: 4
+    title:
+      fontSize: 32
+      color: "$ink"
+      fontFamily: "siyuanSongti"
+    titleDark:
+      fontSize: 32
+      color: "$mapText"
+      fontFamily: "siyuanSongti"
+    body:
+      fontSize: 18
+      color: "$ink"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+    small:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.45
+    number:
+      fontSize: 52
+      color: "$ink"
+      fontFamily: "Liter, MiSans"
+  tableStyles:
+    default:
+      headerFill: "$ink"
+      headerColor: "#F7F4EE"
+      headerBold: true
+      bodyFill: ["#FCFAF6", "#F3EFE6"]
+      bodyColor: "$ink"
+      border:
+        style: solid
+        width: 1
+        color: "$line"
+pages:
+  - pages/p01_cover.page
+  - pages/p02_problem.page
+  - pages/p03_solution.page
+  - pages/p04_journey.page
+  - pages/p05_selfskill.page
+  - pages/p06_lifemap.page
+  - pages/p07_evidence.page
+  - pages/p08_dialogue.page
+  - pages/p09_trust.page
+  - pages/p10_market.page
+  - pages/p11_model.page
+  - pages/p12_competition.page
+  - pages/p13_roadmap.page
+  - pages/p14_final.page

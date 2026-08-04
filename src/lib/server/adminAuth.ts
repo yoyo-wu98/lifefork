@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   createHmac,
+  randomBytes,
   timingSafeEqual,
 } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
@@ -12,12 +13,25 @@ import {
 
 const ADMIN_COOKIE = "lifefork_admin";
 const COOKIE_MAX_AGE = 8 * 60 * 60;
+const LOCAL_DEV_SECRET = "lifefork-local-development-secret-change-before-deploy";
+
+function isProductionRuntime() {
+  return process.env.NODE_ENV === "production";
+}
+
+// Production instances without a configured secret get a random per-process
+// secret instead of the public hardcoded one, so the admin token cannot be
+// forged offline. Admins simply log in again after a restart.
+const ephemeralSecret = randomBytes(32).toString("hex");
 
 function signingSecret() {
-  return (
-    readServerEnvironment("LIFEFORK_SESSION_SECRET") ||
-    "lifefork-local-development-secret-change-before-deploy"
-  );
+  const configured = readServerEnvironment("LIFEFORK_SESSION_SECRET");
+  if (configured) return configured;
+  return isProductionRuntime() ? ephemeralSecret : LOCAL_DEV_SECRET;
+}
+
+export function sessionSecretIsEphemeral() {
+  return !readServerEnvironment("LIFEFORK_SESSION_SECRET") && isProductionRuntime();
 }
 
 function expectedAdminToken() {

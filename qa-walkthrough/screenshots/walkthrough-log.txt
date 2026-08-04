@@ -1,0 +1,33 @@
+[06:53:11] 首页加载 551ms
+[06:53:11] 截图 01-landing-desktop.png
+[06:53:11] 首页 H1: LifeFork / 人生岔路
+[06:53:11] 首页横向溢出: false
+[06:53:11] 截图 02-question-1.png
+[06:53:12] 刷新后当前文本域: question-pastNode，内容长度: 0（预期恢复到第一个未答问题）
+[06:53:13] 截图 03-questions-done.png
+[06:53:13] 截图 04-wechat-step.png
+[06:53:13] 截图 05-extra-text.png
+[06:53:13] 截图 06-methods.png
+[06:53:13] 生成按钮初始禁用: false
+[06:53:13] 截图 07-methods-bottom.png
+[06:53:14] 截图 08-generating.png
+[06:54:44] ⚠ 等待 SelfSkill 超时
+[06:54:45] 生成耗时: 91575ms
+[06:54:45] 截图 09-self-skill-top.png
+[06:54:45] 截图 10-self-skill-mid.png
+[06:54:45] 截图 11-self-skill-bottom.png
+[06:54:46] 截图 12-timeline.png
+[06:54:47] 截图 13-map-overview.png
+[06:54:47] 地图页面按钮数量: 34
+[06:54:48] 截图 14-map-node-selected.png
+[06:54:49] 截图 15-map-focus-1.png
+[06:54:50] 截图 16-map-focus-2.png
+[06:54:50] 尺度按钮数量: 0
+[06:54:50] 对话入口按钮数量: 0
+[06:54:50] localStorage 键:
+  lifefork.analysisSettings: 1320 chars
+  lifefork.extraText: 44 chars
+  lifefork.answers: 254 chars
+  lifefork.selfSkill: 86597 chars
+[06:54:52] 截图 22-demo-scenario-map.png
+[06:54:52] 浏览器 console 错误: 0 个

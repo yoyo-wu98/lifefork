@@ -73,7 +73,7 @@ export function Landing() {
           </span>
           <span className="inline-flex items-center gap-2">
             <Server className="size-4 text-blue" aria-hidden="true" />
-            AI 密钥只保存在服务器
+            你的回答不会被用于训练，仅用于本次分析
           </span>
           <span className="inline-flex items-center gap-2">
             <ShieldCheck className="size-4 text-blue" aria-hidden="true" />

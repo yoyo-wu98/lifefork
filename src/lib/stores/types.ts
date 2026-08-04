@@ -59,6 +59,7 @@ export interface InputSlice {
 export interface SelfSkillSlice {
   selfSkill: SelfSkill | null;
   isGenerating: boolean;
+  lastGenerationSource: "ai" | "local" | null;
   createSkill: () => Promise<void>;
   tuneVoice: (note: string) => void;
   setTimelineNodes: (nodes: TimelineNode[]) => void;
@@ -75,6 +76,7 @@ export interface ForkSlice {
 export interface ChatSlice {
   messages: ChatMessage[];
   isChatResponding: boolean;
+  chatRateLimitedUntil: number | null;
   setMessages: (msgs: ChatMessage[]) => void;
   sendMessage: (content: string) => Promise<void>;
 }

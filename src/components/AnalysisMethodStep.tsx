@@ -81,6 +81,19 @@ export function AnalysisMethodStep() {
         (!ziweiEnabled || birth.gender === "female" || birth.gender === "male"),
     );
 
+  const birthBlockers: string[] = [];
+  if (culturalEnabled) {
+    if (!birth?.date) birthBlockers.push("请填写出生日期");
+    if (!birth?.time) birthBlockers.push("请填写出生时间");
+    if (birth?.timeAccuracy === "unknown") {
+      birthBlockers.push("「不知道」时辰无法排八字/紫微，请改选「误差在两小时内」，或关闭这两项方法");
+    }
+    if (ziweiEnabled && birth?.gender !== "female" && birth?.gender !== "male") {
+      birthBlockers.push("紫微斗数排盘需要选择「女」或「男」性别规则，或关闭紫微斗数");
+    }
+    if (!birth?.consentToProcess) birthBlockers.push("请勾选出生信息处理同意");
+  }
+
   const setBirth = <K extends keyof BirthProfile>(key: K, value: BirthProfile[K]) => {
     setSettings({
       ...settings,
@@ -357,10 +370,12 @@ export function AnalysisMethodStep() {
                 </span>
               </label>
 
-              {!birthReady && (
-                <p className="mt-3 text-xs font-medium text-red-700" role="alert">
-                  请补全出生日期、时间准确度和处理同意。启用紫微斗数时还需选择排盘性别规则。
-                </p>
+              {!birthReady && birthBlockers.length > 0 && (
+                <ul className="mt-3 space-y-1 text-xs font-medium text-red-700" role="alert">
+                  {birthBlockers.map((blocker) => (
+                    <li key={blocker}>• {blocker}</li>
+                  ))}
+                </ul>
               )}
             </section>
           )}
@@ -386,13 +401,22 @@ export function AnalysisMethodStep() {
       </div>
 
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-night/10 pt-5">
-        <button
-          type="button"
-          onClick={() => setStep("extra-text")}
-          className="rounded-lg border border-night/15 px-5 py-2.5 text-sm text-ink hover:bg-deep"
-        >
-          返回补充材料
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setStep("extra-text")}
+            className="rounded-lg border border-night/15 px-5 py-2.5 text-sm text-ink hover:bg-deep"
+          >
+            返回补充材料
+          </button>
+          <button
+            type="button"
+            onClick={() => setStep("questions")}
+            className="rounded-lg border border-night/15 px-5 py-2.5 text-sm text-ink hover:bg-deep"
+          >
+            回到问卷修改答案
+          </button>
+        </div>
         <button
           type="button"
           disabled={!birthReady}

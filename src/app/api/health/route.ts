@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRuntimeConfig } from "@/lib/server/runtimeConfigStore";
 import { isSessionSecretConfigured } from "@/lib/server/publicSession";
+import { sessionSecretIsEphemeral } from "@/lib/server/adminAuth";
 import { readServerEnvironment } from "@/lib/server/environment";
 
 export async function GET() {
@@ -18,7 +19,11 @@ export async function GET() {
             ? "configured"
             : "fallback-only"
           : "disabled",
-        sessionSecret: isSessionSecretConfigured() ? "configured" : "development-fallback",
+        sessionSecret: isSessionSecretConfigured()
+          ? "configured"
+          : sessionSecretIsEphemeral()
+            ? "ephemeral-production-fallback"
+            : "development-fallback",
       },
     },
     {

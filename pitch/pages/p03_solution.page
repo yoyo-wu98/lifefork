@@ -1,0 +1,310 @@
+pageType: content
+background:
+  type: solid
+  color: "$paper"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>THE SOLUTION · 产品是什么</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$title"
+      wrap: false
+      text: |
+        <p>十分钟，五个问题，一张看得懂的人生地图</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: intro
+    elementType: text
+    bounds: [80, 166, 600, 120]
+    content:
+      style: "$body"
+      lineHeight: 1.6
+      text: |
+        <p>LifeFork 是一个自我分析与人生方案模拟产品，面向正在经历职业、关系、迁徙、创作或身份转折的成年人。回答五个核心问题，即可生成一份可编辑的 Self Skill，并由此展开时间线、人生地图与分支自我对话。</p>
+  - elementId: i1num
+    elementType: text
+    bounds: [80, 312, 48, 30]
+    content:
+      fontSize: 22
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      wrap: false
+      text: |
+        <p>01</p>
+  - elementId: i1title
+    elementType: text
+    bounds: [136, 312, 300, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>说清楚此刻</strong></p>
+  - elementId: i1desc
+    elementType: text
+    bounds: [136, 344, 544, 22]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>把模糊的焦虑，整理成可以描述的自我状态。</p>
+  - elementId: i2num
+    elementType: text
+    bounds: [80, 388, 48, 30]
+    content:
+      fontSize: 22
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      wrap: false
+      text: |
+        <p>02</p>
+  - elementId: i2title
+    elementType: text
+    bounds: [136, 388, 300, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>看见模式</strong></p>
+  - elementId: i2desc
+    elementType: text
+    bounds: [136, 420, 544, 22]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>反复出现的人生模式，连同证据一起呈现。</p>
+  - elementId: i3num
+    elementType: text
+    bounds: [80, 464, 48, 30]
+    content:
+      fontSize: 22
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      wrap: false
+      text: |
+        <p>03</p>
+  - elementId: i3title
+    elementType: text
+    bounds: [136, 464, 300, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>探索路径</strong></p>
+  - elementId: i3desc
+    elementType: text
+    bounds: [136, 496, 544, 22]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>比较不同时间尺度下的收益、代价与行动实验。</p>
+  - elementId: i4num
+    elementType: text
+    bounds: [80, 540, 48, 30]
+    content:
+      fontSize: 22
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      wrap: false
+      text: |
+        <p>04</p>
+  - elementId: i4title
+    elementType: text
+    bounds: [136, 540, 300, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>与自己对话</strong></p>
+  - elementId: i4desc
+    elementType: text
+    bounds: [136, 572, 544, 22]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>和过去、未来、未选择路径中的自己交谈。</p>
+  - elementId: panel
+    elementType: shape
+    bounds: [720, 166, 480, 428]
+    shapeName: rect
+    fill: {type: solid, color: "$map"}
+  - elementId: panelLabel
+    elementType: text
+    bounds: [752, 194, 240, 18]
+    content:
+      fontSize: 13
+      color: "$gold"
+      fontFamily: "MiSans"
+      letterSpacing: 3
+      wrap: false
+      text: |
+        <p>产品闭环</p>
+  - elementId: panelLine
+    elementType: shape
+    bounds: [766, 246, 0, 220]
+    shapeName: straightConnector1
+    border: {style: solid, width: 1.5, color: "$mapLine"}
+  - elementId: pn1
+    elementType: shape
+    bounds: [758, 238, 16, 16]
+    shapeName: ellipse
+    fill: {type: solid, color: "$map"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: pt1
+    elementType: text
+    bounds: [792, 234, 400, 24]
+    content:
+      fontSize: 17
+      color: "$mapText"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>五个核心问题</strong></p>
+  - elementId: ps1
+    elementType: text
+    bounds: [792, 260, 400, 18]
+    content:
+      fontSize: 13
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>十分钟 · 对话式提问 · 可选补充材料</p>
+  - elementId: pn2
+    elementType: shape
+    bounds: [758, 310, 16, 16]
+    shapeName: ellipse
+    fill: {type: solid, color: "$map"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: pt2
+    elementType: text
+    bounds: [792, 306, 400, 24]
+    content:
+      fontSize: 17
+      color: "$mapText"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>Self Skill 自我档案</strong></p>
+  - elementId: ps2
+    elementType: text
+    bounds: [792, 332, 400, 18]
+    content:
+      fontSize: 13
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>可编辑 · 可删除 · 可导出 JSON</p>
+  - elementId: pn3
+    elementType: shape
+    bounds: [758, 382, 16, 16]
+    shapeName: ellipse
+    fill: {type: solid, color: "$map"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: pt3
+    elementType: text
+    bounds: [792, 378, 400, 24]
+    content:
+      fontSize: 17
+      color: "$mapText"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>时间线 × 人生地图</strong></p>
+  - elementId: ps3
+    elementType: text
+    bounds: [792, 404, 400, 18]
+    content:
+      fontSize: 13
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>八级时间尺度 · 收益 / 代价 / 未知</p>
+  - elementId: pn4
+    elementType: shape
+    bounds: [758, 454, 16, 16]
+    shapeName: ellipse
+    fill: {type: solid, color: "$map"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: pt4
+    elementType: text
+    bounds: [792, 450, 400, 24]
+    content:
+      fontSize: 17
+      color: "$mapText"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>分支自我对话</strong></p>
+  - elementId: ps4
+    elementType: text
+    bounds: [792, 476, 400, 18]
+    content:
+      fontSize: 13
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>与另一个自己交谈 · 持续校准语气</p>
+  - elementId: panelNote
+    elementType: text
+    bounds: [752, 540, 416, 18]
+    content:
+      fontSize: 13
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>无需注册 · 数据保存在本地浏览器 · 断网可用核心流程</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>03 / 14</p>

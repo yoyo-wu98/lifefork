@@ -1,0 +1,220 @@
+pageType: content
+background:
+  type: solid
+  color: "$paper"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>BUSINESS MODEL · 商业化</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$title"
+      wrap: false
+      text: |
+        <p>免费建立信任，订阅与 B 端兑现价值</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: f1band
+    elementType: shape
+    bounds: [80, 170, 352, 6]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: f1card
+    elementType: shape
+    bounds: [80, 176, 352, 380]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: f1title
+    elementType: text
+    bounds: [104, 200, 304, 28]
+    content:
+      fontSize: 21
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>免费层 · 获客引擎</strong></p>
+  - elementId: f1sub
+    elementType: text
+    bounds: [104, 234, 304, 18]
+    content:
+      fontSize: 13
+      color: "$gold"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>公测阶段全部免费</p>
+  - elementId: f1list
+    elementType: text
+    bounds: [104, 272, 304, 200]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.7
+      text: |
+        <p>· 核心体验全量开放</p>
+        <p>· 五问 / Self Skill / 地图 / 对话</p>
+        <p>· 用完整体验换口碑传播</p>
+        <p>· 目标：留存与使用习惯</p>
+  - elementId: f1tag
+    elementType: text
+    bounds: [104, 500, 304, 22]
+    content:
+      fontSize: 15
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>当前：全量开放中</strong></p>
+  - elementId: f2band
+    elementType: shape
+    bounds: [464, 170, 352, 6]
+    shapeName: rect
+    fill: {type: solid, color: "$violet"}
+  - elementId: f2card
+    elementType: shape
+    bounds: [464, 176, 352, 380]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: f2title
+    elementType: text
+    bounds: [488, 200, 304, 28]
+    content:
+      fontSize: 21
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>订阅层 · 价值变现</strong></p>
+  - elementId: f2sub
+    elementType: text
+    bounds: [488, 234, 304, 18]
+    content:
+      fontSize: 13
+      color: "$violet"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>面向长期自我探索者</p>
+  - elementId: f2list
+    elementType: text
+    bounds: [488, 272, 304, 200]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.7
+      text: |
+        <p>· 跨设备同步与长期档案</p>
+        <p>· 更深分析、更多分支推演</p>
+        <p>· 年度人生报告</p>
+        <p>· 对标冥想 / 日记类产品订阅</p>
+  - elementId: f2tag
+    elementType: text
+    bounds: [488, 500, 304, 22]
+    content:
+      fontSize: 15
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>V1.0 启动</strong></p>
+  - elementId: f3band
+    elementType: shape
+    bounds: [848, 170, 352, 6]
+    shapeName: rect
+    fill: {type: solid, color: "$blue"}
+  - elementId: f3card
+    elementType: shape
+    bounds: [848, 176, 352, 380]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: f3title
+    elementType: text
+    bounds: [872, 200, 304, 28]
+    content:
+      fontSize: 21
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>B 端 · 规模放大</strong></p>
+  - elementId: f3sub
+    elementType: text
+    bounds: [872, 234, 304, 18]
+    content:
+      fontSize: 13
+      color: "$blue"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>面向机构与组织</p>
+  - elementId: f3list
+    elementType: text
+    bounds: [872, 272, 304, 200]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.7
+      text: |
+        <p>· 高校心理中心 / 企业 EAP</p>
+        <p>· 咨询机构的自助探索工具</p>
+        <p>· 匿名化 API 与团体洞察</p>
+        <p>· 不触碰个人原始数据</p>
+  - elementId: f3tag
+    elementType: text
+    bounds: [872, 500, 304, 22]
+    content:
+      fontSize: 15
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>V2.0 落地</strong></p>
+  - elementId: modelNote
+    elementType: text
+    bounds: [80, 600, 1120, 22]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>公测阶段优先验证留存与口碑；订阅与 B 端在 V1.0 之后启动，不牺牲免费层的完整体验。</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>11 / 14</p>

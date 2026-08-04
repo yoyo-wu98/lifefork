@@ -12,7 +12,13 @@ export function ExtraTextStep() {
   const extraText = useLifeforkStore((s) => s.extraText);
   const setExtraText = useLifeforkStore((s) => s.setExtraText);
   const setStep = useLifeforkStore((s) => s.setStep);
+  const editorConfig = useLifeforkStore((s) => s.editorConfig);
+  const runtimeConfig = useLifeforkStore((s) => s.runtimeConfig);
   const limit = AI_TOKEN_BUDGETS.selfSkill.maxInputChars.extraText;
+  const backStep =
+    editorConfig.features.wechatImport && runtimeConfig.features.wechatImport
+      ? "wechat-import"
+      : "questions";
 
   return (
     <section className="space-y-5 rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-5 shadow-sm">
@@ -37,13 +43,23 @@ export function ExtraTextStep() {
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
+          onClick={() => setStep(backStep)}
+          className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep"
+        >
+          上一步
+        </button>
+        <button
+          type="button"
           onClick={() => {
-            setExtraText("");
+            if (extraText.trim()) {
+              // Keep what the user wrote — generation can still use it next time.
+              // Only the step advances; content stays in the browser.
+            }
             setStep("methods");
           }}
           className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep"
         >
-          跳过
+          跳过此步
         </button>
         <button
           type="button"

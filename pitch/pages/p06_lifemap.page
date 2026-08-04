@@ -1,0 +1,321 @@
+pageType: content
+background:
+  type: solid
+  color: "$map"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>INNOVATION 02 · 交互发明</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$titleDark"
+      wrap: false
+      text: |
+        <p>人生地图：从一生到一小时，自由缩放</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: chip1
+    elementType: shape
+    bounds: [80, 172, 116, 42]
+    shapeName: rect
+    fill: {type: solid, color: "$mapDeep"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: chip1t
+    elementType: text
+    bounds: [80, 183, 116, 20]
+    content:
+      fontSize: 15
+      color: "$mapText"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>全人生</p>
+  - elementId: ca1
+    elementType: shape
+    bounds: [199, 193, 20, 0]
+    shapeName: straightConnector1
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 1.5, color: "$mapLine"}
+  - elementId: chip2
+    elementType: shape
+    bounds: [222, 172, 116, 42]
+    shapeName: rect
+    fill: {type: solid, color: "$mapDeep"}
+    border: {style: solid, width: 1, color: "$mapLine"}
+  - elementId: chip2t
+    elementType: text
+    bounds: [222, 183, 116, 20]
+    content:
+      fontSize: 15
+      color: "$mapText"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>十年</p>
+  - elementId: ca2
+    elementType: shape
+    bounds: [341, 193, 20, 0]
+    shapeName: straightConnector1
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 1.5, color: "$mapLine"}
+  - elementId: chip3
+    elementType: shape
+    bounds: [364, 172, 116, 42]
+    shapeName: rect
+    fill: {type: solid, color: "$mapDeep"}
+    border: {style: solid, width: 1, color: "$mapLine"}
+  - elementId: chip3t
+    elementType: text
+    bounds: [364, 183, 116, 20]
+    content:
+      fontSize: 15
+      color: "$mapText"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>阶段</p>
+  - elementId: ca3
+    elementType: shape
+    bounds: [483, 193, 20, 0]
+    shapeName: straightConnector1
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 1.5, color: "$mapLine"}
+  - elementId: chip4
+    elementType: shape
+    bounds: [506, 172, 116, 42]
+    shapeName: rect
+    fill: {type: solid, color: "$mapDeep"}
+    border: {style: solid, width: 1, color: "$mapLine"}
+  - elementId: chip4t
+    elementType: text
+    bounds: [506, 183, 116, 20]
+    content:
+      fontSize: 15
+      color: "$mapText"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>一年</p>
+  - elementId: ca4
+    elementType: shape
+    bounds: [625, 193, 20, 0]
+    shapeName: straightConnector1
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 1.5, color: "$mapLine"}
+  - elementId: chip5
+    elementType: shape
+    bounds: [648, 172, 116, 42]
+    shapeName: rect
+    fill: {type: solid, color: "$mapDeep"}
+    border: {style: solid, width: 1, color: "$mapLine"}
+  - elementId: chip5t
+    elementType: text
+    bounds: [648, 183, 116, 20]
+    content:
+      fontSize: 15
+      color: "$mapText"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>一月</p>
+  - elementId: ca5
+    elementType: shape
+    bounds: [767, 193, 20, 0]
+    shapeName: straightConnector1
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 1.5, color: "$mapLine"}
+  - elementId: chip6
+    elementType: shape
+    bounds: [790, 172, 116, 42]
+    shapeName: rect
+    fill: {type: solid, color: "$mapDeep"}
+    border: {style: solid, width: 1, color: "$mapLine"}
+  - elementId: chip6t
+    elementType: text
+    bounds: [790, 183, 116, 20]
+    content:
+      fontSize: 15
+      color: "$mapText"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>一周</p>
+  - elementId: ca6
+    elementType: shape
+    bounds: [909, 193, 20, 0]
+    shapeName: straightConnector1
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 1.5, color: "$mapLine"}
+  - elementId: chip7
+    elementType: shape
+    bounds: [932, 172, 116, 42]
+    shapeName: rect
+    fill: {type: solid, color: "$mapDeep"}
+    border: {style: solid, width: 1, color: "$mapLine"}
+  - elementId: chip7t
+    elementType: text
+    bounds: [932, 183, 116, 20]
+    content:
+      fontSize: 15
+      color: "$mapText"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>一天</p>
+  - elementId: ca7
+    elementType: shape
+    bounds: [1051, 193, 20, 0]
+    shapeName: straightConnector1
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 1.5, color: "$mapLine"}
+  - elementId: chip8
+    elementType: shape
+    bounds: [1074, 172, 116, 42]
+    shapeName: rect
+    fill: {type: solid, color: "$mapDeep"}
+    border: {style: solid, width: 1.5, color: "$violet"}
+  - elementId: chip8t
+    elementType: text
+    bounds: [1074, 183, 116, 20]
+    content:
+      fontSize: 15
+      color: "$mapText"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>一小时</p>
+  - elementId: pr1title
+    elementType: text
+    bounds: [80, 240, 352, 26]
+    content:
+      fontSize: 19
+      color: "$mapText"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>一处数据，一个实体</strong></p>
+  - elementId: pr1desc
+    elementType: text
+    bounds: [80, 272, 352, 46]
+    content:
+      fontSize: 14
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>同一个人生节点只有一种视觉表示，随尺度形变，绝不重复出现。</p>
+  - elementId: pr2title
+    elementType: text
+    bounds: [464, 240, 352, 26]
+    content:
+      fontSize: 19
+      color: "$mapText"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>渐进披露复杂度</strong></p>
+  - elementId: pr2desc
+    elementType: text
+    bounds: [464, 272, 352, 46]
+    content:
+      fontSize: 14
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>宏观尺度只看主线，放大逐级揭示子节点。默认可见节点不超过 24 个。</p>
+  - elementId: pr3title
+    elementType: text
+    bounds: [848, 240, 352, 26]
+    content:
+      fontSize: 19
+      color: "$mapText"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>焦点即叙事</strong></p>
+  - elementId: pr3desc
+    elementType: text
+    bounds: [848, 272, 352, 46]
+    content:
+      fontSize: 14
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>点击改变焦点，连线高亮当前关系，其余降噪，镜头平滑跟随。</p>
+  - elementId: mapCap
+    elementType: text
+    bounds: [80, 348, 700, 16]
+    content:
+      fontSize: 12
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>产品实拍 · 人生地图（全人生尺度 · 自动聚焦）</p>
+  - elementId: mapShot
+    elementType: image
+    bounds: [80, 374, 1120, 207]
+    src: /Users/yoyow/Downloads/lifefork/pitch/images/map-strip.jpg
+    fit: {mode: cover}
+    border: {style: solid, width: 1, color: "$mapLine"}
+  - elementId: mapNote1
+    elementType: text
+    bounds: [80, 606, 540, 40]
+    content:
+      fontSize: 14
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+      text: |
+        <p><span style="color:$gold;">金色主线</span>为已走过的路径，节点同时标注时间尺度与状态；滚轮缩放只改变镜头与语义尺度，节点拓扑不重排。</p>
+  - elementId: mapNote2
+    elementType: text
+    bounds: [700, 606, 500, 40]
+    content:
+      fontSize: 14
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+      text: |
+        <p>点击节点查看收益、代价与生成依据；双击在单节点、父子同屏、子节点同屏之间循环切换。</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$mapMuted"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>06 / 14</p>

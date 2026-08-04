@@ -58,7 +58,7 @@ export default function HomePage() {
   // ── Progress (derived) ───────────────────────────────────────────
   const progressMap: Record<string, number> = {
     landing: 0,
-    questions: 30,
+    questions: 0,
     "wechat-import": 40,
     "extra-text": 45,
     methods: 52,
@@ -70,7 +70,13 @@ export default function HomePage() {
     share: 100,
     editor: 100,
   };
-  const progress = progressMap[step] ?? 0;
+  const answers = useLifeforkStore((s) => s.answers);
+  const answeredCount = step === "questions"
+    ? Object.values(answers).filter((a) => a.trim()).length
+    : 5;
+  const progress = step === "questions"
+    ? Math.round(10 + (answeredCount / 5) * 30)
+    : (progressMap[step] ?? 0);
   const missingSkill = ["self-skill", "timeline", "forks", "chat", "share"].includes(step) && !selfSkill;
   const missingFork = ["chat", "share"].includes(step) && !selectedFork;
 

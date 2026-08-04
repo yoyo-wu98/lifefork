@@ -185,7 +185,7 @@ export function parseChatRequest(value: unknown): SchemaResult<ChatRequest> {
       forkFutureSelfVoice: truncateForPrompt(stringValue(record.data.forkFutureSelfVoice), 300),
       voiceProfile: truncateForPrompt(stringValue(record.data.voiceProfile), budget.voiceProfile),
       stageVoice: truncateForPrompt(stringValue(record.data.stageVoice), budget.stageVoice),
-      calibrationNotes: stringArray(record.data.calibrationNotes).slice(0, 8),
+      calibrationNotes: stringArray(record.data.calibrationNotes).slice(-8),
       conversationHistory: truncateForPrompt(stringValue(record.data.conversationHistory), budget.conversationHistory),
       userMessage,
     },

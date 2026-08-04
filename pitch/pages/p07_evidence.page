@@ -1,0 +1,202 @@
+pageType: content
+background:
+  type: solid
+  color: "$paper"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>INNOVATION 03 · 信任工程</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$title"
+      wrap: false
+      text: |
+        <p>证据优先：每条结论都能回答「为什么」</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: chainLine
+    elementType: shape
+    bounds: [96, 190, 0, 380]
+    shapeName: straightConnector1
+    border: {style: solid, width: 1.5, color: "$line"}
+  - elementId: st1n
+    elementType: shape
+    bounds: [89, 183, 14, 14]
+    shapeName: ellipse
+    fill: {type: solid, color: "$paper"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: st1t
+    elementType: text
+    bounds: [122, 180, 340, 24]
+    content:
+      fontSize: 17
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>结论</strong> · 它说了什么</p>
+  - elementId: st2n
+    elementType: shape
+    bounds: [89, 247, 14, 14]
+    shapeName: ellipse
+    fill: {type: solid, color: "$paper"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: st2t
+    elementType: text
+    bounds: [122, 244, 340, 24]
+    content:
+      fontSize: 17
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>方法</strong> · 用了哪类分析</p>
+  - elementId: st3n
+    elementType: shape
+    bounds: [89, 311, 14, 14]
+    shapeName: ellipse
+    fill: {type: solid, color: "$paper"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: st3t
+    elementType: text
+    bounds: [122, 308, 340, 24]
+    content:
+      fontSize: 17
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>权重</strong> · 用户自己调的比例</p>
+  - elementId: st4n
+    elementType: shape
+    bounds: [89, 375, 14, 14]
+    shapeName: ellipse
+    fill: {type: solid, color: "$paper"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: st4t
+    elementType: text
+    bounds: [122, 372, 340, 24]
+    content:
+      fontSize: 17
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>参考度</strong> · 这次有多可信</p>
+  - elementId: st5n
+    elementType: shape
+    bounds: [89, 439, 14, 14]
+    shapeName: ellipse
+    fill: {type: solid, color: "$paper"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: st5t
+    elementType: text
+    bounds: [122, 436, 340, 24]
+    content:
+      fontSize: 17
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>依据</strong> · 对应哪段材料</p>
+  - elementId: st6n
+    elementType: shape
+    bounds: [89, 503, 14, 14]
+    shapeName: ellipse
+    fill: {type: solid, color: "$paper"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: st6t
+    elementType: text
+    bounds: [122, 500, 340, 24]
+    content:
+      fontSize: 17
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>限制</strong> · 它不知道什么</p>
+  - elementId: st7n
+    elementType: shape
+    bounds: [89, 567, 14, 14]
+    shapeName: ellipse
+    fill: {type: solid, color: "$gold"}
+  - elementId: st7t
+    elementType: text
+    bounds: [122, 564, 340, 24]
+    content:
+      fontSize: 17
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>可修正</strong> · 用户能否反驳</p>
+  - elementId: rightPara
+    elementType: text
+    bounds: [520, 172, 680, 76]
+    content:
+      style: "$body"
+      lineHeight: 1.6
+      text: |
+        <p>大多数 AI 产品要求你信任黑盒。LifeFork 反其道而行：每条输出都公开自己的配方，并允许你当场反驳。</p>
+  - elementId: shotForks
+    elementType: image
+    bounds: [520, 268, 680, 269]
+    src: /Users/yoyow/Downloads/lifefork/pitch/images/forks-detail.jpg
+    fit: {mode: cover}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: shotForksCap
+    elementType: text
+    bounds: [520, 545, 680, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>产品实拍 · 方案详情：参考度、判断依据、预期收益、成本与状态变化同屏呈现</p>
+  - elementId: quoteBar
+    elementType: shape
+    bounds: [520, 587, 3, 56]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: quote
+    elementType: text
+    bounds: [542, 579, 658, 72]
+    content:
+      fontSize: 24
+      color: "$ink"
+      fontFamily: "siyuanSongti"
+      lineHeight: 1.5
+      text: |
+        <p>我们不预测未来。我们呈现选择的结构，把最终解释权还给用户。</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>07 / 14</p>

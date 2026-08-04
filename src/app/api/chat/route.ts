@@ -38,41 +38,6 @@ function compactReply(reply: string, maxChars = 180): string {
   return boundary >= 100 ? candidate.slice(0, boundary + 1) : `${candidate.slice(0, maxChars - 1)}…`;
 }
 
-const VOICE_MARKERS = ["说白了", "其实", "总觉得", "直接说", "说实话"] as const;
-
-function preferredVoiceMarker(
-  voiceProfile: string,
-  calibrationNotes: string[],
-): string | undefined {
-  const calibrationText = calibrationNotes.join(" ");
-  const calibrated = VOICE_MARKERS.find((marker) => calibrationText.includes(marker));
-  if (calibrated) return calibrated;
-  if (calibrationText.includes("更直接")) return "直接说";
-  if (calibrationText.includes("更口语") || calibrationText.includes("少一点AI味")) {
-    return "其实";
-  }
-
-  try {
-    const parsed = JSON.parse(voiceProfile) as { signaturePhrases?: unknown };
-    const phrases = Array.isArray(parsed.signaturePhrases)
-      ? parsed.signaturePhrases.filter((item): item is string => typeof item === "string")
-      : [];
-    return VOICE_MARKERS.find((marker) => phrases.some((phrase) => phrase.includes(marker)));
-  } catch {
-    return VOICE_MARKERS.find((marker) => voiceProfile.includes(marker));
-  }
-}
-
-function applyVoiceConstraint(
-  reply: string,
-  voiceProfile: string,
-  calibrationNotes: string[],
-): string {
-  if (VOICE_MARKERS.some((marker) => reply.includes(marker))) return reply;
-  const marker = preferredVoiceMarker(voiceProfile, calibrationNotes);
-  return marker ? `${marker}，${reply}` : reply;
-}
-
 export async function POST(request: NextRequest) {
   const { guard, blocked } = guardPublicApi(request, {
     bucket: "instance-chat",
@@ -187,11 +152,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         reply: compactReply(
-          applyVoiceConstraint(
-            response.data?.reply ?? localDialogueFallback(userMessage),
-            voiceProfile,
-            calibrationNotes,
-          ),
+          response.data?.reply ?? localDialogueFallback(userMessage),
         ),
         safetyIntercept: false,
       },
@@ -210,7 +171,7 @@ export async function POST(request: NextRequest) {
     return respond(
       {
         success: false,
-        error: "Failed to generate chat reply",
+        error: "这次回复生成失败，请稍后重试。",
         meta: {
           llmUsed: false,
           fallbackReason: "route_error",

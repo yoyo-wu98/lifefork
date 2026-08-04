@@ -1,0 +1,161 @@
+pageType: content
+background:
+  type: solid
+  color: "$map"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>MARKET · 市场机会</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$titleDark"
+      wrap: false
+      text: |
+        <p>500 亿市场，供给缺口肉眼可见</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: marketChart
+    elementType: chart
+    bounds: [80, 170, 560, 420]
+    type: bar
+    data:
+      - {year: "2022", size: 312}
+      - {year: "2023", size: 380}
+      - {year: "2024E", size: 430}
+      - {year: "2025E", size: 500}
+    x: year
+    y: [size]
+    names: ["市场规模"]
+    colors: ["#B08A3E"]
+    title: {text: "中国心理健康服务市场规模（亿元）", color: "#9BA3B5", fontSize: 14}
+    legend: false
+    dataLabels:
+      show: true
+      content: value
+      color: "#EDEAE2"
+      fontSize: 14
+    options:
+      barWidth: 0.5
+      fontFamily: "MiSans"
+    xAxis:
+      label: {color: "#9BA3B5", fontSize: 13}
+      axisLine: {style: solid, color: "#3A4358", width: 1}
+      gridLine: false
+    yAxis:
+      show: false
+  - elementId: m1num
+    elementType: text
+    bounds: [700, 178, 500, 56]
+    content:
+      fontSize: 46
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      wrap: false
+      text: |
+        <p>9500 万</p>
+  - elementId: m1label
+    elementType: text
+    bounds: [700, 240, 500, 22]
+    content:
+      fontSize: 15
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>国内泛心理问题人群规模</p>
+  - elementId: m2num
+    elementType: text
+    bounds: [700, 308, 500, 56]
+    content:
+      fontSize: 46
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      wrap: false
+      text: |
+        <p>+18%</p>
+  - elementId: m2label
+    elementType: text
+    bounds: [700, 370, 500, 22]
+    content:
+      fontSize: 15
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>市场年复合增长率（2023–2025E）</p>
+  - elementId: m3num
+    elementType: text
+    bounds: [700, 438, 500, 56]
+    content:
+      fontSize: 46
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      wrap: false
+      text: |
+        <p>22%</p>
+  - elementId: m3label
+    elementType: text
+    bounds: [700, 500, 500, 22]
+    content:
+      fontSize: 15
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>互联网心理健康服务增速，跑赢大盘</p>
+  - elementId: minsightBar
+    elementType: shape
+    bounds: [700, 556, 3, 44]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: minsight
+    elementType: text
+    bounds: [718, 552, 482, 52]
+    content:
+      fontSize: 16
+      color: "$mapText"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+      text: |
+        <p>LifeFork 切入心理咨询与泛娱乐之间的空白带：结构化自我探索。</p>
+  - elementId: source
+    elementType: text
+    bounds: [80, 648, 1000, 16]
+    content:
+      fontSize: 11
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>数据来源：观研天下（2025）、艾瑞咨询；市场规模为中国心理健康服务市场整体口径。</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$mapMuted"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>10 / 14</p>

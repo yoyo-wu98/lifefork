@@ -1,0 +1,8 @@
+
+> lifefork@0.8.0 start:3005
+> PORT=3005 HOSTNAME=0.0.0.0 node --env-file-if-exists=.env.local scripts/start-standalone.mjs
+
+▲ Next.js 16.2.12
+- Local:         http://localhost:3005
+- Network:       http://0.0.0.0:3005
+✓ Ready in 0ms

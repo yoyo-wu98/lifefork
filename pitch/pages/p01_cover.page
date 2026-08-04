@@ -1,0 +1,157 @@
+pageType: cover
+background:
+  type: solid
+  color: "$map"
+elements:
+  - elementId: brand
+    elementType: text
+    bounds: [80, 62, 420, 20]
+    content:
+      fontSize: 14
+      color: "$mapMuted"
+      fontFamily: "Liter, MiSans"
+      letterSpacing: 4
+      wrap: false
+      text: |
+        <p>LIFEFORK · 人生岔路</p>
+  - elementId: brandRight
+    elementType: text
+    bounds: [860, 62, 340, 20]
+    content:
+      fontSize: 13
+      color: "$mapMuted"
+      fontFamily: "Liter, MiSans"
+      letterSpacing: 3
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>PUBLIC BETA · 2026</p>
+  - elementId: titleMain
+    elementType: text
+    bounds: [80, 210, 900, 92]
+    content:
+      fontSize: 68
+      color: "$mapText"
+      fontFamily: "siyuanSongti"
+      wrap: false
+      text: |
+        <p>人生岔路</p>
+  - elementId: titleEn
+    elementType: text
+    bounds: [80, 316, 760, 30]
+    content:
+      fontSize: 20
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      letterSpacing: 6
+      wrap: false
+      text: |
+        <p>EVERY LIFE, WELL-EXAMINED.</p>
+  - elementId: tagline
+    elementType: text
+    bounds: [80, 370, 520, 34]
+    content:
+      fontSize: 22
+      color: "$mapText"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>为每个站在人生岔路口的人，画一张看得懂的地图</p>
+  - elementId: pathMain
+    elementType: shape
+    bounds: [80, 500, 560, 0]
+    shapeName: straightConnector1
+    border: {style: solid, width: 2.5, color: "$gold"}
+  - elementId: nodeStart
+    elementType: shape
+    bounds: [74, 494, 12, 12]
+    shapeName: ellipse
+    fill: {type: solid, color: "$gold"}
+  - elementId: nodeFork
+    elementType: shape
+    bounds: [632, 492, 16, 16]
+    shapeName: ellipse
+    fill: {type: solid, color: "$map"}
+    border: {style: solid, width: 2, color: "$gold"}
+  - elementId: branchUp
+    elementType: shape
+    bounds: [648, 400, 380, 100]
+    shapeName: straightConnector1
+    flip: [false, true]
+    border: {style: solid, width: 2, color: "$violet"}
+  - elementId: branchMid
+    elementType: shape
+    bounds: [648, 500, 380, 0]
+    shapeName: straightConnector1
+    border: {style: solid, width: 2, color: "$gold"}
+  - elementId: branchDown
+    elementType: shape
+    bounds: [648, 500, 380, 100]
+    shapeName: straightConnector1
+    border: {style: solid, width: 2, color: "$blue"}
+  - elementId: nodeEnd1
+    elementType: shape
+    bounds: [1022, 394, 12, 12]
+    shapeName: ellipse
+    fill: {type: solid, color: "$violet"}
+  - elementId: nodeEnd2
+    elementType: shape
+    bounds: [1022, 494, 12, 12]
+    shapeName: ellipse
+    fill: {type: solid, color: "$gold"}
+  - elementId: nodeEnd3
+    elementType: shape
+    bounds: [1022, 594, 12, 12]
+    shapeName: ellipse
+    fill: {type: solid, color: "$blue"}
+  - elementId: labelPast
+    elementType: text
+    bounds: [80, 516, 80, 18]
+    content:
+      fontSize: 12
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>过去</p>
+  - elementId: labelNow
+    elementType: text
+    bounds: [560, 522, 80, 18]
+    content:
+      fontSize: 12
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>此刻</p>
+  - elementId: labelFuture
+    elementType: text
+    bounds: [1044, 494, 160, 18]
+    content:
+      fontSize: 12
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>未来 × N</p>
+  - elementId: metaLeft
+    elementType: text
+    bounds: [80, 648, 620, 20]
+    content:
+      fontSize: 14
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>自我分析 · 人生方案模拟 · 分支自我对话</p>
+  - elementId: metaRight
+    elementType: text
+    bounds: [760, 650, 440, 18]
+    content:
+      fontSize: 12
+      color: "$mapMuted"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>lifefork-public-beta.poremansovir.chatgpt.site</p>

@@ -14,8 +14,32 @@ export const createForkSlice: LifeforkSlice<ForkSlice> = (set, get) => ({
   setPreviewForkId: (previewForkId) => set({ previewForkId }),
 
   selectFork: (path) => {
-    const { selfSkill } = get();
-    const messages: ChatMessage[] = [
+    const { selfSkill, selectedFork, messages } = get();
+
+    // Re-entering the same branch keeps the conversation instead of wiping it.
+    if (selectedFork?.id === path.id) {
+      set({ previewForkId: path.id, step: "chat" });
+      saveStep("chat");
+      return;
+    }
+
+    // Switching to a different branch with an active conversation asks first.
+    if (selectedFork && selectedFork.id !== path.id && messages.length > 1) {
+      get().requestConfirmation(
+        {
+          title: `切换到「${path.title}」？`,
+          message: `当前与「${selectedFork.title}」的对话记录（${messages.length} 条）会被替换。聊天记录无法跨方案保留。`,
+          confirmLabel: "切换方案",
+          tone: "default",
+        },
+        () => {
+          get().selectFork(path);
+        },
+      );
+      return;
+    }
+
+    const opening: ChatMessage[] = [
       {
         id: id(),
         role: "instance",
@@ -35,13 +59,13 @@ export const createForkSlice: LifeforkSlice<ForkSlice> = (set, get) => ({
     set({
       previewForkId: path.id,
       selectedFork: path,
-      messages,
+      messages: opening,
       badge: "方案回复",
       step: "chat",
     });
 
     saveSelectedFork(path);
-    saveChatMessages(messages);
+    saveChatMessages(opening);
     saveStep("chat");
   },
 });

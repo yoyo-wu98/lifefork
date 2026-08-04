@@ -1,0 +1,323 @@
+pageType: content
+background:
+  type: solid
+  color: "$paper"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>EXPERIENCE · 十分钟闭环</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$title"
+      wrap: false
+      text: |
+        <p>从回答到对话：第一次使用就走完全程</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: card1
+    elementType: shape
+    bounds: [80, 170, 263, 300]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: c1num
+    elementType: text
+    bounds: [104, 194, 60, 44]
+    content:
+      fontSize: 40
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      wrap: false
+      text: |
+        <p>1</p>
+  - elementId: c1title
+    elementType: text
+    bounds: [104, 248, 215, 26]
+    content:
+      fontSize: 20
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>回答五问</strong></p>
+  - elementId: c1desc
+    elementType: text
+    bounds: [104, 284, 215, 120]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>每次只问一个问题，十分钟内完成。可追加灵感标签、补充日记或微信脱敏摘要。</p>
+  - elementId: c1chip
+    elementType: shape
+    bounds: [104, 424, 56, 26]
+    shapeName: rect
+    fill: {type: solid, color: "$goldSoft"}
+  - elementId: c1chipText
+    elementType: text
+    bounds: [104, 429, 56, 16]
+    content:
+      fontSize: 12
+      color: "$gold"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>输入</p>
+  - elementId: arrow1
+    elementType: shape
+    bounds: [346, 320, 18, 0]
+    shapeName: straightConnector1
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 1.5, color: "$faint"}
+  - elementId: card2
+    elementType: shape
+    bounds: [367, 170, 263, 300]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: c2num
+    elementType: text
+    bounds: [391, 194, 60, 44]
+    content:
+      fontSize: 40
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      wrap: false
+      text: |
+        <p>2</p>
+  - elementId: c2title
+    elementType: text
+    bounds: [391, 248, 215, 26]
+    content:
+      fontSize: 20
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>生成 Self Skill</strong></p>
+  - elementId: c2desc
+    elementType: text
+    bounds: [391, 284, 215, 120]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>本地规则与服务器 AI 协同，产出可编辑的自我画像与阶段时间线。</p>
+  - elementId: c2chip
+    elementType: shape
+    bounds: [391, 424, 56, 26]
+    shapeName: rect
+    fill: {type: solid, color: "$goldSoft"}
+  - elementId: c2chipText
+    elementType: text
+    bounds: [391, 429, 56, 16]
+    content:
+      fontSize: 12
+      color: "$gold"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>沉淀</p>
+  - elementId: arrow2
+    elementType: shape
+    bounds: [633, 320, 18, 0]
+    shapeName: straightConnector1
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 1.5, color: "$faint"}
+  - elementId: card3
+    elementType: shape
+    bounds: [654, 170, 263, 300]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: c3num
+    elementType: text
+    bounds: [678, 194, 60, 44]
+    content:
+      fontSize: 40
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      wrap: false
+      text: |
+        <p>3</p>
+  - elementId: c3title
+    elementType: text
+    bounds: [678, 248, 215, 26]
+    content:
+      fontSize: 20
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>打开人生地图</strong></p>
+  - elementId: c3desc
+    elementType: text
+    bounds: [678, 284, 215, 120]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>八级时间尺度自由缩放，每条分支标注收益、代价与未知因素。</p>
+  - elementId: c3chip
+    elementType: shape
+    bounds: [678, 424, 56, 26]
+    shapeName: rect
+    fill: {type: solid, color: "$goldSoft"}
+  - elementId: c3chipText
+    elementType: text
+    bounds: [678, 429, 56, 16]
+    content:
+      fontSize: 12
+      color: "$gold"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>探索</p>
+  - elementId: arrow3
+    elementType: shape
+    bounds: [920, 320, 18, 0]
+    shapeName: straightConnector1
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 1.5, color: "$faint"}
+  - elementId: card4
+    elementType: shape
+    bounds: [941, 170, 263, 300]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: c4num
+    elementType: text
+    bounds: [965, 194, 60, 44]
+    content:
+      fontSize: 40
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      wrap: false
+      text: |
+        <p>4</p>
+  - elementId: c4title
+    elementType: text
+    bounds: [965, 248, 215, 26]
+    content:
+      fontSize: 20
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>分支自我对话</strong></p>
+  - elementId: c4desc
+    elementType: text
+    bounds: [965, 284, 215, 120]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>与任一分支下的模拟自我交谈，持续校准它的说话方式与判断。</p>
+  - elementId: c4chip
+    elementType: shape
+    bounds: [965, 424, 56, 26]
+    shapeName: rect
+    fill: {type: solid, color: "$goldSoft"}
+  - elementId: c4chipText
+    elementType: text
+    bounds: [965, 429, 56, 16]
+    content:
+      fontSize: 12
+      color: "$gold"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>对话</p>
+  - elementId: proofDivider
+    elementType: shape
+    bounds: [80, 512, 1120, 0]
+    shapeName: straightConnector1
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: p1icon
+    elementType: icon
+    bounds: [80, 540, 22, 22]
+    iconName: "fas:bolt"
+    fill: {type: solid, color: "$gold"}
+  - elementId: p1text
+    elementType: text
+    bounds: [114, 541, 320, 22]
+    content:
+      fontSize: 15
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>无需注册，打开即用</p>
+  - elementId: p2icon
+    elementType: icon
+    bounds: [464, 540, 22, 22]
+    iconName: "fas:shield-halved"
+    fill: {type: solid, color: "$gold"}
+  - elementId: p2text
+    elementType: text
+    bounds: [498, 541, 340, 22]
+    content:
+      fontSize: 15
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>AI 不可用时，本地规则完整兜底</p>
+  - elementId: p3icon
+    elementType: icon
+    bounds: [848, 540, 22, 22]
+    iconName: "fas:share-nodes"
+    fill: {type: solid, color: "$gold"}
+  - elementId: p3text
+    elementType: text
+    bounds: [882, 541, 340, 22]
+    content:
+      fontSize: 15
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>结果卡片可分享，Self Skill 可导出</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>04 / 14</p>

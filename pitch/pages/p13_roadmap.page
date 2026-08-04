@@ -1,0 +1,265 @@
+pageType: content
+background:
+  type: solid
+  color: "$paper"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>ROADMAP · 路线图</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$title"
+      wrap: false
+      text: |
+        <p>从公测到平台：三步走</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: v1label
+    elementType: text
+    bounds: [100, 214, 280, 32]
+    content:
+      fontSize: 25
+      color: "$gold"
+      fontFamily: "Liter, MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p><strong>V0.8 · 现在</strong></p>
+  - elementId: v2label
+    elementType: text
+    bounds: [500, 214, 280, 32]
+    content:
+      fontSize: 25
+      color: "$ink"
+      fontFamily: "Liter, MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p><strong>V1.0 · 12 个月内</strong></p>
+  - elementId: v3label
+    elementType: text
+    bounds: [900, 214, 280, 32]
+    content:
+      fontSize: 25
+      color: "$ink"
+      fontFamily: "Liter, MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p><strong>V2.0 · 24 个月内</strong></p>
+  - elementId: tlLine
+    elementType: shape
+    bounds: [120, 288, 1040, 0]
+    shapeName: straightConnector1
+    border: {style: solid, width: 2, color: "$line"}
+  - elementId: tlNode1
+    elementType: shape
+    bounds: [231, 279, 18, 18]
+    shapeName: ellipse
+    fill: {type: solid, color: "$gold"}
+  - elementId: tlNode2
+    elementType: shape
+    bounds: [631, 279, 18, 18]
+    shapeName: ellipse
+    fill: {type: solid, color: "$paper"}
+    border: {style: solid, width: 2, color: "$gold"}
+  - elementId: tlNode3
+    elementType: shape
+    bounds: [1031, 279, 18, 18]
+    shapeName: ellipse
+    fill: {type: solid, color: "$paper"}
+    border: {style: solid, width: 2, color: "$gold"}
+  - elementId: v1card
+    elementType: shape
+    bounds: [70, 330, 340, 190]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: v1ctitle
+    elementType: text
+    bounds: [94, 352, 292, 24]
+    content:
+      fontSize: 17
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>公开测试（已上线）</strong></p>
+  - elementId: v1list
+    elementType: text
+    bounds: [94, 388, 292, 110]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.7
+      text: |
+        <p>· 匿名多人访问，无需注册</p>
+        <p>· 完整体验闭环已打通</p>
+        <p>· 真实模型验收与降级兜底</p>
+  - elementId: v2card
+    elementType: shape
+    bounds: [470, 330, 340, 190]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: v2ctitle
+    elementType: text
+    bounds: [494, 352, 292, 24]
+    content:
+      fontSize: 17
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>产品与商业闭环</strong></p>
+  - elementId: v2list
+    elementType: text
+    bounds: [494, 388, 292, 110]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.7
+      text: |
+        <p>· 账号与跨设备同步</p>
+        <p>· 订阅上线</p>
+        <p>· 群体统计分层数据库</p>
+  - elementId: v3card
+    elementType: shape
+    bounds: [870, 330, 340, 190]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: v3ctitle
+    elementType: text
+    bounds: [894, 352, 292, 24]
+    content:
+      fontSize: 17
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>平台化</strong></p>
+  - elementId: v3list
+    elementType: text
+    bounds: [894, 388, 292, 110]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.7
+      text: |
+        <p>· B 端合作落地</p>
+        <p>· Self Skill 开放标准</p>
+        <p>· 多语言版本</p>
+  - elementId: fundLabel
+    elementType: text
+    bounds: [80, 566, 400, 18]
+    content:
+      fontSize: 13
+      color: "$gold"
+      fontFamily: "MiSans"
+      letterSpacing: 3
+      wrap: false
+      text: |
+        <p>本轮资金用途（规划）</p>
+  - elementId: fchip1
+    elementType: shape
+    bounds: [80, 596, 263, 44]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: fchip1t
+    elementType: text
+    bounds: [80, 608, 263, 20]
+    content:
+      fontSize: 14
+      color: "$ink"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>AI 体验与研发 · 50%</p>
+  - elementId: fchip2
+    elementType: shape
+    bounds: [367, 596, 263, 44]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: fchip2t
+    elementType: text
+    bounds: [367, 608, 263, 20]
+    content:
+      fontSize: 14
+      color: "$ink"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>内容与专家网络 · 20%</p>
+  - elementId: fchip3
+    elementType: shape
+    bounds: [654, 596, 263, 44]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: fchip3t
+    elementType: text
+    bounds: [654, 608, 263, 20]
+    content:
+      fontSize: 14
+      color: "$ink"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>增长与品牌 · 20%</p>
+  - elementId: fchip4
+    elementType: shape
+    bounds: [941, 596, 263, 44]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: fchip4t
+    elementType: text
+    bounds: [941, 608, 263, 20]
+    content:
+      fontSize: 14
+      color: "$ink"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>合规与安全 · 10%</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>13 / 14</p>

@@ -1,0 +1,207 @@
+pageType: content
+background:
+  type: solid
+  color: "$paper"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>THE PROBLEM · 为什么是现在</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$title"
+      wrap: false
+      text: |
+        <p>人生最重要的决定，用着最原始的工具</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: s1tick
+    elementType: shape
+    bounds: [80, 172, 36, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: s1num
+    elementType: text
+    bounds: [80, 186, 352, 64]
+    content:
+      style: "$number"
+      wrap: false
+      text: |
+        <p>2–3 亿</p>
+  - elementId: s1label
+    elementType: text
+    bounds: [80, 256, 352, 44]
+    content:
+      style: "$small"
+      text: |
+        <p>国内有心理困扰的人群，其中泛心理问题人群约 9500 万</p>
+  - elementId: s2tick
+    elementType: shape
+    bounds: [464, 172, 36, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: s2num
+    elementType: text
+    bounds: [464, 186, 352, 64]
+    content:
+      style: "$number"
+      wrap: false
+      text: |
+        <p>9.5%</p>
+  - elementId: s2label
+    elementType: text
+    bounds: [464, 256, 352, 44]
+    content:
+      style: "$small"
+      text: |
+        <p>我国抑郁症患者治疗率，高收入国家约为 50%</p>
+  - elementId: s3tick
+    elementType: shape
+    bounds: [848, 172, 36, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: s3num
+    elementType: text
+    bounds: [848, 186, 352, 64]
+    content:
+      style: "$number"
+      wrap: false
+      text: |
+        <p>20 人</p>
+  - elementId: s3label
+    elementType: text
+    bounds: [848, 256, 352, 44]
+    content:
+      style: "$small"
+      text: |
+        <p>每百万人口可提供心理服务的人数，美国约为 1000 人</p>
+  - elementId: divider
+    elementType: shape
+    bounds: [80, 332, 1120, 0]
+    shapeName: straightConnector1
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: sectionLabel
+    elementType: text
+    bounds: [80, 352, 600, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "siyuanSongti"
+      wrap: false
+      text: |
+        <p>现有的三个选项，都不及格</p>
+  - elementId: c1icon
+    elementType: icon
+    bounds: [80, 392, 28, 28]
+    iconName: "fas:user-clock"
+    fill: {type: solid, color: "$gold"}
+  - elementId: c1title
+    elementType: text
+    bounds: [120, 393, 312, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>心理咨询 · 有效但稀缺</strong></p>
+  - elementId: c1desc
+    elementType: text
+    bounds: [80, 436, 352, 120]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.6
+      text: |
+        <p>单次咨询数百元起，资源集中在一线城市，预约等待以周计。对大多数站在岔路口的人来说，门槛太高。</p>
+  - elementId: c2icon
+    elementType: icon
+    bounds: [464, 392, 28, 28]
+    iconName: "fas:dice"
+    fill: {type: solid, color: "$gold"}
+  - elementId: c2title
+    elementType: text
+    bounds: [504, 393, 312, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>测评与占星 · 轻松但不可信</strong></p>
+  - elementId: c2desc
+    elementType: text
+    bounds: [464, 436, 352, 120]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.6
+      text: |
+        <p>静态标签加巴纳姆效应：好玩，但不提供证据，也无需为结论负责。测完之后，人生还是停在原地。</p>
+  - elementId: c3icon
+    elementType: icon
+    bounds: [848, 392, 28, 28]
+    iconName: "fas:robot"
+    fill: {type: solid, color: "$gold"}
+  - elementId: c3title
+    elementType: text
+    bounds: [888, 393, 312, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>通用 AI 聊天 · 聪明但没结构</strong></p>
+  - elementId: c3desc
+    elementType: text
+    bounds: [848, 436, 352, 120]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.6
+      text: |
+        <p>对话结束就散场：不沉淀、不可追溯、没有证据链，更无法比较不同选择各自的收益与代价。</p>
+  - elementId: source
+    elementType: text
+    bounds: [80, 648, 980, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>数据来源：观研天下《中国心理健康服务行业深度研究报告（2025）》、中国国民心理健康发展报告（2021–2022）</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>02 / 14</p>

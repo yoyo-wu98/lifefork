@@ -137,28 +137,35 @@ export function WeChatImportStep() {
   };
 
   const skip = () => {
-    setWechatRaw("");
-    setWechatAnalysis(null);
     setStep("extra-text");
   };
   const next = () => {
     setWechatRaw("");
     setStep("extra-text");
   };
+  const back = () => {
+    setStep("questions");
+  };
 
   return (
     <section className="space-y-5 rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-5 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-blue">微信记录本地分析</p>
+          <p className="text-sm font-medium text-blue">可选：让分析更准</p>
           <h3 className="mt-1 text-2xl font-semibold text-ink">导入微信聊天记录</h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-mist">
             粘贴或上传已经导出的聊天文本。系统会在当前浏览器中提取高频主题、情绪线索和关键片段。离开此步骤后会清除原文，只保留脱敏后的本地分析结果。
+            <strong className="text-ink">不知道从哪里导出？直接点「跳过」即可，这一步不是必须的。</strong>
           </p>
         </div>
-        <button type="button" onClick={skip} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
-          跳过微信导入
-        </button>
+        <div className="flex gap-2">
+          <button type="button" onClick={back} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
+            上一步
+          </button>
+          <button type="button" onClick={skip} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
+            跳过此步
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
@@ -275,14 +282,14 @@ export function WeChatImportStep() {
 
       <div className="flex flex-wrap gap-3">
         <button type="button" onClick={skip} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
-          不使用聊天记录
+          跳过此步，继续下一步
         </button>
         <button
           disabled={!wechatAnalysis}
           onClick={next}
           className="rounded-lg bg-night px-5 py-2 text-sm font-medium text-deep shadow-quiet disabled:cursor-not-allowed disabled:opacity-40"
         >
-          把分析结果加入个人分析
+          {wechatAnalysis ? "把分析结果加入个人分析" : "先点上方「本地分析这段聊天」"}
         </button>
         {wechatAnalysis && canUseServerAi && (
           <button

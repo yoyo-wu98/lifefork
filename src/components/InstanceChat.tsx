@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LoaderCircle, Send, SlidersHorizontal } from "lucide-react";
 import { useLifeforkStore } from "@/lib/stores/lifeforkStore";
 import type { ChatMessage } from "@/lib/types";
@@ -28,12 +28,18 @@ function executionLabel(execution: ChatMessage["execution"]): string {
     const duration = execution.durationMs
       ? ` · ${(execution.durationMs / 1000).toFixed(1)} 秒`
       : "";
-    return `服务器 AI · ${execution.provider} / ${execution.model}${duration}`;
+    return `AI 生成${duration}`;
   }
   if (execution.fallbackReason === "initial_scenario_intro") {
     return "方案说明 · 本地生成";
   }
-  return "本地规则回复 · 服务器 AI 未参与";
+  if (execution.fallbackReason === "rate_limited") {
+    return "发送太频繁，已用简化回复 · 稍后可重试 AI";
+  }
+  if (execution.fallbackReason === "api_timeout") {
+    return "服务器响应超时，已用简化回复";
+  }
+  return "简化回复（服务器 AI 未参与）";
 }
 
 /**
@@ -46,14 +52,55 @@ export function InstanceChat() {
   const selectedFork = useLifeforkStore((s) => s.selectedFork);
   const messages = useLifeforkStore((s) => s.messages);
   const isChatResponding = useLifeforkStore((s) => s.isChatResponding);
+  const chatRateLimitedUntil = useLifeforkStore((s) => s.chatRateLimitedUntil);
   const sendMessage = useLifeforkStore((s) => s.sendMessage);
   const setMessages = useLifeforkStore((s) => s.setMessages);
   const tuneVoice = useLifeforkStore((s) => s.tuneVoice);
   const setStep = useLifeforkStore((s) => s.setStep);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const runtimeConfig = useLifeforkStore((s) => s.runtimeConfig);
+  const editorConfig = useLifeforkStore((s) => s.editorConfig);
+
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const voiceNoteRef = useRef<HTMLInputElement>(null);
+  const bottomAnchorRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const userScrolledUpRef = useRef(false);
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+
+  const shouldUseAi =
+    runtimeConfig.features.ai &&
+    editorConfig.features.aiApi &&
+    editorConfig.global.aiMode === "api-enhanced";
+
+  // Countdown for rate-limit hint.
+  useEffect(() => {
+    if (!chatRateLimitedUntil) {
+      setSecondsLeft(null);
+      return;
+    }
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((chatRateLimitedUntil - Date.now()) / 1000));
+      setSecondsLeft(left > 0 ? left : null);
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [chatRateLimitedUntil]);
+
+  // Auto-scroll to newest message unless the user scrolled up to read history.
+  useEffect(() => {
+    if (userScrolledUpRef.current) return;
+    bottomAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages.length, isChatResponding]);
 
   if (!selfSkill || !selectedFork) return null;
+
+  const handleListScroll = () => {
+    const el = listRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    userScrolledUpRef.current = distanceFromBottom > 80;
+  };
 
   const handleSend = () => {
     const input = inputRef.current;
@@ -62,6 +109,8 @@ export function InstanceChat() {
     if (!content) return;
     void sendMessage(content);
     input.value = "";
+    input.style.height = "auto";
+    input.focus();
   };
 
   const handleVoiceFeedback = (note: string, label: string) => {
@@ -70,7 +119,9 @@ export function InstanceChat() {
     const systemMsg = {
       id: crypto.randomUUID(),
       role: "system" as const,
-      content: `语气校准已记录：${label}。下一次回复会更靠近这个方向。`,
+      content: shouldUseAi
+        ? `语气校准已记录：${label}。下一次回复会更靠近这个方向。`
+        : `语气偏好已记录：${label}。本地简化模式下回复变化有限，启用服务器 AI 后会更明显。`,
       createdAt: new Date().toISOString(),
     };
     setMessages([...currentMessages, systemMsg]);
@@ -81,6 +132,11 @@ export function InstanceChat() {
     if (!note) return;
     handleVoiceFeedback(note.slice(0, 80), note.slice(0, 80));
     if (voiceNoteRef.current) voiceNoteRef.current.value = "";
+  };
+
+  const autoResize = (el: HTMLTextAreaElement) => {
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
   };
 
   return (
@@ -101,6 +157,16 @@ export function InstanceChat() {
           <p className="mt-1 text-xs leading-5 text-mist">
             完成度根据语气样本和校准记录计算，不代表客观相似率。
           </p>
+          {!shouldUseAi && (
+            <p className="mt-2 inline-flex items-center gap-2 rounded-full border border-gold/25 bg-gold/10 px-3 py-1 text-[11px] text-ink">
+              当前为简化回复模式（服务器 AI 未参与），回答较模板化。
+            </p>
+          )}
+          {secondsLeft !== null && (
+            <p className="mt-2 inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-[11px] text-red-700" role="status">
+              发送太频繁，请 {secondsLeft} 秒后再试 AI 回复。
+            </p>
+          )}
         </div>
         <button
           type="button"
@@ -112,7 +178,13 @@ export function InstanceChat() {
       </div>
 
       {/* Messages */}
-      <div className="max-h-[50vh] space-y-3 overflow-y-auto rounded-lg border border-night/10 bg-deep/70 p-4">
+      <div
+        ref={listRef}
+        onScroll={handleListScroll}
+        aria-live="polite"
+        aria-label="与分支自我的对话记录"
+        className="max-h-[50vh] space-y-3 overflow-y-auto rounded-lg border border-night/10 bg-deep/70 p-4"
+      >
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -124,7 +196,7 @@ export function InstanceChat() {
                   : "border border-gold/20 bg-gold/10 text-ink"
             }`}
           >
-            <p>{msg.content}</p>
+            <p className="whitespace-pre-wrap break-words">{msg.content}</p>
             {msg.role === "instance" && (
               <p className="mt-2 border-t border-current/10 pt-2 text-[11px] leading-4 opacity-70">
                 {executionLabel(msg.execution)}
@@ -140,9 +212,11 @@ export function InstanceChat() {
         {isChatResponding && (
           <div className="flex max-w-[85%] items-center gap-2 rounded-lg border border-gold/20 bg-gold/10 px-4 py-3 text-xs text-mist">
             <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
-            正在结合当前方案和语气档案生成回复...
+            正在结合当前方案和语气档案生成回复…
+            <span className="text-[11px] opacity-70">（最长约 45 秒）</span>
           </div>
         )}
+        <div ref={bottomAnchorRef} />
       </div>
 
       {/* Voice calibration */}
@@ -176,6 +250,7 @@ export function InstanceChat() {
             className="min-w-0 flex-1 rounded-lg border border-night/10 bg-deep/70 px-3 py-2 text-xs outline-none focus:border-blue"
             placeholder="补充要求，例如：少用长句，先给数字，再解释"
             onKeyDown={(event) => {
+              if (event.nativeEvent.isComposing || event.keyCode === 229) return;
               if (event.key === "Enter") submitCustomVoiceNote();
             }}
           />
@@ -206,22 +281,28 @@ export function InstanceChat() {
       </div>
 
       {/* Input */}
-      <div className="flex gap-2">
-        <input
+      <div className="flex items-end gap-2">
+        <textarea
           ref={inputRef}
           disabled={isChatResponding}
           maxLength={600}
-          className="min-w-0 flex-1 rounded-lg border border-night/10 bg-deep/70 px-4 py-2 text-sm outline-none focus:border-blue focus:bg-[oklch(0.995_0.003_92)]"
+          rows={1}
+          className="min-w-0 flex-1 resize-none rounded-lg border border-night/10 bg-deep/70 px-4 py-3 text-base leading-6 outline-none focus:border-blue focus:bg-[oklch(0.995_0.003_92)]"
           placeholder="例如：这个方案最大的成本是什么？我应该先验证什么？"
+          onInput={(e) => autoResize(e.currentTarget)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") handleSend();
+            if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
           }}
         />
         <button
           type="button"
           disabled={isChatResponding}
           title="发送"
-          className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-night text-deep shadow-quiet disabled:opacity-40"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg bg-night text-deep shadow-quiet disabled:opacity-40"
           onClick={handleSend}
         >
           {isChatResponding ? (
@@ -232,6 +313,7 @@ export function InstanceChat() {
           <span className="sr-only">发送</span>
         </button>
       </div>
+      <p className="text-[11px] text-mist">Enter 发送，Shift+Enter 换行</p>
 
       {/* Navigation */}
       <div className="flex flex-wrap gap-3">

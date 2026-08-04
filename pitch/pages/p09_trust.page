@@ -1,0 +1,233 @@
+pageType: content
+background:
+  type: solid
+  color: "$paper"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>TRUST · 隐私架构</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$title"
+      wrap: false
+      text: |
+        <p>隐私不是功能，是架构</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: t1card
+    elementType: shape
+    bounds: [80, 170, 352, 205]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: t1icon
+    elementType: icon
+    bounds: [104, 192, 26, 26]
+    iconName: "fas:user-secret"
+    fill: {type: solid, color: "$gold"}
+  - elementId: t1title
+    elementType: text
+    bounds: [142, 194, 268, 24]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>匿名即用</strong></p>
+  - elementId: t1desc
+    elementType: text
+    bounds: [104, 240, 304, 100]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>无需注册。个人分析只保存在用户自己的浏览器，访客之间互不读取。</p>
+  - elementId: t2card
+    elementType: shape
+    bounds: [464, 170, 352, 205]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: t2icon
+    elementType: icon
+    bounds: [488, 192, 26, 26]
+    iconName: "fas:lock"
+    fill: {type: solid, color: "$gold"}
+  - elementId: t2title
+    elementType: text
+    bounds: [526, 194, 268, 24]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>原文不出本地</strong></p>
+  - elementId: t2desc
+    elementType: text
+    bounds: [488, 240, 304, 100]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>微信原文仅在浏览器内存中处理，服务器只收到用户确认的脱敏短摘要。</p>
+  - elementId: t3card
+    elementType: shape
+    bounds: [848, 170, 352, 205]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: t3icon
+    elementType: icon
+    bounds: [872, 192, 26, 26]
+    iconName: "fas:key"
+    fill: {type: solid, color: "$gold"}
+  - elementId: t3title
+    elementType: text
+    bounds: [910, 194, 268, 24]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>密钥零暴露</strong></p>
+  - elementId: t3desc
+    elementType: text
+    bounds: [872, 240, 304, 100]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>AI 密钥仅存于服务器，前端永远拿不到；生成、对话、导入分别限流。</p>
+  - elementId: t4card
+    elementType: shape
+    bounds: [80, 405, 352, 205]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: t4icon
+    elementType: icon
+    bounds: [104, 427, 26, 26]
+    iconName: "fas:house-laptop"
+    fill: {type: solid, color: "$gold"}
+  - elementId: t4title
+    elementType: text
+    bounds: [142, 429, 268, 24]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>本地完整兜底</strong></p>
+  - elementId: t4desc
+    elementType: text
+    bounds: [104, 475, 304, 100]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>无账号、无密钥、无网络，本地规则也能跑完核心体验。</p>
+  - elementId: t5card
+    elementType: shape
+    bounds: [464, 405, 352, 205]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: t5icon
+    elementType: icon
+    bounds: [488, 427, 26, 26]
+    iconName: "fas:life-ring"
+    fill: {type: solid, color: "$gold"}
+  - elementId: t5title
+    elementType: text
+    bounds: [526, 429, 268, 24]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>危机拦截</strong></p>
+  - elementId: t5desc
+    elementType: text
+    bounds: [488, 475, 304, 100]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>危机输入触发保护机制：停止常规模拟，引导用户寻求现实支持。</p>
+  - elementId: t6card
+    elementType: shape
+    bounds: [848, 405, 352, 205]
+    shapeName: rect
+    fill: {type: solid, color: "$paperRaised"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: t6icon
+    elementType: icon
+    bounds: [872, 427, 26, 26]
+    iconName: "fas:scale-balanced"
+    fill: {type: solid, color: "$gold"}
+  - elementId: t6title
+    elementType: text
+    bounds: [910, 429, 268, 24]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>伦理章程</strong></p>
+  - elementId: t6desc
+    elementType: text
+    bounds: [872, 475, 304, 100]
+    content:
+      fontSize: 14
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.55
+      text: |
+        <p>WCAG 2.2 AA 无障碍基线；不提供医疗、心理诊断、法律或财务结论。</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>09 / 14</p>

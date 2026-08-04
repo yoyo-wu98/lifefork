@@ -1,0 +1,113 @@
+pageType: final
+background:
+  type: solid
+  color: "$map"
+elements:
+  - elementId: brand
+    elementType: text
+    bounds: [80, 62, 420, 20]
+    content:
+      fontSize: 14
+      color: "$mapMuted"
+      fontFamily: "Liter, MiSans"
+      letterSpacing: 4
+      wrap: false
+      text: |
+        <p>LIFEFORK · 人生岔路</p>
+  - elementId: fmNode
+    elementType: shape
+    bounds: [884, 124, 12, 12]
+    shapeName: ellipse
+    fill: {type: solid, color: "$gold"}
+  - elementId: fmB1
+    elementType: shape
+    bounds: [896, 80, 200, 50]
+    shapeName: straightConnector1
+    flip: [false, true]
+    border: {style: solid, width: 2, color: "$violet"}
+  - elementId: fmB2
+    elementType: shape
+    bounds: [896, 130, 200, 0]
+    shapeName: straightConnector1
+    border: {style: solid, width: 2, color: "$gold"}
+  - elementId: fmB3
+    elementType: shape
+    bounds: [896, 130, 200, 50]
+    shapeName: straightConnector1
+    border: {style: solid, width: 2, color: "$blue"}
+  - elementId: fmN1
+    elementType: shape
+    bounds: [1090, 74, 10, 10]
+    shapeName: ellipse
+    fill: {type: solid, color: "$violet"}
+  - elementId: fmN2
+    elementType: shape
+    bounds: [1090, 125, 10, 10]
+    shapeName: ellipse
+    fill: {type: solid, color: "$gold"}
+  - elementId: fmN3
+    elementType: shape
+    bounds: [1090, 176, 10, 10]
+    shapeName: ellipse
+    fill: {type: solid, color: "$blue"}
+  - elementId: finalLine
+    elementType: text
+    bounds: [80, 296, 1120, 68]
+    content:
+      fontSize: 46
+      color: "$mapText"
+      fontFamily: "siyuanSongti"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>每一条路，都值得被认真看见。</p>
+  - elementId: finalSub
+    elementType: text
+    bounds: [80, 390, 1120, 26]
+    content:
+      fontSize: 18
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 —— 公测现已开放，打开浏览器即可开始</p>
+  - elementId: ctaBtn
+    elementType: shape
+    bounds: [490, 466, 300, 54]
+    shapeName: rect
+    fill: {type: solid, color: "$mapDeep"}
+    border: {style: solid, width: 1.5, color: "$gold"}
+  - elementId: ctaText
+    elementType: text
+    bounds: [490, 482, 300, 24]
+    content:
+      fontSize: 17
+      color: "$gold"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p><strong>立即体验公开测试版</strong></p>
+  - elementId: ctaUrl
+    elementType: text
+    bounds: [340, 540, 600, 18]
+    content:
+      fontSize: 12
+      color: "$mapMuted"
+      fontFamily: "Liter, MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>lifefork-public-beta.poremansovir.chatgpt.site</p>
+  - elementId: contact
+    elementType: text
+    bounds: [80, 632, 1120, 20]
+    content:
+      fontSize: 13
+      color: "$mapMuted"
+      fontFamily: "MiSans"
+      align: [center, top]
+      wrap: false
+      text: |
+        <p>投资与合作洽谈 · 欢迎会后交流</p>

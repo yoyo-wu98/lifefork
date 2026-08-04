@@ -46,7 +46,7 @@ function resolveRestoredStep(
   const requested = storedStep === "select-version" ? "questions" : (storedStep ?? "landing");
 
   if (!selfSkill) {
-    if (requested === "generating") return "questions";
+    if (requested === "generating") return hasCompleteAnswers ? "methods" : "questions";
     if (
       (requested === "wechat-import" || requested === "extra-text" || requested === "methods") &&
       !hasCompleteAnswers
@@ -150,7 +150,7 @@ export const createNavigationSlice: LifeforkSlice<NavigationSlice> = (set, get) 
       get().requestConfirmation(
         {
           title: "开始新的分析？",
-          message: "当前浏览器里的问卷、个人分析、方案和对话会被清除。已导出的 JSON 文件不会受影响。",
+          message: "当前浏览器里的问卷、个人分析、方案和对话会被清除。已导出的备份文件不会受影响。",
           confirmLabel: "清除并开始",
           tone: "danger",
         },
@@ -209,7 +209,7 @@ export const createNavigationSlice: LifeforkSlice<NavigationSlice> = (set, get) 
       get().requestConfirmation(
         {
           title: "打开完整示例？",
-          message: "当前浏览器里的进度会被示例数据替换。你可以先导出 Self Skill JSON，再继续。",
+          message: "当前浏览器里的进度会被示例数据替换。你可以先在结果页导出备份文件，再继续。",
           confirmLabel: "替换为示例",
           tone: "danger",
         },

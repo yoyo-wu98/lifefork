@@ -1,0 +1,163 @@
+pageType: content
+background:
+  type: solid
+  color: "$paper"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>INNOVATION 04 · 体验峰值</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$title"
+      wrap: false
+      text: |
+        <p>与另一个自己对话：未选择的路，也能认真走完</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: b1bar
+    elementType: shape
+    bounds: [80, 172, 3, 22]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: b1title
+    elementType: text
+    bounds: [98, 170, 542, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>多时空自我实例</strong></p>
+  - elementId: b1desc
+    elementType: text
+    bounds: [98, 202, 542, 44]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+      text: |
+        <p>与过去、现在、未来，以及未选择路径中的自己，一一交谈。</p>
+  - elementId: b2bar
+    elementType: shape
+    bounds: [80, 290, 3, 22]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: b2title
+    elementType: text
+    bounds: [98, 288, 542, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>语气持续校准</strong></p>
+  - elementId: b2desc
+    elementType: text
+    bounds: [98, 320, 542, 44]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+      text: |
+        <p>「这句像我」「少一点 AI 味」——分支自我会学习你的表达方式，越聊越像你。</p>
+  - elementId: b3bar
+    elementType: shape
+    bounds: [80, 408, 3, 22]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: b3title
+    elementType: text
+    bounds: [98, 406, 542, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>收益与代价并陈</strong></p>
+  - elementId: b3desc
+    elementType: text
+    bounds: [98, 438, 542, 44]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+      text: |
+        <p>每条回复都标注生成来源与耗时，明确写着「不代表真实未来」。</p>
+  - elementId: b4bar
+    elementType: shape
+    bounds: [80, 526, 3, 22]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: b4title
+    elementType: text
+    bounds: [98, 524, 542, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>危机守护</strong></p>
+  - elementId: b4desc
+    elementType: text
+    bounds: [98, 556, 542, 44]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+      text: |
+        <p>识别危机输入即停止常规模拟，引导用户寻求现实中的支持。</p>
+  - elementId: shotDialogue
+    elementType: image
+    bounds: [700, 166, 500, 448]
+    src: /Users/yoyow/Downloads/lifefork/pitch/images/dialogue-crop.jpg
+    fit: {mode: cover}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: shotDialogueCap
+    elementType: text
+    bounds: [700, 624, 500, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>产品实拍 · 分支方案模拟对话（真实模型回复，附语气校准）</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>08 / 14</p>

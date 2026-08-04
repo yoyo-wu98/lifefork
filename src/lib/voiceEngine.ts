@@ -189,7 +189,6 @@ export function renderInUserVoice(base: string, voice: VoiceProfile, stageVoice?
     stageVoice?.stage === "past"
       ? "\n当时的信息和表达能力有限，需要结合现在的材料重新判断。"
       : "";
-  const softened = base.replace(/应该/g, "可以先");
-  const withPrefix = prefix && !softened.startsWith(prefix) ? `${prefix}${softened}` : softened;
+  const withPrefix = prefix && !base.startsWith(prefix) ? `${prefix}${base}` : base;
   return applyCalibration(`${withPrefix}${stageLine}`, voice.calibrationNotes);
 }

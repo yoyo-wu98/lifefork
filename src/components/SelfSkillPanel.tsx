@@ -45,6 +45,10 @@ function contributionLabel(item: MethodContribution) {
 export function SelfSkillPanel() {
   const selfSkill = useLifeforkStore((state) => state.selfSkill);
   const setStep = useLifeforkStore((state) => state.setStep);
+  const lastGenerationSource = useLifeforkStore((state) => state.lastGenerationSource);
+  const createSkill = useLifeforkStore((state) => state.createSkill);
+  const editorConfig = useLifeforkStore((state) => state.editorConfig);
+  const runtimeConfig = useLifeforkStore((state) => state.runtimeConfig);
 
   if (!selfSkill) return null;
 
@@ -66,6 +70,25 @@ export function SelfSkillPanel() {
 
   return (
     <section className="mx-auto w-full max-w-6xl space-y-8">
+      {lastGenerationSource === "local" && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gold/25 bg-gold/5 px-5 py-4">
+          <div>
+            <p className="text-sm font-medium text-ink">本次结果由本地快速分析生成</p>
+            <p className="mt-1 text-xs leading-5 text-mist">
+              服务器 AI 未参与。结论基于规则模板，参考度有限。
+            </p>
+          </div>
+          {runtimeConfig.features.ai && editorConfig.features.aiApi && (
+            <button
+              type="button"
+              onClick={() => void createSkill()}
+              className="rounded-lg bg-night px-4 py-2 text-sm font-medium text-deep"
+            >
+              重试 AI 分析
+            </button>
+          )}
+        </div>
+      )}
       <header className="border-b border-night/10 pb-7">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div className="max-w-3xl">

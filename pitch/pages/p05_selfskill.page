@@ -1,0 +1,163 @@
+pageType: content
+background:
+  type: solid
+  color: "$paper"
+elements:
+  - elementId: kicker
+    elementType: text
+    bounds: [80, 50, 700, 20]
+    content:
+      style: "$kicker"
+      wrap: false
+      text: |
+        <p>INNOVATION 01 · 核心资产</p>
+  - elementId: title
+    elementType: text
+    bounds: [80, 78, 1120, 44]
+    content:
+      style: "$title"
+      wrap: false
+      text: |
+        <p>Self Skill：用户真正拥有的自我数据结构</p>
+  - elementId: titleBar
+    elementType: shape
+    bounds: [80, 136, 44, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: b1bar
+    elementType: shape
+    bounds: [80, 172, 3, 22]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: b1title
+    elementType: text
+    bounds: [98, 170, 542, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>可编辑、可删除、可导出</strong></p>
+  - elementId: b1desc
+    elementType: text
+    bounds: [98, 202, 542, 44]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+      text: |
+        <p>画像不是黑盒结论，而是一份归用户所有的 JSON 档案，随时清空、随时带走。</p>
+  - elementId: b2bar
+    elementType: shape
+    bounds: [80, 290, 3, 22]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: b2title
+    elementType: text
+    bounds: [98, 288, 542, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>结构化判断</strong></p>
+  - elementId: b2desc
+    elementType: text
+    bounds: [98, 320, 542, 44]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+      text: |
+        <p>每条画像按「结论 → 方法 → 权重 → 参考度 → 证据 → 限制」完整展开。</p>
+  - elementId: b3bar
+    elementType: shape
+    bounds: [80, 408, 3, 22]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: b3title
+    elementType: text
+    bounds: [98, 406, 542, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>阶段化性格</strong></p>
+  - elementId: b3desc
+    elementType: text
+    bounds: [98, 438, 542, 44]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+      text: |
+        <p>MBTI 只描述特定人生阶段的偏好，拒绝用一个标签定义人的一生。</p>
+  - elementId: b4bar
+    elementType: shape
+    bounds: [80, 526, 3, 22]
+    shapeName: rect
+    fill: {type: solid, color: "$gold"}
+  - elementId: b4title
+    elementType: text
+    bounds: [98, 524, 542, 26]
+    content:
+      fontSize: 19
+      color: "$ink"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p><strong>持续校准</strong></p>
+  - elementId: b4desc
+    elementType: text
+    bounds: [98, 556, 542, 44]
+    content:
+      fontSize: 15
+      color: "$muted"
+      fontFamily: "MiSans"
+      lineHeight: 1.5
+      text: |
+        <p>时间线、语气与分支记录随使用不断修正，这份档案越用越像你。</p>
+  - elementId: shotReport
+    elementType: image
+    bounds: [680, 166, 520, 468]
+    src: /Users/yoyow/Downloads/lifefork/pitch/images/report-crop.jpg
+    fit: {mode: cover}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: shotReportCap
+    elementType: text
+    bounds: [680, 644, 520, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>产品实拍 · 个人分析报告（真实生成结果）</p>
+  - elementId: footer
+    elementType: text
+    bounds: [80, 688, 420, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "MiSans"
+      wrap: false
+      text: |
+        <p>LifeFork · 人生岔路 — 公测路演</p>
+  - elementId: pageNum
+    elementType: text
+    bounds: [1100, 688, 100, 16]
+    content:
+      fontSize: 11
+      color: "$faint"
+      fontFamily: "Liter, MiSans"
+      align: [right, top]
+      wrap: false
+      text: |
+        <p>05 / 14</p>

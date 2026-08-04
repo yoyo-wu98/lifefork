@@ -8,10 +8,12 @@ import type { ChatMessage } from "@/lib/types";
 import type { ChatSlice, LifeforkSlice } from "@/lib/stores/types";
 
 const id = () => crypto.randomUUID();
+const CHAT_TIMEOUT_MS = 45_000;
 
 export const createChatSlice: LifeforkSlice<ChatSlice> = (set, get) => ({
   messages: [],
   isChatResponding: false,
+  chatRateLimitedUntil: null,
 
   setMessages: (messages) => {
     set({ messages });
@@ -32,6 +34,7 @@ export const createChatSlice: LifeforkSlice<ChatSlice> = (set, get) => ({
     if (!selfSkill || !selectedFork) return;
     if (isChatResponding) return;
 
+    const forkIdAtSend = selectedFork.id;
     set({ isChatResponding: true });
 
     const userMsg: ChatMessage = {
@@ -40,6 +43,12 @@ export const createChatSlice: LifeforkSlice<ChatSlice> = (set, get) => ({
       content,
       createdAt: new Date().toISOString(),
     };
+
+    // Optimistic: show the user's message immediately, persist it,
+    // so a slow server reply never swallows their words.
+    const optimisticMessages = [...messages, userMsg];
+    set({ messages: optimisticMessages });
+    saveChatMessages(optimisticMessages);
 
     let replyContent: string;
     let execution: NonNullable<ChatMessage["execution"]>;
@@ -76,6 +85,7 @@ export const createChatSlice: LifeforkSlice<ChatSlice> = (set, get) => ({
           const history = messages
             .filter(
               (message) =>
+                message.role !== "system" &&
                 message.execution?.source !== "safety-intercept" &&
                 !containsCrisisSignal(message.content),
             )
@@ -89,6 +99,7 @@ export const createChatSlice: LifeforkSlice<ChatSlice> = (set, get) => ({
           const res = await fetch("/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            signal: AbortSignal.timeout(CHAT_TIMEOUT_MS),
             body: JSON.stringify({
               selfSkillSummary: selfSkill.identity.selfNarrative,
               forkTitle: selectedFork.title,
@@ -107,8 +118,14 @@ export const createChatSlice: LifeforkSlice<ChatSlice> = (set, get) => ({
             }),
           });
 
-          const json = res.ok ? await res.json() : null;
-          if (json?.success) {
+          let json: any = null;
+          try {
+            json = await res.json();
+          } catch {
+            json = null;
+          }
+
+          if (res.ok && json?.success) {
             replyContent = json.data.reply;
             const used = json.meta?.llmUsed === true;
             execution = {
@@ -128,6 +145,21 @@ export const createChatSlice: LifeforkSlice<ChatSlice> = (set, get) => ({
               durationMs: Date.now() - startedAt,
               tokenUsage: json.usage,
             };
+          } else if (res.status === 429) {
+            const retryAfter =
+              typeof json?.retryAfterSeconds === "number"
+                ? json.retryAfterSeconds
+                : Math.max(1, Math.ceil(((json?.meta?.resetAt ?? 0) - Date.now()) / 1000));
+            set({ chatRateLimitedUntil: Date.now() + retryAfter * 1000 });
+            replyContent = generateInstanceReply(content, selfSkill, selectedFork);
+            execution = {
+              source: "local-fallback",
+              used: false,
+              provider: "local",
+              model: "local-dialogue-rules",
+              fallbackReason: "rate_limited",
+              durationMs: Date.now() - startedAt,
+            };
           } else {
             replyContent = generateInstanceReply(content, selfSkill, selectedFork);
             execution = {
@@ -139,22 +171,28 @@ export const createChatSlice: LifeforkSlice<ChatSlice> = (set, get) => ({
               durationMs: Date.now() - startedAt,
             };
           }
-        } catch {
+        } catch (err) {
+          const isTimeout = err instanceof DOMException && err.name === "TimeoutError";
           replyContent = generateInstanceReply(content, selfSkill, selectedFork);
           execution = {
             source: "local-fallback",
             used: false,
             provider: "local",
             model: "local-dialogue-rules",
-            fallbackReason: "api_request_failed",
+            fallbackReason: isTimeout ? "api_timeout" : "api_request_failed",
             durationMs: Date.now() - startedAt,
           };
         }
       }
 
+      // If the user switched branches while we waited, don't clobber the
+      // new branch's messages with the old branch's conversation.
+      if (get().selectedFork?.id !== forkIdAtSend) {
+        return;
+      }
+
       const nextMessages = [
-        ...messages,
-        userMsg,
+        ...get().messages,
         {
           id: id(),
           role: "instance" as const,
