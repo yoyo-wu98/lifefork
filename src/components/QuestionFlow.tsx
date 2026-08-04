@@ -156,6 +156,12 @@ export function QuestionFlow() {
             onChange={(event) => setAnswer(activePrompt.key, event.target.value)}
           />
           <p className="mt-2 text-xs text-mist">回答会自动保存在当前浏览器。</p>
+          {activePrompt.key === "recurringEmotion" && (
+            <p className="mt-2 text-xs leading-5 text-mist">
+              如果你正经历难以承受的情绪，可以拨打心理援助热线{" "}
+              <a href="tel:4001619995" className="text-blue underline">400-161-9995</a>（24 小时）。
+            </p>
+          )}
 
           <div className="mt-4">
             <p className="text-xs text-mist">可以直接选择一个示例，再继续补充</p>

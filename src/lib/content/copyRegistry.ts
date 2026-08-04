@@ -55,7 +55,7 @@ export const LANDING_PAGE_COPY = defineCopy({
   value: {
     brandKicker: "LifeFork / 人生岔路",
     headline: ["整理你现在的问题。", "比较方案、依据、成本和下一步。"],
-    body: "回答 5 个问题并选择分析方法后，LifeFork 会生成个人分析、时间线和多条可比较的方案。每条结论都会标明用户材料、统计参考、AI 模型、阶段性格或文化解读的贡献。你可以调整各方法权重，并和不同方案下的模拟版本继续对话。",
+    body: "回答 5 个关于你当前选择的问题，LifeFork 会整理出你的处境、几条可选路线，以及每条路线的收益、成本和下一步。你可以继续和每条路线里的「模拟的你」对话。每条结论都注明依据来自你的回答、公开统计还是 AI 推测。",
     primaryAction: "开始分析",
     secondaryAction: "查看完整示例",
   },
@@ -94,7 +94,7 @@ export const APP_NAV_COPY = defineCopy({
       currentDialogue: "方案对话",
       shareCard: "结果卡片",
       demoScenario: "完整示例",
-      reset: "清空重来",
+      reset: "清空全部数据",
     },
   },
 });

@@ -22,6 +22,7 @@ import {
   saveStep,
 } from "@/lib/storage";
 import { INITIAL_ANSWERS, ROOT_FORK_ID, type LifeforkSlice, type NavigationSlice } from "@/lib/stores/types";
+import { storageWriteHasFailed } from "@/lib/storage";
 import type { AppStep, ForkPath, SelfSkill } from "@/lib/types";
 
 function firstConfiguredLine(state: { editorConfig?: { share?: { futureSelfLines?: string[] } } }): string {
@@ -110,6 +111,11 @@ export const createNavigationSlice: LifeforkSlice<NavigationSlice> = (set, get) 
     if (!selectedFork) {
       saveSelectedFork(null);
       saveChatMessages([]);
+    }
+    if (storageWriteHasFailed()) {
+      set({
+        badge: "当前浏览器无法保存数据，刷新或关闭后进度会丢失，建议先在结果卡片页导出备份文件",
+      });
     }
   },
 

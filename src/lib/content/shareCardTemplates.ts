@@ -33,5 +33,7 @@ export function buildShareCardClipboardText(params: {
     `${labels.timePoint}：${params.timePoint}`,
     ...dynamicTypeLines,
     `${labels.futureSelfLine}：${params.futureSelfLine}`,
+    "",
+    "——由 LifeFork 根据我的输入生成的情景模拟，仅供参考。",
   ].join("\n");
 }

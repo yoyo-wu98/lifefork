@@ -51,7 +51,7 @@ export default function HomePage() {
   // ── Auto-dismiss badges ──────────────────────────────────────────
   useEffect(() => {
     if (!badge) return;
-    const timer = setTimeout(() => setBadge(null), 2400);
+    const timer = setTimeout(() => setBadge(null), 3600);
     return () => clearTimeout(timer);
   }, [badge, setBadge]);
 

@@ -124,7 +124,7 @@ export default function AdminPage() {
         return;
       }
       setConfig(body.data);
-      setMessage("全局配置已保存。所有新请求会立即使用这份配置。");
+      setMessage("全局配置已保存。约 1 分钟内前台自动生效（已打开页面的用户下次切回时也会刷新）。");
     } catch {
       setMessage("配置保存失败，请检查网络连接后重试。");
     } finally {

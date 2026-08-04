@@ -66,6 +66,9 @@ export function Landing() {
             约 8 分钟 · 无需账号 · {runtimeConfig.betaLabel}
           </span>
         </div>
+        <p className="mt-4 max-w-[68ch] text-sm leading-6 text-ink">
+          LifeFork 生成的是情景模拟，不是预测，也不是心理或医疗建议。请把它作为整理思路的工具，而不是重大决策的唯一依据。
+        </p>
         <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-xs text-mist">
           <span className="inline-flex items-center gap-2">
             <Users className="size-4 text-blue" aria-hidden="true" />

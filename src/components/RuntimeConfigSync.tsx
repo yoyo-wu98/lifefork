@@ -5,6 +5,8 @@ import { applyAnalysisPreset } from "@/lib/analysis/methodRegistry";
 import { useLifeforkStore } from "@/lib/stores/lifeforkStore";
 import type { PublicRuntimeConfig } from "@/lib/runtimeConfig";
 
+const POLL_INTERVAL_MS = 60_000;
+
 export function RuntimeConfigSync() {
   const setRuntimeConfig = useLifeforkStore((state) => state.setRuntimeConfig);
   const setAnalysisSettings = useLifeforkStore(
@@ -12,14 +14,13 @@ export function RuntimeConfigSync() {
   );
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetch("/api/public-config", {
-      cache: "no-store",
-      signal: controller.signal,
-    })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((body: { success?: boolean; data?: PublicRuntimeConfig } | null) => {
-        if (body?.success && body.data) {
+    let mounted = true;
+
+    const sync = () => {
+      fetch("/api/public-config", { cache: "no-store" })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((body: { success?: boolean; data?: PublicRuntimeConfig } | null) => {
+          if (!mounted || !body?.success || !body.data) return;
           setRuntimeConfig(body.data);
           if (!window.localStorage.getItem("lifefork.analysisSettings")) {
             setAnalysisSettings(
@@ -29,10 +30,22 @@ export function RuntimeConfigSync() {
               ),
             );
           }
-        }
-      })
-      .catch(() => undefined);
-    return () => controller.abort();
+        })
+        .catch(() => undefined);
+    };
+
+    sync();
+    const interval = setInterval(sync, POLL_INTERVAL_MS);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") sync();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [setAnalysisSettings, setRuntimeConfig]);
 
   return null;

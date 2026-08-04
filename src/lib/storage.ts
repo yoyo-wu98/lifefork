@@ -73,11 +73,18 @@ const read = (key: string): string | null => {
   }
 };
 
+let storageWriteFailed = false;
+
+export function storageWriteHasFailed() {
+  return storageWriteFailed;
+}
+
 const write = (key: string, value: string) => {
   try {
     getStorage()?.setItem(key, value);
   } catch {
     // Storage can fail in private mode, quota errors, or blocked browser contexts.
+    storageWriteFailed = true;
   }
 };
 
@@ -225,16 +232,28 @@ export const loadLifeMapOffsets = (): StoredLifeMapOffsets =>
   safeParse<StoredLifeMapOffsets>(read(KEY_LIFE_MAP_OFFSETS)) ?? {};
 
 export const clearAll = () => {
-  [
-    KEY_SELF_SKILL,
-    KEY_STEP,
-    KEY_FORK,
-    KEY_CHAT,
-    KEY_WECHAT_ANALYSIS,
-    KEY_LIFE_MAP_OFFSETS,
-    KEY_ANALYSIS_SETTINGS,
-    KEY_ANSWERS,
-    KEY_EXTRA_TEXT,
-    KEY_SELECTED_VERSION,
-  ].forEach(remove);
+  try {
+    const storage = getStorage();
+    if (!storage) return;
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < storage.length; i += 1) {
+      const key = storage.key(i);
+      if (key?.startsWith("lifefork.")) keysToRemove.push(key);
+    }
+    keysToRemove.forEach(remove);
+  } catch {
+    // Fall back to explicit list if enumeration fails.
+    [
+      KEY_SELF_SKILL,
+      KEY_STEP,
+      KEY_FORK,
+      KEY_CHAT,
+      KEY_WECHAT_ANALYSIS,
+      KEY_LIFE_MAP_OFFSETS,
+      KEY_ANALYSIS_SETTINGS,
+      KEY_ANSWERS,
+      KEY_EXTRA_TEXT,
+      KEY_SELECTED_VERSION,
+    ].forEach(remove);
+  }
 };

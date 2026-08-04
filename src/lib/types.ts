@@ -492,6 +492,7 @@ export interface SelfSkill {
   analysisSettings?: AnalysisSettings;
   integratedAnalysis?: IntegratedAnalysis;
   forks: ForkPath[];
+  confirmedTimelineNodeIds?: string[];
 }
 
 export interface GenerateSelfSkillInput {

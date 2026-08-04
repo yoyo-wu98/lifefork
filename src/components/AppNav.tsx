@@ -96,6 +96,7 @@ export function AppNav() {
             type="button"
             className="rounded-lg px-3 py-2 text-sm text-mist hover:bg-red-50 hover:text-red-700"
             onClick={resetExperience}
+            title="清空当前浏览器里的问卷、分析、方案和对话"
           >
             {editorConfig.nav.reset}
           </button>
