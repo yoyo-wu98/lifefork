@@ -1,4 +1,5 @@
 import type { GenerateSelfSkillInput, SelfSkill } from "@/lib/types";
+import { attachAssetOutlooks } from "@/lib/analysis/assetProjection";
 import { buildStageVoices, buildVoiceProfile } from "@/lib/voiceEngine";
 import { buildClaims, buildEvidence, validateClaimEvidence } from "@/lib/selfSkill/evidenceBuilder";
 import { buildDynamicTypeProfile } from "@/lib/selfSkill/dynamicTypeRules";
@@ -24,7 +25,7 @@ export function generateSelfSkill(input: GenerateSelfSkillInput, options: Genera
   const stageVoices = buildStageVoices(input, voice);
   const evidence = buildEvidence(input, nextId);
   const claims = validateClaimEvidence(buildClaims(input, profile.values, evidence, nextId), evidence);
-  const forks = buildLifeSimulationMap(input.currentChoice, evidence.map((item) => item.id));
+  const forks = attachAssetOutlooks(buildLifeSimulationMap(input.currentChoice, evidence.map((item) => item.id)));
   const dynamicTypeProfile = buildDynamicTypeProfile(input, evidence, forks);
   const createdAt = options.now ? new Date(options.now).toISOString() : new Date().toISOString();
 

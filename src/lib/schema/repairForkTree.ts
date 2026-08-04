@@ -1,4 +1,5 @@
 import type { ForkPath, GenerateSelfSkillInput, SelfSkill } from "@/lib/types";
+import { attachAssetOutlooks } from "@/lib/analysis/assetProjection";
 import { CONTENT_SYSTEM_OWNER } from "@/lib/content/copyRegistry";
 import { buildDynamicTypeProfile } from "@/lib/selfSkill/dynamicTypeRules";
 import { buildLifeSimulationMap } from "@/lib/selfSkillEngine";
@@ -43,10 +44,16 @@ export function repairForkTree(skill: SelfSkill): SelfSkill {
   const forks = Array.isArray(skill.forks) ? skill.forks : [];
   const needsRepair = !forks.length || flattenForks(forks).some((path) => !hasModernForkShape(path));
   const evidenceIds = skill.evidence.map((item) => item.id);
-  const repairedForks = needsRepair ? buildLifeSimulationMap(skill.questions?.currentChoice ?? "", evidenceIds) : forks;
+  const repairedForks = attachAssetOutlooks(
+    needsRepair ? buildLifeSimulationMap(skill.questions?.currentChoice ?? "", evidenceIds) : forks,
+  );
   const dynamicTypeProfile = skill.dynamicTypeProfile ?? buildDynamicTypeProfile(inputFromSkill(skill), skill.evidence, repairedForks);
 
-  if (!needsRepair && skill.dynamicTypeProfile) return skill;
+  if (!needsRepair && skill.dynamicTypeProfile) {
+    // 叉树形状无需修复，但可能缺少资产情景（旧版本存档）
+    if (flattenForks(repairedForks).every((path) => path.assetOutlook)) return skill;
+    return { ...skill, forks: repairedForks };
+  }
 
   return {
     ...skill,

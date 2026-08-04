@@ -24,29 +24,29 @@ export function AppNav() {
   ];
 
   const stepClass = (target: AppStep) =>
-    `shrink-0 rounded-lg px-3 py-2 text-sm ${
+    `shrink-0 rounded-lg px-2 py-2 text-sm sm:px-3 ${
       step === target
         ? "bg-night text-deep"
         : "text-mist hover:bg-night/5 hover:text-ink"
     }`;
 
   return (
-    <nav className="sticky top-3 z-50 rounded-lg border border-night/10 bg-[var(--lf-paper-raised)] px-2 py-2 shadow-quiet">
-      <div className="flex min-w-0 items-center gap-2">
+    <nav className="sticky top-3 z-50 rounded-lg border border-night/10 bg-[var(--lf-paper-raised)] px-1.5 py-2 shadow-quiet sm:px-2">
+      <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
         <button
           type="button"
-          className="shrink-0 rounded-lg px-3 py-2 text-left hover:bg-night/5"
+          className="shrink-0 rounded-lg px-2 py-2 text-left hover:bg-night/5 sm:px-3"
           onClick={() => setStep("landing")}
         >
           <span className="block text-sm font-semibold leading-none text-ink">LifeFork</span>
-          <span className="mt-1 block text-[11px] leading-none text-mist">
+          <span className="mt-1 hidden text-[11px] leading-none text-mist sm:block">
             {stepLabels[step] ?? step}
           </span>
         </button>
 
-        <div className="h-7 w-px shrink-0 bg-night/10" />
+        <div className="hidden h-7 w-px shrink-0 bg-night/10 sm:block" />
 
-        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+        <div className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto sm:gap-1">
           <button
             type="button"
             className={stepClass("landing")}
@@ -72,7 +72,7 @@ export function AppNav() {
 
         <div className="hidden h-7 w-px shrink-0 bg-night/10 md:block" />
 
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
           {editorConfig.features.demoScenario && runtimeConfig.features.demoScenario && (
             <button
               type="button"
@@ -94,11 +94,12 @@ export function AppNav() {
           )}
           <button
             type="button"
-            className="rounded-lg px-3 py-2 text-sm text-mist hover:bg-red-50 hover:text-red-700"
+            className="rounded-lg px-2 py-2 text-sm text-mist hover:bg-red-50 hover:text-red-700 sm:px-3"
             onClick={resetExperience}
             title="清空当前浏览器里的问卷、分析、方案和对话"
           >
-            {editorConfig.nav.reset}
+            <span className="sm:hidden">清空</span>
+            <span className="hidden sm:inline">{editorConfig.nav.reset}</span>
           </button>
         </div>
       </div>

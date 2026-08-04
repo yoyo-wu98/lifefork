@@ -355,6 +355,34 @@ export interface Consequence {
   delta: Partial<LifeStateVector>;
 }
 
+/**
+ * 资产情景模拟（非理财建议）：以"当前可投资结余的月数"为单位，
+ * 由 gains/costs/summary 文本信号 + stateVector + lane 启发式生成。
+ */
+export interface AssetProjection {
+  yearLabel: string;
+  years: number;
+  /** 相当于几个月可投资结余（保守情形） */
+  conservative: number;
+  base: number;
+  optimistic: number;
+  /** 该时点之后的月度趋势斜率（月/月），正值为上升 */
+  slope: number;
+}
+
+export type AssetTrend = "rising" | "stable" | "volatile" | "declining";
+
+export interface AssetOutlook {
+  horizonYears: number;
+  points: AssetProjection[];
+  trend: AssetTrend;
+  trendLabel: string;
+  /** 命中的文本信号，用于"依据"披露 */
+  signals: string[];
+  generatedBy: "heuristic" | "ai";
+  disclaimer: string;
+}
+
 export interface ForkPath {
   id: string;
   content?: ContentAttribution;
@@ -382,6 +410,7 @@ export interface ForkPath {
   costs: string[];
   futureSelfName: string;
   futureSelfVoice: string;
+  assetOutlook?: AssetOutlook;
   children?: ForkPath[];
 }
 

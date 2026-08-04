@@ -1,4 +1,5 @@
 import type { PointerEvent } from "react";
+import { ASSET_SIMULATION_TAG } from "@/lib/analysis/assetProjection";
 import { laneMeta, ROOT_NODE_ID, scaleMeta } from "./constants";
 import type { SceneRect, StableSceneNode } from "./model/stableScene";
 
@@ -151,6 +152,61 @@ export function LifeMapNode({
             <span>{scaleLabel}</span>
             <span style={{ color: active ? "var(--lf-gold)" : lane.color }}>{status}</span>
           </span>
+          {node.path.assetOutlook && (
+            <span className="mt-1.5 block" aria-hidden="true">
+              <svg
+                viewBox="0 0 100 12"
+                preserveAspectRatio="none"
+                className="block h-3 w-full opacity-80"
+              >
+                <title>{ASSET_SIMULATION_TAG}</title>
+                <path
+                  d={(() => {
+                    const points = node.path.assetOutlook.points;
+                    const max = Math.max(...points.map((point) => point.optimistic));
+                    const min = Math.min(0, ...points.map((point) => point.conservative));
+                    const span = max - min || 1;
+                    const step = 100 / Math.max(1, points.length - 1);
+                    const top = points
+                      .map(
+                        (point, index) =>
+                          `${index === 0 ? "M" : "L"}${(index * step).toFixed(1)},${(12 - ((point.optimistic - min) / span) * 11 - 0.5).toFixed(1)}`,
+                      )
+                      .join(" ");
+                    const bottom = [...points]
+                      .reverse()
+                      .map((point) => {
+                        const index = points.indexOf(point);
+                        return `L${(index * step).toFixed(1)},${(12 - ((point.conservative - min) / span) * 11 - 0.5).toFixed(1)}`;
+                      })
+                      .join(" ");
+                    return `${top} ${bottom} Z`;
+                  })()}
+                  fill={lane.color}
+                  opacity={0.28}
+                />
+                <path
+                  d={(() => {
+                    const points = node.path.assetOutlook.points;
+                    const max = Math.max(...points.map((point) => point.optimistic));
+                    const min = Math.min(0, ...points.map((point) => point.conservative));
+                    const span = max - min || 1;
+                    const step = 100 / Math.max(1, points.length - 1);
+                    return points
+                      .map(
+                        (point, index) =>
+                          `${index === 0 ? "M" : "L"}${(index * step).toFixed(1)},${(12 - ((point.base - min) / span) * 11 - 0.5).toFixed(1)}`,
+                      )
+                      .join(" ");
+                  })()}
+                  fill="none"
+                  stroke={lane.color}
+                  strokeWidth={1.6}
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+          )}
           <span
             className="mt-2 block font-semibold"
             style={{ fontSize: readableTitleSize, lineHeight: 1.3 }}

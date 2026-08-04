@@ -1,4 +1,5 @@
 import type { ForkPath, GenerateSelfSkillInput, LifeScale, LifeStateVector, SelfSkill, TimelineNode } from "@/lib/types";
+import { attachAssetOutlooks } from "@/lib/analysis/assetProjection";
 import { buildDynamicTypeBranchSignal, buildDynamicTypeProfile } from "@/lib/selfSkill/dynamicTypeRules";
 import { generateSelfSkill } from "@/lib/selfSkill/localGenerator";
 import { DAY, MONTH, WEEK, YEAR, timeRange } from "@/lib/selfSkill/timeRangeRules";
@@ -781,6 +782,8 @@ const generatedSelfSkill = generateSelfSkill(fullLifeDemoInput, {
   now: SCENARIO_CREATED_AT,
   seed: "life-scenario-lab-full-life-demo-v0.5",
 });
+// 演示数据同样经过资产情景启发式生成，保证示例里每个节点都有可交互趋势图
+const fullLifeDemoForksWithAssets = attachAssetOutlooks(fullLifeDemoForks);
 const fullLifeDemoDynamicTypeProfile = buildDynamicTypeProfile(fullLifeDemoInput, generatedSelfSkill.evidence, fullLifeDemoForks);
 
 function stageVoice(stage: "past" | "hidden" | "present" | "future" | "fork") {
@@ -852,7 +855,7 @@ export const fullLifeDemoSelfSkill: SelfSkill = {
   },
   timeline: fullLifeDemoTimeline,
   dynamicTypeProfile: fullLifeDemoDynamicTypeProfile,
-  forks: fullLifeDemoForks,
+  forks: fullLifeDemoForksWithAssets,
 };
 
 export const fullLifeDemoPersona = {
@@ -976,7 +979,7 @@ export function collectScenarioForkNodes(paths: readonly ForkPath[]): ForkPath[]
   return paths.flatMap((path) => [path, ...collectScenarioForkNodes(path.children ?? [])]);
 }
 
-const renderedForkNodeCount = collectScenarioForkNodes(fullLifeDemoForks).length;
+const renderedForkNodeCount = collectScenarioForkNodes(fullLifeDemoForksWithAssets).length;
 const renderedAppNodeCount = renderedForkNodeCount + APP_HISTORY_AND_CURRENT_NODE_COUNT;
 
 export const fullLifeDemoChoiceSets = [
@@ -1560,7 +1563,7 @@ export const fullLifeDemoFixture: FullLifeScenarioFixture = {
   canonicalPersona: fullLifeDemoPersona,
   lifeStages: fullLifeDemoStages,
   selfSkill: fullLifeDemoSelfSkill,
-  renderedForks: fullLifeDemoForks,
+  renderedForks: fullLifeDemoForksWithAssets,
   choiceSets: fullLifeDemoChoiceSets,
   representativePath: fullLifeRepresentativePath,
   replayBranches: fullLifeDemoReplayBranches,
@@ -1589,7 +1592,7 @@ export const fullLifeDemoFixture: FullLifeScenarioFixture = {
 };
 
 function findRenderedForkPath(nodeId: string): ForkPath | undefined {
-  return collectScenarioForkNodes(fullLifeDemoForks).find((node) => node.id === nodeId);
+  return collectScenarioForkNodes(fullLifeDemoForksWithAssets).find((node) => node.id === nodeId);
 }
 
 function mapRoleForScale(scale: LifeScale): ForkPath["mapRole"] {

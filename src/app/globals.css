@@ -103,6 +103,8 @@ input::placeholder {
     linear-gradient(90deg, var(--lf-map-grid) 1px, transparent 1px);
   background-size: 64px 64px;
   overscroll-behavior: contain;
+  /* 移动端必须禁用浏览器原生手势，否则双指捏合会缩放整个页面而非地图画布 */
+  touch-action: none;
 }
 
 /* line-clamp fallback: Tailwind's line-clamp-2 can lose the -webkit-box

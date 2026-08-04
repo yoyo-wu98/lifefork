@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import type { ForkPath } from "@/lib/types";
 import { DYNAMIC_TYPE_PROFILE_COPY } from "@/lib/content/copyRegistry";
 import type { ScenarioChoiceOption, ScenarioChoiceSet } from "@/lib/scenarios/types";
 import { useLifeforkStore } from "@/lib/stores/lifeforkStore";
-import { ROOT_NODE_ID, scaleMeta, stateLabels } from "./constants";
+import { AssetChartShell, INCOME_TIERS, SingleAssetChart } from "./AssetChart";
+import { laneMeta, ROOT_NODE_ID, scaleMeta, stateLabels } from "./constants";
 import { StateBar } from "./StateBar";
 
 const formatConfidence = (confidence: number) => `${Math.round(confidence * 100)}%`;
@@ -21,6 +23,7 @@ type NodeDetailPanelProps = {
 export function NodeDetailPanel({ path, nextScaleLabel, onNextScale, onSelect, choiceSets = [], onSelectChoice }: NodeDetailPanelProps) {
   const dynamicTypeLabels = DYNAMIC_TYPE_PROFILE_COPY.value.branchDetailLabels;
   const dynamicType = path.dynamicType;
+  const [monthlyIncome, setMonthlyIncome] = useState<number>(INCOME_TIERS[1]);
   const branchExplanation = useLifeforkStore((state) =>
     state.selfSkill?.integratedAnalysis?.branchExplanations.find(
       (item) => item.branchId === path.id,
@@ -55,6 +58,28 @@ export function NodeDetailPanel({ path, nextScaleLabel, onNextScale, onSelect, c
         </div>
       </div>
       <p className="my-5 max-w-[78ch] text-sm leading-7 text-mist">{path.summary}</p>
+
+      {path.assetOutlook && (
+        <div className="mb-5 rounded-lg border border-night/10 bg-deep/50 p-4">
+          <AssetChartShell
+            title="资产可能性范围 · 情景模拟"
+            subtitle={
+              <>
+                依据：{path.assetOutlook.signals.join("、")}
+                {path.assetOutlook.generatedBy === "ai" ? " · AI 生成" : " · 本地规则生成"}
+              </>
+            }
+            monthlyIncome={monthlyIncome}
+            onIncomeChange={setMonthlyIncome}
+          >
+            <SingleAssetChart
+              path={path}
+              monthlyIncome={monthlyIncome}
+              color={path.lane ? laneMeta[path.lane].color : "#6f87b8"}
+            />
+          </AssetChartShell>
+        </div>
+      )}
 
       {choiceSets.length > 0 && (
         <div className="mb-5 space-y-3 rounded-lg border border-gold/20 bg-gold/10 p-4">

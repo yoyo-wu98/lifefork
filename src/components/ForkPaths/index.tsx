@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   fullLifeDemoFixture,
   getFullLifeDemoChoiceSetsForNode,
@@ -9,6 +9,7 @@ import {
 import { useLifeforkStore } from "@/lib/stores/lifeforkStore";
 import type { ForkPath, SelfSkill } from "@/lib/types";
 import { ROOT_NODE_ID, scaleMeta } from "./constants";
+import { AssetChartShell, CompareAssetChart, INCOME_TIERS } from "./AssetChart";
 import { CurrentRouteBar } from "./CurrentRouteBar";
 import { LifeMapCanvas } from "./LifeMapCanvas";
 import { NodeDetailPanel } from "./NodeDetailPanel";
@@ -56,6 +57,11 @@ export function ForkPaths() {
     selfSkill.id === fullLifeDemoFixture.selfSkill.id
       ? getFullLifeDemoChoiceSetsForNode(activePath.id)
       : [];
+  const [compareIncome, setCompareIncome] = useState<number>(INCOME_TIERS[1]);
+  const assetComparePaths = useMemo(
+    () => futureRoots.filter((path) => path.assetOutlook),
+    [futureRoots],
+  );
   const previewPath = (path: ForkPath) => {
     onPreviewId(path.id);
   };
@@ -113,6 +119,19 @@ export function ForkPaths() {
           if (choicePath) onSelect(choicePath);
         }}
       />
+
+      {assetComparePaths.length >= 2 && (
+        <section className="rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-5 shadow-sm">
+          <AssetChartShell
+            title="各方案资产趋势对比 · 基准情形"
+            subtitle="把鼠标移到图上查看每个方案在同一年份的数值；虚线区间见上方单方案图。"
+            monthlyIncome={compareIncome}
+            onIncomeChange={setCompareIncome}
+          >
+            <CompareAssetChart paths={assetComparePaths} monthlyIncome={compareIncome} />
+          </AssetChartShell>
+        </section>
+      )}
     </section>
   );
 }
