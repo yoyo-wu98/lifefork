@@ -64,6 +64,17 @@ type PanState = {
   lastY: number;
 };
 
+type PinchState = {
+  pointerIds: [number, number];
+  lastDistance: number;
+  lastMidX: number;
+  lastMidY: number;
+};
+
+function distance(x1: number, y1: number, x2: number, y2: number) {
+  return Math.hypot(x2 - x1, y2 - y1);
+}
+
 const focusModes: FocusMode[] = ["single", "parent-self", "self-children"];
 const MIN_READABLE_FOCUS_ZOOM = 0.42;
 
@@ -156,6 +167,8 @@ export function LifeMapCanvas({
   const cameraRef = useRef<LifeMapCamera>({ x: 0, y: 0, zoom: cameraZoom.life });
   const panRef = useRef<PanState | null>(null);
   const dragRef = useRef<DragState | null>(null);
+  const pinchRef = useRef<PinchState | null>(null);
+  const activePointersRef = useRef(new Map<number, { x: number; y: number }>());
   const skipNextFocusRef = useRef(false);
   const hasInitializedRef = useRef(false);
   const interactionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -338,6 +351,23 @@ export function LifeMapCanvas({
     );
   };
 
+  const clampCamera = (next: LifeMapCamera): LifeMapCamera => {
+    // Keep at least a corner of the content world reachable — panning into
+    // empty space was the most common "map disappeared" accident.
+    const worldW = scene.worldBounds.x + scene.worldBounds.width + 240;
+    const worldH = scene.worldBounds.y + scene.worldBounds.height + 240;
+    const margin = 120;
+    const minX = -(worldW * next.zoom) + margin;
+    const maxX = viewport.width - margin;
+    const minY = -(worldH * next.zoom) + margin;
+    const maxY = viewport.height - margin;
+    return {
+      ...next,
+      x: Math.max(minX, Math.min(maxX, next.x)),
+      y: Math.max(minY, Math.min(maxY, next.y)),
+    };
+  };
+
   const zoomAtViewportCenter = (factor: number) => {
     const next = zoomCameraAroundPoint(
       cameraRef.current,
@@ -346,7 +376,7 @@ export function LifeMapCanvas({
     );
     skipNextFocusRef.current = true;
     markTransientInteraction();
-    setCamera(next);
+    setCamera(clampCamera(next));
     setSemanticScale(semanticScaleForZoom(next.zoom));
   };
 
@@ -365,11 +395,11 @@ export function LifeMapCanvas({
     if (!shouldZoom) {
       skipNextFocusRef.current = true;
       markTransientInteraction();
-      setCamera({
+      setCamera(clampCamera({
         ...cameraRef.current,
         x: cameraRef.current.x - event.deltaX,
         y: cameraRef.current.y - event.deltaY,
-      });
+      }));
       return;
     }
 
@@ -385,7 +415,7 @@ export function LifeMapCanvas({
     );
     skipNextFocusRef.current = true;
     markTransientInteraction();
-    setCamera(next);
+    setCamera(clampCamera(next));
     setSemanticScale(semanticScaleForZoom(next.zoom));
   };
 
@@ -412,6 +442,27 @@ export function LifeMapCanvas({
     if (target.closest("[data-map-node]")) return;
 
     event.currentTarget.setPointerCapture(event.pointerId);
+    activePointersRef.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    });
+
+    // Second finger → switch from pan to pinch.
+    if (activePointersRef.current.size === 2) {
+      const [a, b] = Array.from(activePointersRef.current.values());
+      const midX = (a.x + b.x) / 2;
+      const midY = (a.y + b.y) / 2;
+      pinchRef.current = {
+        pointerIds: [event.pointerId, Array.from(activePointersRef.current.keys()).find((k) => k !== event.pointerId)!],
+        lastDistance: distance(a.x, a.y, b.x, b.y),
+        lastMidX: midX,
+        lastMidY: midY,
+      };
+      panRef.current = null;
+      setDirectManipulation(true);
+      return;
+    }
+
     panRef.current = {
       pointerId: event.pointerId,
       lastX: event.clientX,
@@ -440,17 +491,60 @@ export function LifeMapCanvas({
       return;
     }
 
+    // Track all active pointers for pinch.
+    if (activePointersRef.current.has(event.pointerId)) {
+      activePointersRef.current.set(event.pointerId, {
+        x: event.clientX,
+        y: event.clientY,
+      });
+    }
+
+    const pinch = pinchRef.current;
+    if (pinch && pinch.pointerIds.includes(event.pointerId)) {
+      const points = pinch.pointerIds
+        .map((pid) => activePointersRef.current.get(pid))
+        .filter((p): p is { x: number; y: number } => Boolean(p));
+      if (points.length === 2) {
+        const [a, b] = points;
+        const nextDistance = distance(a.x, a.y, b.x, b.y);
+        const nextMidX = (a.x + b.x) / 2;
+        const nextMidY = (a.y + b.y) / 2;
+        const scaleDelta = nextDistance / Math.max(1, pinch.lastDistance);
+        const panDeltaX = nextMidX - pinch.lastMidX;
+        const panDeltaY = nextMidY - pinch.lastMidY;
+
+        const rect = viewportRef.current?.getBoundingClientRect();
+        if (rect) {
+          const point = { x: nextMidX - rect.left, y: nextMidY - rect.top };
+          const nextZoom = cameraRef.current.zoom * scaleDelta;
+          const zoomed = zoomCameraAroundPoint(cameraRef.current, point, nextZoom);
+          skipNextFocusRef.current = true;
+          markTransientInteraction();
+          setCamera(clampCamera({
+            ...zoomed,
+            x: zoomed.x + panDeltaX,
+            y: zoomed.y + panDeltaY,
+          }));
+          setSemanticScale(semanticScaleForZoom(zoomed.zoom));
+        }
+        pinch.lastDistance = nextDistance;
+        pinch.lastMidX = nextMidX;
+        pinch.lastMidY = nextMidY;
+      }
+      return;
+    }
+
     const pan = panRef.current;
     if (!pan || pan.pointerId !== event.pointerId) return;
     const deltaX = event.clientX - pan.lastX;
     const deltaY = event.clientY - pan.lastY;
     pan.lastX = event.clientX;
     pan.lastY = event.clientY;
-    setCamera({
+    setCamera(clampCamera({
       ...cameraRef.current,
       x: cameraRef.current.x + deltaX,
       y: cameraRef.current.y + deltaY,
-    });
+    }));
   };
 
   const finishPointerInteraction = (event: PointerEvent<HTMLDivElement>) => {
@@ -463,7 +557,22 @@ export function LifeMapCanvas({
       panRef.current = null;
       skipNextFocusRef.current = true;
     }
-    setDirectManipulation(false);
+    activePointersRef.current.delete(event.pointerId);
+    if (pinchRef.current?.pointerIds.includes(event.pointerId)) {
+      pinchRef.current = null;
+      // If one finger remains, resume pan with it.
+      const remaining = Array.from(activePointersRef.current.entries())[0];
+      if (remaining) {
+        panRef.current = {
+          pointerId: remaining[0],
+          lastX: remaining[1].x,
+          lastY: remaining[1].y,
+        };
+      }
+    }
+    if (activePointersRef.current.size === 0) {
+      setDirectManipulation(false);
+    }
   };
 
   useEffect(() => {
@@ -509,7 +618,7 @@ export function LifeMapCanvas({
     setDirectManipulation(false);
     setFocusMode("single");
     setSemanticScale("life");
-    setCamera(initialCameraForScene(scene, viewport));
+    setCamera(clampCamera(initialCameraForScene(scene, viewport)));
     const root = scene.nodeById.get(ROOT_NODE_ID);
     if (root) onPreview(root.path);
   };
@@ -565,8 +674,8 @@ export function LifeMapCanvas({
           <button
             type="button"
             className="h-10 w-10 rounded-lg border border-night/10 bg-[var(--lf-paper-raised)] text-base text-ink hover:border-blue/35"
-            aria-label="重置人生地图镜头"
-            title="重置镜头"
+            aria-label="回到全景视图"
+            title="回到全景视图"
             onClick={resetCamera}
           >
             ⌖
@@ -609,7 +718,8 @@ export function LifeMapCanvas({
         </div>
 
         <div className="pointer-events-none absolute bottom-5 left-5 z-40 max-w-[calc(100%-2.5rem)] rounded-lg border border-[var(--lf-map-line)] bg-[var(--lf-map-label)] px-3 py-2 text-xs text-[var(--lf-map-muted)]">
-          滚轮缩放 · 双指移动 · 点击查看 · 双击切换聚焦范围
+          <span className="hidden sm:inline">滚轮缩放 · 双指移动 · 点击查看 · 双击切换聚焦范围</span>
+          <span className="sm:hidden">双指开合缩放 · 拖动移动 · 点按查看</span>
         </div>
 
         <div

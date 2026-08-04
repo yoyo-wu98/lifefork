@@ -63,7 +63,7 @@ export const stateLabels: Array<[keyof LifeStateVector, string]> = [
 // ── Focus mode labels ─────────────────────────────────────────────────
 
 export const focusModeLabel: Record<FocusMode, string> = {
-  single: "只看当前节点",
-  "parent-self": "父节点和当前节点",
-  "self-children": "当前节点和子节点",
+  single: "只看这一个",
+  "parent-self": "和上一层对比",
+  "self-children": "展开看下一步",
 };
