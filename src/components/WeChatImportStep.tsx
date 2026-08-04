@@ -180,7 +180,7 @@ export function WeChatImportStep() {
             />
           </label>
           <textarea
-            className="min-h-56 w-full resize-y rounded-lg border border-night/10 bg-deep/70 p-4 text-sm leading-6 outline-none focus:border-blue focus:bg-[oklch(0.995_0.003_92)]"
+            className="min-h-56 w-full resize-y rounded-lg border border-night/10 bg-deep/70 p-4 text-base leading-6 outline-none focus:border-blue focus:bg-[oklch(0.995_0.003_92)]"
             placeholder={`也可以直接粘贴聊天记录。例如：
 [2026-04-24 21:10:03] 我：我最近总觉得被困住了
 [2026-04-24 21:11:20] 朋友：你也许没有讨厌工作，只是太想做自己的东西了？`}

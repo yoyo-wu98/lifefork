@@ -31,7 +31,7 @@ export function ExtraTextStep() {
       </div>
       <textarea
         placeholder="例如：我正在考虑辞职做自己的项目。主要顾虑是收入不稳定，也担心半年后发现方向不适合。"
-        className="min-h-44 w-full resize-y rounded-lg border border-night/10 bg-deep/70 p-4 text-sm leading-6 outline-none focus:border-blue focus:bg-[oklch(0.995_0.003_92)]"
+        className="min-h-44 w-full resize-y rounded-lg border border-night/10 bg-deep/70 p-4 text-base leading-6 outline-none focus:border-blue focus:bg-[oklch(0.995_0.003_92)]"
         value={extraText}
         maxLength={limit}
         onChange={(e) => setExtraText(e.target.value)}

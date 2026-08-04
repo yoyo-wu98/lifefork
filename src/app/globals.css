@@ -38,7 +38,7 @@ body {
   background:
     linear-gradient(180deg, var(--lf-page) 0%, var(--lf-page-soft) 100%);
   color: var(--lf-ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Segoe UI", system-ui, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -58,7 +58,7 @@ button {
   min-height: 2.5rem;
 }
 
-button,
+button:not(:disabled),
 textarea,
 input {
   transition:
@@ -103,6 +103,15 @@ input::placeholder {
     linear-gradient(90deg, var(--lf-map-grid) 1px, transparent 1px);
   background-size: 64px 64px;
   overscroll-behavior: contain;
+}
+
+/* line-clamp fallback: Tailwind's line-clamp-2 can lose the -webkit-box
+   prefix in production builds; this keeps the ellipsis truncation. */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 [data-testid="life-map-viewport"] .text-ink {

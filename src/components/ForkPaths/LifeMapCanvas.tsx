@@ -699,7 +699,7 @@ export function LifeMapCanvas({
       <div
         ref={viewportRef}
         data-testid="life-map-viewport"
-        className="life-map-viewport relative h-[560px] touch-none overflow-hidden rounded-lg border border-[var(--lf-map-line)] bg-[var(--lf-map)] md:h-[680px]"
+        className="life-map-viewport relative h-[min(680px,calc(100svh-220px))] min-h-[420px] touch-none overflow-hidden rounded-lg border border-[var(--lf-map-line)] bg-[var(--lf-map)] md:h-[min(680px,calc(100svh-200px))]"
         tabIndex={0}
         role="application"
         aria-label="人生方案地图。滚轮缩放，触控板双指移动，点击节点查看详情，双击切换聚焦范围。"
