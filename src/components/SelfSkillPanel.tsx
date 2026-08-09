@@ -2,7 +2,6 @@
 
 import {
   ArrowRight,
-  BarChart3,
   CheckCircle2,
   ChevronDown,
   Database,
@@ -11,6 +10,7 @@ import {
   MessageSquareText,
   Settings2,
 } from "lucide-react";
+import { DecisionBriefPanel } from "@/components/DecisionBriefPanel";
 import { ANALYSIS_METHODS } from "@/lib/analysis/methodRegistry";
 import { useLifeforkStore } from "@/lib/stores/lifeforkStore";
 import type {
@@ -143,40 +143,7 @@ export function SelfSkillPanel() {
         </div>
       </header>
 
-      <section aria-labelledby="summary-heading">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="size-5 text-blue" aria-hidden="true" />
-          <h2 id="summary-heading" className="text-xl font-semibold text-ink">
-            先看重点
-          </h2>
-        </div>
-        <dl className="mt-4 grid border-y border-night/10 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="border-b border-night/10 py-4 sm:border-r lg:border-b-0">
-            <dt className="text-xs text-mist">当前核心冲突</dt>
-            <dd className="mt-1 text-base font-semibold text-ink">
-              {selfSkill.semantic.innerConflict}
-            </dd>
-          </div>
-          <div className="border-b border-night/10 py-4 sm:pl-4 lg:border-b-0 lg:border-r">
-            <dt className="text-xs text-mist">决策方式</dt>
-            <dd className="mt-1 text-base font-semibold text-ink">
-              {selfSkill.decision.riskPreference}
-            </dd>
-          </div>
-          <div className="border-b border-night/10 py-4 sm:border-b-0 sm:border-r lg:pl-4">
-            <dt className="text-xs text-mist">表达风格</dt>
-            <dd className="mt-1 text-base font-semibold text-ink">
-              {selfSkill.voice.toneName}
-            </dd>
-          </div>
-          <div className="py-4 sm:pl-4">
-            <dt className="text-xs text-mist">当前选择</dt>
-            <dd className="mt-1 line-clamp-2 text-sm font-medium leading-6 text-ink">
-              {selfSkill.questions.currentChoice}
-            </dd>
-          </div>
-        </dl>
-      </section>
+      <DecisionBriefPanel selfSkill={selfSkill} onNavigate={setStep} />
 
       {analysis && (
         <section aria-labelledby="insights-heading">

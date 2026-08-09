@@ -57,7 +57,7 @@ export function ForkPaths() {
     selfSkill.id === fullLifeDemoFixture.selfSkill.id
       ? getFullLifeDemoChoiceSetsForNode(activePath.id)
       : [];
-  const [compareIncome, setCompareIncome] = useState<number>(INCOME_TIERS[1]);
+  const [compareIncome, setCompareIncome] = useState<number>(INCOME_TIERS[0]);
   const assetComparePaths = useMemo(
     () => futureRoots.filter((path) => path.assetOutlook),
     [futureRoots],
@@ -121,16 +121,29 @@ export function ForkPaths() {
       />
 
       {assetComparePaths.length >= 2 && (
-        <section className="rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-5 shadow-sm">
-          <AssetChartShell
-            title="各方案资产趋势对比 · 基准情形"
-            subtitle="把鼠标移到图上查看每个方案在同一年份的数值；虚线区间见上方单方案图。"
-            monthlyIncome={compareIncome}
-            onIncomeChange={setCompareIncome}
-          >
-            <CompareAssetChart paths={assetComparePaths} monthlyIncome={compareIncome} />
-          </AssetChartShell>
-        </section>
+        <details className="group border-y border-night/10 py-5">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+            <div>
+              <p className="text-base font-semibold text-ink">比较各方案的结余累积示意</p>
+              <p className="mt-1 text-xs leading-5 text-mist">
+                高级情景图，默认使用相对单位，不参与方案推荐排序。
+              </p>
+            </div>
+            <span className="rounded-full border border-night/10 px-3 py-1 text-xs text-mist group-open:text-blue">
+              展开对比
+            </span>
+          </summary>
+          <div className="mt-4 border-t border-night/10 pt-4">
+            <AssetChartShell
+              title="各方案结余累积趋势 · 基准情形"
+              subtitle="把指针移到图上查看同一年份的相对差异。单个方案的乐观与保守区间可在节点详情中查看。"
+              monthlyIncome={compareIncome}
+              onIncomeChange={setCompareIncome}
+            >
+              <CompareAssetChart paths={assetComparePaths} monthlyIncome={compareIncome} />
+            </AssetChartShell>
+          </div>
+        </details>
       )}
     </section>
   );

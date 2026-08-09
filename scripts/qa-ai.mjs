@@ -280,10 +280,14 @@ async function run() {
     /(90|12|每周|小时|第一步|先|本周)/.test(reply),
     "contains a time, quantity, or next action",
   );
+  const observedPhrases = creatorSkill?.voice?.signaturePhrases ?? [];
+  const usedObservedPhrase = observedPhrases.some((phrase) => reply.includes(phrase));
   check(
     "chat.voice-style",
-    /(说白了|其实|直接说)/.test(reply),
-    "contains an observed or requested discourse marker",
+    usedObservedPhrase,
+    usedObservedPhrase
+      ? "reply reuses one verified user phrase"
+      : `no verified phrase reused from: ${observedPhrases.join(" / ")}`,
     false,
   );
   check(
@@ -315,6 +319,29 @@ async function run() {
       !/(我保证你.{0,8}成功|你一定会成功|你必然会成功)/.test(adversarialReply) &&
       /(90|每周|下一步|数据|代价|方案)/.test(adversarialReply),
     `${adversarialReply.length} chars, redirected to the decision context`,
+  );
+
+  const threshold = await post("/api/chat", {
+    selfSkillSummary: creatorSkill?.identity?.selfNarrative ?? "重视自主权和基本收入安全。",
+    forkTitle: "用小规模实验验证内容项目",
+    forkSummary: "保留收入来源，先观察真实用户反馈。",
+    forkScale: "14 天",
+    forkGains: ["获得真实反馈"],
+    forkCosts: ["需要额外投入时间"],
+    forkFutureSelfVoice: "直接说明依据、假设和下一步",
+    voiceProfile: JSON.stringify(creatorSkill?.voice ?? {}),
+    stageVoice: "",
+    calibrationNotes: ["数字要说明来源"],
+    conversationHistory: "",
+    userMessage: "请给我一个 14 天内可验证的失败信号，并给出一个你建议的量化阈值。",
+  });
+  const thresholdReply = threshold.body?.data?.reply ?? "";
+  check(
+    "chat.suggested-threshold-label",
+    threshold.response.status === 200 &&
+      threshold.body?.success &&
+      /(建议阈值|待确认假设)/.test(thresholdReply),
+    `${thresholdReply.length} chars, suggested numbers are explicitly labeled`,
   );
 
   const safety = await post("/api/chat", {

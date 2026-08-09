@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BrainCircuit, LoaderCircle } from "lucide-react";
+import { BrainCircuit, CheckCircle2, LoaderCircle } from "lucide-react";
 import { useLifeforkStore } from "@/lib/stores/lifeforkStore";
 import { disclaimer } from "@/lib/copy";
 import { containsCrisisSignal, safetyMessage } from "@/lib/safety";
@@ -137,6 +137,8 @@ export function WeChatImportStep() {
   };
 
   const skip = () => {
+    setWechatRaw("");
+    setWechatAnalysis(null);
     setStep("extra-text");
   };
   const next = () => {
@@ -158,14 +160,9 @@ export function WeChatImportStep() {
             <strong className="text-ink">不知道从哪里导出？直接点「跳过」即可，这一步不是必须的。</strong>
           </p>
         </div>
-        <div className="flex gap-2">
-          <button type="button" onClick={back} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
-            上一步
-          </button>
-          <button type="button" onClick={skip} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
-            跳过此步
-          </button>
-        </div>
+        <button type="button" onClick={back} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
+          上一步
+        </button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
@@ -282,14 +279,14 @@ export function WeChatImportStep() {
 
       <div className="flex flex-wrap gap-3">
         <button type="button" onClick={skip} className="rounded-lg border border-night/15 px-5 py-2 text-sm text-ink hover:bg-deep">
-          跳过此步，继续下一步
+          不使用聊天记录
         </button>
         <button
           disabled={!wechatAnalysis}
           onClick={next}
           className="rounded-lg bg-night px-5 py-2 text-sm font-medium text-deep shadow-quiet disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {wechatAnalysis ? "把分析结果加入个人分析" : "先点上方「本地分析这段聊天」"}
+          {wechatAnalysis ? "使用当前分析并继续" : "请先完成本地分析"}
         </button>
         {wechatAnalysis && canUseServerAi && (
           <button
@@ -303,10 +300,30 @@ export function WeChatImportStep() {
             ) : (
               <BrainCircuit className="size-4" aria-hidden="true" />
             )}
-            {wechatAnalysis.aiAnalysis ? "重新做 AI 深度分析" : "使用服务器 AI 深度分析"}
+            {wechatAnalysis.aiAnalysis
+              ? "重新做服务器 AI 补充"
+              : "使用服务器 AI 补充分析"}
           </button>
         )}
       </div>
+      {wechatAnalysis?.aiAnalysis && (
+        <div className="flex flex-wrap items-center gap-2 border-y border-night/10 py-3 text-xs leading-5">
+          <CheckCircle2 className="size-4 shrink-0 text-blue" aria-hidden="true" />
+          <span className="font-medium text-ink">
+            {wechatAnalysis.aiAnalysis.execution.used
+              ? "服务器 AI 补充已完成"
+              : "服务器未返回模型结果，当前继续使用本地分析"}
+          </span>
+          <span className="text-mist">
+            {wechatAnalysis.aiAnalysis.execution.used
+              ? `${wechatAnalysis.aiAnalysis.execution.provider} / ${wechatAnalysis.aiAnalysis.execution.model}`
+              : wechatAnalysis.aiAnalysis.execution.fallbackReason || "本地备用结果"}
+            {wechatAnalysis.aiAnalysis.execution.durationMs
+              ? ` · ${(wechatAnalysis.aiAnalysis.execution.durationMs / 1000).toFixed(1)} 秒`
+              : ""}
+          </span>
+        </div>
+      )}
       {wechatAnalysis && canUseServerAi && (
         <p className="text-xs leading-5 text-mist">
           服务器只接收上方的本地统计摘要、主题和情绪标签；聊天原文与关键片段留在此页面内存中，刷新或离开后清除。

@@ -4,8 +4,8 @@ import { useMemo, useState, type ReactNode } from "react";
 import type { AssetProjection, ForkPath } from "@/lib/types";
 import { laneMeta } from "./constants";
 
-export const INCOME_TIERS = [4000, 10000, 20000] as const;
-export const INCOME_TIER_LABELS = ["约 4 千", "约 1 万", "约 2 万"] as const;
+export const INCOME_TIERS = [0, 4000, 10000, 20000] as const;
+export const INCOME_TIER_LABELS = ["相对单位", "约 4 千元/月", "约 1 万元/月", "约 2 万元/月"] as const;
 
 type Mode = "optimistic" | "base" | "conservative";
 
@@ -22,6 +22,19 @@ const fmt = (value: number) => {
   if (abs >= 10000) return `${sign}${(abs / 10000).toFixed(abs >= 100000 ? 0 : 1)} 万`;
   return `${sign}${abs >= 100 ? Math.round(abs) : value % 1 ? value.toFixed(1) : value}`;
 };
+
+function formatProjectionValue(unitValue: number, monthlyIncome: number): string {
+  if (monthlyIncome <= 0) return `${fmt(unitValue)} 个月结余`;
+  return `${formatWan((unitValue * monthlyIncome) / 10000)} 元`;
+}
+
+function formatProjectionRange(
+  conservative: number,
+  optimistic: number,
+  monthlyIncome: number,
+): string {
+  return `${formatProjectionValue(conservative, monthlyIncome)} ~ ${formatProjectionValue(optimistic, monthlyIncome)}`;
+}
 
 export function formatWan(value: number): string {
   const sign = value < 0 ? "-" : "";
@@ -59,7 +72,7 @@ export function AssetChartShell({
           {subtitle && <p className="mt-1 text-xs leading-5 text-mist">{subtitle}</p>}
         </div>
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="text-mist">每月可投资结余假设</span>
+          <span className="text-mist">显示单位</span>
           {INCOME_TIERS.map((tier, index) => (
             <button
               key={tier}
@@ -72,7 +85,7 @@ export function AssetChartShell({
                   : "border-night/10 text-mist hover:bg-night/5"
               }`}
             >
-              {INCOME_TIER_LABELS[index]}元/月
+              {INCOME_TIER_LABELS[index]}
             </button>
           ))}
         </div>
@@ -80,23 +93,23 @@ export function AssetChartShell({
       {children}
       {footer}
       <p className="text-[11px] leading-5 text-mist/80">
-        情景模拟范围示意，不是预测，也不是理财建议。区间基于这个方案的文字描述与状态评估生成，越远的年份范围越宽。
+        默认以「1 个月可投资结余」为单位，只用于比较方案。金额换算只执行单位乘法，未纳入起始资产、投资回报、税费和通胀。区间来自文字信号与状态评估，不能作为财务预测或理财建议。
       </p>
     </div>
   );
 }
 
-function useGeometry(points: AssetProjection[]) {
+function useGeometry(points: AssetProjection[], xCount = points.length) {
   return useMemo(() => {
     const maxValue = Math.max(1, ...points.map((point) => point.optimistic));
     const minValue = Math.min(0, ...points.map((point) => point.conservative));
     const span = maxValue - minValue || 1;
     const x = (index: number) =>
-      PAD.left + (points.length <= 1 ? INNER_W / 2 : (index / (points.length - 1)) * INNER_W);
+      PAD.left + (xCount <= 1 ? INNER_W / 2 : (index / (xCount - 1)) * INNER_W);
     const y = (value: number) =>
       PAD.top + INNER_H - ((value - minValue) / span) * INNER_H;
     return { maxValue, minValue, x, y };
-  }, [points]);
+  }, [points, xCount]);
 }
 
 function bandPath(points: AssetProjection[], geo: ReturnType<typeof useGeometry>): string {
@@ -135,7 +148,7 @@ export function SingleAssetChart({
 
   const activePoint = hoverIndex !== null ? outlook.points[hoverIndex] : null;
   const tickValues = [geo.maxValue, geo.maxValue / 2, Math.max(0, geo.minValue)];
-  const fmtAxis = (unitValue: number) => formatWan((unitValue * monthlyIncome * 12) / 10000);
+  const fmtAxis = (unitValue: number) => formatProjectionValue(unitValue, monthlyIncome);
 
   return (
     <div className="space-y-2">
@@ -163,7 +176,7 @@ export function SingleAssetChart({
           viewBox={`0 0 ${CHART_W} ${CHART_H}`}
           className="block w-full"
           role="img"
-          aria-label={`${path.title} 的资产情景模拟图`}
+          aria-label={`${path.title} 的可投资结余累积情景图`}
           onPointerLeave={() => setHoverIndex(null)}
         >
           {/* 网格与纵轴刻度 */}
@@ -238,14 +251,14 @@ export function SingleAssetChart({
           <div className="pointer-events-none absolute left-2 top-2 rounded-lg border border-night/10 bg-[var(--lf-paper-raised)] px-3 py-2 text-xs shadow-sm">
             <p className="font-medium text-ink">{activePoint.yearLabel}后 · {MODE_LABEL[mode]}</p>
             <p className="mt-1 text-mist">
-              约 {formatWan((activePoint[mode] * monthlyIncome * 12) / 10000)} 元
+              {formatProjectionValue(activePoint[mode], monthlyIncome)}
               <span className="text-mist/70">
-                （区间 {formatWan((activePoint.conservative * monthlyIncome * 12) / 10000)} ~ {formatWan((activePoint.optimistic * monthlyIncome * 12) / 10000)}）
+                （区间 {formatProjectionRange(activePoint.conservative, activePoint.optimistic, monthlyIncome)}）
               </span>
             </p>
             <p className="mt-1 text-mist/80">
-              之后月度趋势：{activePoint.slope >= 0 ? "+" : ""}
-              {fmt(activePoint.slope * monthlyIncome)} 元/月
+              下一年变化：{activePoint.slope >= 0 ? "+" : ""}
+              {formatProjectionValue(activePoint.slope, monthlyIncome)}
             </p>
           </div>
         )}
@@ -265,7 +278,10 @@ export function CompareAssetChart({
   const horizon = Math.max(...paths.map((path) => path.assetOutlook?.horizonYears ?? 0), 1);
   const years = Array.from({ length: horizon }, (_, index) => index + 1);
   const allPoints = paths.flatMap((path) => path.assetOutlook?.points ?? []);
-  const geo = useGeometry(allPoints.filter((point) => point.years <= horizon));
+  const geo = useGeometry(
+    allPoints.filter((point) => point.years <= horizon),
+    years.length,
+  );
 
   const series = paths.map((path) => {
     const points = path.assetOutlook?.points ?? [];
@@ -289,7 +305,7 @@ export function CompareAssetChart({
           viewBox={`0 0 ${CHART_W} ${CHART_H}`}
           className="block w-full"
           role="img"
-          aria-label="各方案资产情景对比图"
+          aria-label="各方案可投资结余累积情景对比图"
           onPointerLeave={() => setHoverIndex(null)}
         >
           {[geo.maxValue, geo.maxValue / 2, Math.max(0, geo.minValue)].map((value) => (
@@ -304,7 +320,7 @@ export function CompareAssetChart({
                 strokeDasharray="3 4"
               />
               <text x={PAD.left - 6} y={geo.y(value) + 4} textAnchor="end" className="fill-mist text-[10px]">
-                {formatWan((value * monthlyIncome * 12) / 10000)}
+                {formatProjectionValue(value, monthlyIncome)}
               </text>
             </g>
           ))}
@@ -380,7 +396,7 @@ export function CompareAssetChart({
               return (
                 <p key={path.id} className="text-mist">
                   <span className="mr-1.5 inline-block h-2 w-2 rounded-full" style={{ background: color }} />
-                  约 {formatWan((point.base * monthlyIncome * 12) / 10000)} 元（{formatWan((point.conservative * monthlyIncome * 12) / 10000)} ~ {formatWan((point.optimistic * monthlyIncome * 12) / 10000)}）
+                  {formatProjectionValue(point.base, monthlyIncome)}（{formatProjectionRange(point.conservative, point.optimistic, monthlyIncome)}）
                 </p>
               );
             })}

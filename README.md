@@ -23,12 +23,14 @@ V0.8 面向公开测试：
 2. 可选导入微信文本，在浏览器本地提取主题和情绪线索。
 3. 可选补充日记、备忘录或聊天片段。
 4. 选择分析方法、开关和权重。
-5. 生成个人分析报告。
+5. 生成个人分析报告，并先看到当前问题、证据、未知项和 14 天验证计划。
 6. 查看并修改人生时间线。
 7. 在人生方案地图中切换全人生、十年、阶段、一年、一月、一周、一天和一小时尺度。
-8. 查看每条分支的收益、成本、状态变化、生成依据和未知因素。
+8. 查看每条分支的收益、成本、状态变化、生成依据和未知因素；高级结余图默认使用相对单位。
 9. 与该分支下的模拟版本对话，并持续校准说话方式。
-10. 生成结果卡片或导出完整 `Self Skill` JSON。
+10. 生成包含方案理由、未知项和下一步的决策摘要，或导出完整 `Self Skill` JSON。
+
+首次使用时只需选择一个分析预设。单项方法和权重放在高级设置中，按需展开。
 
 分析方法：
 
@@ -65,7 +67,7 @@ npm run start:3005
 
 打开 [http://localhost:3005](http://localhost:3005)。
 
-不要同时运行多个开发或生产进程。地图验收优先使用生产预览，避免开发文件监听器占用额外内存。
+开发命令默认使用 Turbopack，减少大型依赖目录下的文件监听开销。`npm run dev:webpack` 只用于定位特定兼容问题。不要同时运行多个开发或生产进程；完整验收优先使用生产预览。
 
 ## 环境变量
 
@@ -254,11 +256,13 @@ src/
     api/
   components/
     AnalysisMethodStep.tsx
+    DecisionBriefPanel.tsx
     SelfSkillPanel.tsx
     ForkPaths/
   lib/
     analysis/
     ai/
+    decisionBrief.ts
     selfSkill/
     server/
     stores/
@@ -268,6 +272,7 @@ src/
 
 - `src/lib/analysis/`：方法注册、权重、文化排盘和综合报告
 - `src/lib/ai/`：模型网关、提示词、预算和请求校验
+- `src/lib/decisionBrief.ts`：把报告、方案和最终结果统一为同一份决策摘要
 - `src/lib/server/`：匿名会话、限流、后台认证和全局配置
 - `src/lib/selfSkill/`：本地分析、时间线、分支树和阶段性格
 - `src/components/ForkPaths/`：稳定场景、相机、可见性、节点和连线
@@ -277,6 +282,7 @@ src/
 - [公开测试产品需求与交互规范](docs/PUBLIC_BETA_PRODUCT_SPEC.md)
 - [AI 核心功能验收与体验评估报告](docs/AI_CORE_ACCEPTANCE_REPORT.md)
 - [端到端用户体验与发布验收报告](docs/END_TO_END_USER_AUDIT_2026-07-31.md)
+- [V0.8.2 全流程重构与验收报告](docs/PRODUCT_REFACTOR_AND_ACCEPTANCE_2026-08-09.md)
 - [分析方法、权重与来源规范](docs/ANALYSIS_METHODS_AND_PROVENANCE.md)
 - [V0.8 技术审计与重构报告](docs/PUBLIC_BETA_TECHNICAL_REPORT.md)
 - [人生地图交互规范](docs/LIFE_MAP_INTERACTION_SPEC.md)

@@ -68,7 +68,7 @@ npm run build:cloudflare
 托管环境必须设置：
 
 ```dotenv
-LIFEFORK_VERSION=0.8.0
+LIFEFORK_VERSION=0.8.2
 LIFEFORK_AI_ENABLED=true
 LIFEFORK_AI_PROVIDER=openai
 LIFEFORK_COOKIE_SECURE=true
@@ -82,7 +82,7 @@ OPENAI_MODEL=gpt-5.6-terra
 
 部署后验证：
 
-1. `/api/health` 返回 `status: ok` 和 `version: 0.8.0`。
+1. `/api/health` 返回 `status: ok` 和 `version: 0.8.2`。
 2. `/admin` 登录成功。
 3. 修改公告并保存，刷新后仍存在。
 4. 生成或聊天响应元数据包含实际 provider 和 model。

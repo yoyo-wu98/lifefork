@@ -1,10 +1,11 @@
 {
   "name": "lifefork",
-  "version": "0.8.0",
+  "version": "0.8.2",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack --disable-source-maps",
-    "dev:3005": "next dev --webpack --disable-source-maps -p 3005",
+    "dev": "next dev --turbopack --disable-source-maps",
+    "dev:3005": "next dev --turbopack --disable-source-maps -p 3005",
+    "dev:webpack": "next dev --webpack --disable-source-maps",
     "build": "next build",
     "build:cloudflare": "node scripts/build-cloudflare.mjs",
     "postbuild": "node scripts/prepare-standalone.mjs",

@@ -4,6 +4,7 @@ import {
   BarChart3,
   BrainCircuit,
   CalendarRange,
+  ChevronDown,
   Cpu,
   Database,
   Fingerprint,
@@ -64,6 +65,11 @@ export function AnalysisMethodStep() {
   const createSkill = useLifeforkStore((state) => state.createSkill);
   const runtimeConfig = useLifeforkStore((state) => state.runtimeConfig);
   const normalizedWeights = normalizeMethodWeights(settings.methods);
+  const enabledMethodCount = settings.methods.filter((method) => method.enabled).length;
+  const activePresetLabel =
+    settings.preset === "custom"
+      ? "自定义配置"
+      : ANALYSIS_PRESETS[settings.preset].label;
   const culturalEnabled = runtimeConfig.features.culturalMethods && settings.methods.some(
     (method) => method.enabled && (method.id === "bazi" || method.id === "ziwei"),
   );
@@ -160,104 +166,121 @@ export function AnalysisMethodStep() {
                 );
               })}
             </div>
+            <p className="mt-3 text-xs leading-5 text-mist">
+              当前：{activePresetLabel}，启用 {enabledMethodCount} 种方法。大多数用户可以直接继续生成。
+            </p>
           </section>
 
-          <section className="divide-y divide-night/10 border-y border-night/10" aria-label="分析方法">
-            {settings.methods.map((method) => {
-              const Icon = METHOD_ICONS[method.id];
-              const methodAvailable =
-                runtimeConfig.features.culturalMethods ||
-                (method.id !== "bazi" && method.id !== "ziwei");
-              return (
-                <article
-                  key={method.id}
-                  className={`grid gap-4 py-5 md:grid-cols-[1fr_220px] ${
-                    methodAvailable ? "" : "opacity-50"
-                  }`}
-                >
-                  <div className="flex gap-3">
-                    <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-night text-deep">
-                      <Icon className="size-4" aria-hidden="true" />
-                    </span>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-sm font-semibold text-ink">{method.label}</h3>
-                        <span className="rounded-full border border-night/10 px-2 py-0.5 text-[11px] text-mist">
-                          {RELIABILITY_LABELS[method.reliability]}
-                        </span>
-                      </div>
-                      <p className="mt-1 max-w-[64ch] text-xs leading-5 text-mist">
-                        {method.description}
-                      </p>
-                      {!methodAvailable && (
-                        <p className="mt-1 text-xs font-medium text-mist">
-                          当前测试环境已关闭这项方法。
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={method.enabled}
-                      disabled={!methodAvailable}
-                      aria-label={`${method.enabled ? "关闭" : "启用"}${method.label}`}
-                      onClick={() =>
-                        setSettings({
-                          ...settings,
-                          preset: "custom",
-                          methods: updateMethod(settings.methods, method.id, {
-                            enabled: !method.enabled,
-                            weight:
-                              !method.enabled && method.weight === 0
-                                ? ANALYSIS_PRESETS.balanced.weights[method.id]
-                                : method.weight,
-                          }),
-                        })
-                      }
-                      className={`relative h-7 w-12 shrink-0 rounded-full border transition-colors ${
-                        method.enabled
-                          ? "border-blue bg-blue"
-                          : "border-night/20 bg-night/5"
-                      }`}
-                    >
-                      <span
-                        className={`absolute top-1 size-5 rounded-full bg-[oklch(0.99_0.004_92)] shadow-sm transition-transform ${
-                          method.enabled ? "translate-x-5" : "translate-x-1"
-                        }`}
-                      />
-                    </button>
-                    <label className="min-w-0 flex-1">
-                      <span className="flex items-center justify-between text-[11px] text-mist">
-                        <span>权重</span>
-                        <span>{normalizedWeights[method.id]}%</span>
+          <details className="group border-y border-night/10" aria-label="高级分析方法设置">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4">
+              <div>
+                <p className="text-sm font-semibold text-ink">高级设置：调整单项方法和权重</p>
+                <p className="mt-1 text-xs leading-5 text-mist">
+                  需要控制统计、AI、MBTI 或文化方法占比时再展开。
+                </p>
+              </div>
+              <ChevronDown
+                className="size-5 shrink-0 text-mist transition-transform group-open:rotate-180"
+                aria-hidden="true"
+              />
+            </summary>
+            <section className="divide-y divide-night/10 border-t border-night/10" aria-label="分析方法">
+              {settings.methods.map((method) => {
+                const Icon = METHOD_ICONS[method.id];
+                const methodAvailable =
+                  runtimeConfig.features.culturalMethods ||
+                  (method.id !== "bazi" && method.id !== "ziwei");
+                return (
+                  <article
+                    key={method.id}
+                    className={`grid gap-4 py-5 md:grid-cols-[1fr_220px] ${
+                      methodAvailable ? "" : "opacity-50"
+                    }`}
+                  >
+                    <div className="flex gap-3">
+                      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-night text-deep">
+                        <Icon className="size-4" aria-hidden="true" />
                       </span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="50"
-                        step="1"
-                        disabled={!method.enabled || !methodAvailable}
-                        value={method.weight}
-                        onChange={(event) =>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-sm font-semibold text-ink">{method.label}</h3>
+                          <span className="rounded-full border border-night/10 px-2 py-0.5 text-[11px] text-mist">
+                            {RELIABILITY_LABELS[method.reliability]}
+                          </span>
+                        </div>
+                        <p className="mt-1 max-w-[64ch] text-xs leading-5 text-mist">
+                          {method.description}
+                        </p>
+                        {!methodAvailable && (
+                          <p className="mt-1 text-xs font-medium text-mist">
+                            当前测试环境已关闭这项方法。
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={method.enabled}
+                        disabled={!methodAvailable}
+                        aria-label={`${method.enabled ? "关闭" : "启用"}${method.label}`}
+                        onClick={() =>
                           setSettings({
                             ...settings,
                             preset: "custom",
                             methods: updateMethod(settings.methods, method.id, {
-                              weight: Number(event.target.value),
+                              enabled: !method.enabled,
+                              weight:
+                                !method.enabled && method.weight === 0
+                                  ? ANALYSIS_PRESETS.balanced.weights[method.id]
+                                  : method.weight,
                             }),
                           })
                         }
-                        className="mt-2 w-full accent-[oklch(0.53_0.12_245)] disabled:opacity-30"
-                      />
-                    </label>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
+                        className={`relative h-7 w-12 shrink-0 rounded-full border transition-colors ${
+                          method.enabled
+                            ? "border-blue bg-blue"
+                            : "border-night/20 bg-night/5"
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 size-5 rounded-full bg-[oklch(0.99_0.004_92)] shadow-sm transition-transform ${
+                            method.enabled ? "translate-x-5" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                      <label className="min-w-0 flex-1">
+                        <span className="flex items-center justify-between text-[11px] text-mist">
+                          <span>权重</span>
+                          <span>{normalizedWeights[method.id]}%</span>
+                        </span>
+                        <input
+                          type="range"
+                          min="0"
+                          max="50"
+                          step="1"
+                          disabled={!method.enabled || !methodAvailable}
+                          value={method.weight}
+                          onChange={(event) =>
+                            setSettings({
+                              ...settings,
+                              preset: "custom",
+                              methods: updateMethod(settings.methods, method.id, {
+                                weight: Number(event.target.value),
+                              }),
+                            })
+                          }
+                          className="mt-2 w-full accent-[oklch(0.53_0.12_245)] disabled:opacity-30"
+                        />
+                      </label>
+                    </div>
+                  </article>
+                );
+              })}
+            </section>
+          </details>
 
           {culturalEnabled && (
             <section className="rounded-lg border border-gold/30 bg-gold/5 p-5" aria-labelledby="birth-heading">

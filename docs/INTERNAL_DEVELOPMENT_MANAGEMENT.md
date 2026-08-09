@@ -423,7 +423,7 @@ interface EditorConfig {
 - `AppNav`：读取导航标签、演示样本开关、后台入口开关。
 - `QuestionFlow`：读取微信导入开关，决定五问后进入微信导入或额外文本。
 - `GeneratingScreen`：读取本地体验偏好；服务端是否启用 AI 以 `RuntimeConfig` 和 `/api/public-config` 为准。
-- `ShareCard`：读取分享箴言和免责声明。
+- `ShareCard`：读取免责声明，并通过 `decisionBrief` 生成与当前方案一致的决策摘要。
 - `selfSkillSlice.createSkill()`：同时读取公开运行配置，决定是否请求 `/api/generate-self-skill`。
 - `chatSlice.sendMessage()`：同时读取公开运行配置，决定是否请求 `/api/chat`。
 
@@ -510,12 +510,13 @@ landing / any foreground step
 | 2 | 回答五问 | `QuestionFlow` | `setAnswer` | answers |
 | 3 | 导入微信或跳过 | `WeChatImportStep` | `setWechatRaw`、`setWechatAnalysis` | `WeChatAnalysis` |
 | 4 | 粘贴额外文本或跳过 | `ExtraTextStep` | `setExtraText`、`createSkill` | input bundle |
-| 5 | 等待生成 | `GeneratingScreen` | `createSkill` | `SelfSkill` |
-| 6 | 查看画像 | `SelfSkillPanel` | `setStep` | decision |
-| 7 | 编辑时间线 | `TimelineView` | store timeline actions | updated timeline |
-| 8 | 打开地图 | `ForkPaths` | `setPreviewForkId`、`selectFork` | selected fork |
-| 9 | 对话 | `InstanceChat` | `sendMessage`、`tuneVoice` | messages、voice |
-| 10 | 分享/导出 | `ShareCard` | `setProverb`、`resetExperience` | JSON、copy text |
+| 5 | 选择分析预设，可选展开高级权重 | `AnalysisMethodStep` | `setAnalysisSettings` | `AnalysisSettings` |
+| 6 | 等待生成 | `GeneratingScreen` | `createSkill` | `SelfSkill` |
+| 7 | 查看决策摘要和详细画像 | `SelfSkillPanel`、`DecisionBriefPanel` | `setStep` | `DecisionBrief` |
+| 8 | 编辑时间线 | `TimelineView` | store timeline actions | updated timeline |
+| 9 | 打开地图 | `ForkPaths` | `setPreviewForkId`、`selectFork` | selected fork |
+| 10 | 对话 | `InstanceChat` | `sendMessage`、`tuneVoice` | messages、voice |
+| 11 | 分享/导出 | `ShareCard` | `resetExperience` | decision summary、JSON、copy text |
 
 ### 5.3 返回用户路径
 
@@ -978,7 +979,7 @@ npm run dev:3005
 注意：
 
 - 交互试用优先生产预览 `preview:3005`。
-- 不默认使用 Turbopack dev。
+- 默认使用 Turbopack dev；Webpack 仅保留为兼容问题定位入口。
 - Next root 必须锁定项目目录，避免扫描用户 home。
 - 不允许多个 3003/3004/3005 dev server 同时挂着。
 
@@ -996,7 +997,7 @@ npm run dev:3005
 
 职责：
 
-- 管理页面文案、地图节点叙事、分享卡模板、AI 输出口径和动态类型文案。
+- 管理页面文案、地图节点叙事、结果摘要标签、AI 输出口径和动态类型文案。
 - 建立文案 registry、文案 ID、surface、intent、tone、riskLevel、version。
 - 把 Product & Research 的文案边界转成可维护的数据结构。
 - 和 AI Team 对齐 prompt 输出语气，和 UI Team 对齐页面文案调用。
@@ -1037,7 +1038,7 @@ npm run dev:3005
 职责：
 
 - 提供编辑可用的全局配置窗口。
-- 允许非工程人员修改首页、导航、免责声明、分享箴言和功能开关。
+- 允许非工程人员修改首页、导航、免责声明和功能开关。
 - 提供配置导出、下载、导入、恢复默认。
 - 为未来 CMS/API 后台提供字段模型和交互原型。
 
@@ -1057,7 +1058,7 @@ npm run dev:3005
 - 编辑首页品牌、两行标题、正文、主按钮、副按钮。
 - 编辑全局免责声明。
 - 编辑导航标签。
-- 编辑分享卡片随机箴言。
+- 查看结果页动态生成规则；通用随机建议已停用。
 - 设置部署模式：`local-preview`、`static-hosted`、`server-hosted`。
 - 设置 AI 模式：`local-fallback`、`api-enhanced`。
 - 开关演示样本、微信导入、AI API、后台编辑。

@@ -264,24 +264,16 @@ export function EditorConsole() {
           </article>
 
           <article className="rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-5 shadow-sm">
-            <h3 className="text-xl font-semibold text-ink">行动建议</h3>
-            <p className="mt-2 text-xs text-mist">每行一条。结果卡片会随机显示其中一条。</p>
-            <textarea
-              value={draft.share.futureSelfLines.join("\n")}
-              onChange={(event) =>
-                setDraft((current) => ({
-                  ...current,
-                  share: {
-                    ...current.share,
-                    futureSelfLines: event.target.value
-                      .split("\n")
-                      .map((line) => line.trim())
-                      .filter(Boolean),
-                  },
-                }))
-              }
-              className="mt-4 min-h-52 w-full rounded-lg border border-night/10 bg-deep/70 p-3 text-sm leading-6 text-ink outline-none focus:border-blue"
-            />
+            <h3 className="text-xl font-semibold text-ink">结果页生成规则</h3>
+            <p className="mt-2 text-sm leading-6 text-mist">
+              结果页会根据用户当前问题、所选方案、证据和未知项动态生成决策摘要，不再随机插入通用建议。
+            </p>
+            <ul className="mt-4 space-y-2 border-y border-night/10 py-4 text-xs leading-5 text-mist">
+              <li>• 展示选择该方案的理由和仍需确认的信息。</li>
+              <li>• 自动生成未来 14 天的验证步骤。</li>
+              <li>• 图片和文字版不包含微信原文。</li>
+              <li>• 全局免责声明仍在左侧「全局设置」中管理。</li>
+            </ul>
           </article>
 
           <article className="rounded-lg border border-night/10 bg-[oklch(0.99_0.004_92)] p-5 shadow-sm">

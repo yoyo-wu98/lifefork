@@ -13,7 +13,7 @@ export const AI_TOKEN_BUDGETS = {
     maxOutputTokens: 3000,
   },
   dialogue: {
-    promptVersion: "dialogue.v4",
+    promptVersion: "dialogue.v6",
     maxInputChars: {
       selfSkillSummary: 500,
       forkSummary: 700,

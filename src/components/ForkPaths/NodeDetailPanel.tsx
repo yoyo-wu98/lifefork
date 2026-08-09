@@ -23,7 +23,7 @@ type NodeDetailPanelProps = {
 export function NodeDetailPanel({ path, nextScaleLabel, onNextScale, onSelect, choiceSets = [], onSelectChoice }: NodeDetailPanelProps) {
   const dynamicTypeLabels = DYNAMIC_TYPE_PROFILE_COPY.value.branchDetailLabels;
   const dynamicType = path.dynamicType;
-  const [monthlyIncome, setMonthlyIncome] = useState<number>(INCOME_TIERS[1]);
+  const [monthlyIncome, setMonthlyIncome] = useState<number>(INCOME_TIERS[0]);
   const branchExplanation = useLifeforkStore((state) =>
     state.selfSkill?.integratedAnalysis?.branchExplanations.find(
       (item) => item.branchId === path.id,
@@ -60,25 +60,38 @@ export function NodeDetailPanel({ path, nextScaleLabel, onNextScale, onSelect, c
       <p className="my-5 max-w-[78ch] text-sm leading-7 text-mist">{path.summary}</p>
 
       {path.assetOutlook && (
-        <div className="mb-5 rounded-lg border border-night/10 bg-deep/50 p-4">
-          <AssetChartShell
-            title="资产可能性范围 · 情景模拟"
-            subtitle={
-              <>
-                依据：{path.assetOutlook.signals.join("、")}
-                {path.assetOutlook.generatedBy === "ai" ? " · AI 生成" : " · 本地规则生成"}
-              </>
-            }
-            monthlyIncome={monthlyIncome}
-            onIncomeChange={setMonthlyIncome}
-          >
-            <SingleAssetChart
-              path={path}
+        <details className="group mb-5 border-y border-night/10 py-4">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-ink">可投资结余累积示意（高级）</p>
+              <p className="mt-1 text-xs leading-5 text-mist">
+                默认显示相对单位。展开后可查看区间和可选金额换算。
+              </p>
+            </div>
+            <span className="rounded-full border border-night/10 px-3 py-1 text-xs text-mist group-open:text-blue">
+              展开图表
+            </span>
+          </summary>
+          <div className="mt-4 border-t border-night/10 pt-4">
+            <AssetChartShell
+              title="当前方案的结余累积范围"
+              subtitle={
+                <>
+                  依据：{path.assetOutlook.signals.join("、")}
+                  {path.assetOutlook.generatedBy === "ai" ? " · AI 生成" : " · 本地启发式规则生成"}
+                </>
+              }
               monthlyIncome={monthlyIncome}
-              color={path.lane ? laneMeta[path.lane].color : "#6f87b8"}
-            />
-          </AssetChartShell>
-        </div>
+              onIncomeChange={setMonthlyIncome}
+            >
+              <SingleAssetChart
+                path={path}
+                monthlyIncome={monthlyIncome}
+                color={path.lane ? laneMeta[path.lane].color : "#6f87b8"}
+              />
+            </AssetChartShell>
+          </div>
+        </details>
       )}
 
       {choiceSets.length > 0 && (
@@ -161,7 +174,7 @@ export function NodeDetailPanel({ path, nextScaleLabel, onNextScale, onSelect, c
           <div className="mt-4 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-3">
               {branchExplanation.methodContributions.map((method) => (
-                <div key={`${path.id}-${method.methodId}`} className="border-l-2 border-blue/20 pl-3">
+                <div key={`${path.id}-${method.methodId}`} className="rounded-lg border border-night/10 bg-deep/50 p-3">
                   <p className="text-xs font-medium text-ink">
                     {method.methodLabel} · 用户权重 {Math.round(method.userWeight)}% ·
                     参考度 {formatConfidence(method.confidence)}

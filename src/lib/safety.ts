@@ -1,21 +1,11 @@
-const crisisKeywords = [
-  "自杀",
+// High-precision phrases: kept as substring matches.
+const HIGH_PRECISION = [
   "不想活",
   "活不下去",
   "死了算了",
   "伤害自己",
   "我要报复",
   "我想报复",
-  "毁掉他",
-  "毁掉她",
-  "毁掉他们",
-  "割腕",
-  "服毒",
-  "烧炭",
-];
-
-// High-precision phrases: kept as substring matches.
-const HIGH_PRECISION = [
   "我想杀人",
   "我要杀人",
   "想自杀",
@@ -43,10 +33,12 @@ const HIGH_RISK_PATTERNS: RegExp[] = [
   // Revenge/violence intent with first-person or explicit target
   /我?要(杀|砍|捅|弄死|炸|毒死)/,
   /我?想(杀|砍|捅|弄死|炸|毒死)/,
+  /我.{0,4}(想|要|准备|打算|计划).{0,4}(伤害|弄伤|割伤)(我|自己)/,
   /(杀|弄死|干掉)(了|掉)?(我|自己)/,
   // "毁掉自己" only when self-destructive intent is clear
   /毁(了|掉|灭)?自己(的)?(人生|命|生活|前途)?$/,
   /想(要)?毁(了|掉|灭)(我|自己|他|她|他们)/,
+  /我.{0,4}(想|要|准备|打算|计划).{0,4}报复/,
   /我?要(报|复)(仇)?/,
 ];
 

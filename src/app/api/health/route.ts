@@ -10,7 +10,7 @@ export async function GET() {
   return NextResponse.json(
     {
       status: healthy ? "ok" : "maintenance",
-      version: readServerEnvironment("LIFEFORK_VERSION") ?? "0.8.0",
+      version: readServerEnvironment("LIFEFORK_VERSION") ?? "0.8.2",
       timestamp: new Date().toISOString(),
       services: {
         web: "ok",

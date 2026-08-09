@@ -366,7 +366,7 @@ export interface AssetProjection {
   conservative: number;
   base: number;
   optimistic: number;
-  /** 该时点之后的月度趋势斜率（月/月），正值为上升 */
+  /** 该时点到下一年的结余单位变化，正值为上升 */
   slope: number;
 }
 
